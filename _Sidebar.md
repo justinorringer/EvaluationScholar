@@ -1,3 +1,4 @@
+- [Wiki To-Do List](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Wiki-ToDo-and-Notes)
 - [Project Prompt](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Project-Prompt)
 - [Ground Rules](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Ground-Rules)
 - [Minutes](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Weekly-Minutes)
