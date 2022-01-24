@@ -1,3 +1,4 @@
+Notes:
 - Client lists three requirements steps: retrieving data, storing it in a queryable format, and displaying it in graphs
 - Client says he might be able to provide CVs in BibTex form, either a subset of staff or possibly universally mandated later on
 - May want to be able to extract data to an Excel file as a temporary proof-of-concept
