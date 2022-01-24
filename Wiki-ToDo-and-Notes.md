@@ -3,6 +3,7 @@ Maintenance:
 
 Additions:
 - Define testing strategies
+- For cases, make wireframes and add to wiki
 - Add Acceptance testing plan for **each** requirement, getting ahead of  the requirements
     - Repeatable tests, descriptive
     - Include boundary tests
