@@ -3,7 +3,7 @@ services:
     container_name: flask_database
     image: mysql
     environment:
-      MYSQL_ROOT_PASSWORD: "true"
+      MYSQL_RANDOM_ROOT_PASSWORD: "true"
       MYSQL_DATABASE: default
       MYSQL_USER: user
       MYSQL_PASSWORD: password
