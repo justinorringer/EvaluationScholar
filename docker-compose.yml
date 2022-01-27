@@ -1,0 +1,22 @@
+services:
+  mysql-database:
+    container_name: flask_database
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "true"
+      MYSQL_DATABASE: default
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+  flask-app:
+    container_name: flask_app
+    depends_on:
+      - mysql-database
+    build: .
+    volumes:
+      - '.:/app'
+    ports:
+      - "5000:5000"
