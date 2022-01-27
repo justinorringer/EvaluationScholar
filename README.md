@@ -8,4 +8,4 @@ This will create and run two containers: the MySQL database and the Flask app. T
 
 ### Code Changes
 
-Flask will automatically detect changes to the project code and rerun the app.
+While in debug mode, Flask will automatically detect changes to the project code and rerun the app.
