@@ -7,15 +7,24 @@ services:
       MYSQL_DATABASE: default
       MYSQL_USER: user
       MYSQL_PASSWORD: password
+
+    #Exposes the service port to the host
     ports:
       - "3306:3306"
+
+    #This specifies that the container should use a persistent volume at /mysql-data
+    #Otherwise, the container will create a new volume on each run and lose data
     volumes:
       - ./mysql-data:/var/lib/mysql
   flask-app:
     container_name: flask_app
     depends_on:
       - mysql-database
+
+    #Builds the image from the Dockerfile in the current directory
     build: .
+
+    #Shares the container volume with the host so code changes are immediately available
     volumes:
       - '.:/app'
     ports:
