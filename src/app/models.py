@@ -1,8 +1,7 @@
 #Defines data models for the application
-from app import app
 from flask_sqlalchemy import SQLAlchemy
 
-db = SQLAlchemy(app)
+db = SQLAlchemy()
 
 author_paper = db.Table('author_paper', db.Model.metadata,
     db.Column('author_id', db.Integer, db.ForeignKey('author.id')),

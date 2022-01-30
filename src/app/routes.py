@@ -1,9 +1,9 @@
-from app import app
-
 import random
+from flask import Blueprint
+routes = Blueprint('routes', __name__, template_folder='templates')
 
 #API routes
 
-@app.route('/random', methods=['GET'])
+@routes.route('/random', methods=['GET'])
 def rand():
     return str(random.randint(1, 100))

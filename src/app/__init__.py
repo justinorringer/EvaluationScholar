@@ -1,23 +1,16 @@
-from flask import Flask
 import os
-app = Flask(__name__)
+from app.factory import create_app
 
-db_host = str(os.environ.get('DB_HOST'))
-db_user = str(os.environ.get('DB_USER'))
-db_pass = str(os.environ.get('DB_PASSWORD'))
-db_database = str(os.environ.get('DB_DATABASE'))
+def start_app():
+    app = create_app()
 
-connection = db_host + "://" + db_user + ":" + db_pass  + "@mysql-database:3306" + "/" + db_database
-print(connection)
+    db_host = str(os.environ.get('DB_HOST'))
+    db_user = str(os.environ.get('DB_USER'))
+    db_pass = str(os.environ.get('DB_PASSWORD'))
+    db_database = str(os.environ.get('DB_DATABASE'))
 
-app.config['SQLALCHEMY_DATABASE_URI'] = connection
+    connection = db_host + "://" + db_user + ":" + db_pass  + "@mysql-database:3306" + "/" + db_database
 
-#Imports application routes
-from app import routes
-from app import views
+    app.config['SQLALCHEMY_DATABASE_URI'] = connection
 
-from app.models import db, Author
-db.init_app(app)
-db.create_all()
-
-app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5000)

@@ -1,2 +1,3 @@
-#Runs the package initalization, starting the flask server
-from app import app
+from app import start_app
+
+start_app()
