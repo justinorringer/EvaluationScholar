@@ -33,14 +33,13 @@ class Paper(Base):
     date=Column(String(10), unique=False, nullable=False)
     #I believe we were just linking these to the Citation table
     #num_cited=Column(Integer, nullable=False)
-    auth_name=Column(String(40), nullable=False)
 
     authors = relationship('Author', secondary=author_paper, back_populates='papers')
+    citations = relationship('Citation', backref='paper')
 
-    def __init__(self, name, date, auth_name):
+    def __init__(self, name, date):
         self.name = name
         self.date = date
-        self.auth_name = auth_name
 
 class Citation(Base):
     __tablename__ = 'citation'
@@ -48,6 +47,5 @@ class Citation(Base):
     id_cited_paper=Column(Integer, ForeignKey('paper.id'), nullable=False)
     num_cited=Column(Integer, nullable=False)
 
-    def __init__(self, id_cited_paper, num_cited):
-        self.id_cited_paper = id_cited_paper
+    def __init__(self, num_cited):
         self.num_cited = num_cited

@@ -1,2 +1,5 @@
 mysql-data/
 src/app/__pycache__/
+src/test/__pycache__/
+src/test/.pytest_cache/
+src/test/.coverage
