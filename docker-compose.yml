@@ -23,6 +23,12 @@ services:
     depends_on:
       - mysql-database
 
+    environment:
+      DB_USER: user
+      DB_PASSWORD: password
+      DB_DATABASE: default
+      DB_HOST: mysql
+
     #Builds the image from the Dockerfile in the current directory
     build: .
 
