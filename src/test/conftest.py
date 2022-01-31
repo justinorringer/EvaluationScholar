@@ -4,7 +4,6 @@ sys.path.append("..")
 
 from app.models import Base
 from app.factory import create_app
-from app.database import TestSession
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker

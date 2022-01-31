@@ -10,7 +10,6 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: password
 
-    #Exposes the service port to the host
     ports:
       - "3306:3306"
 
