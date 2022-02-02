@@ -7,9 +7,10 @@
 - System Requirements
     - [Overall View]()
     - [FR1](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR1-Submitting-Papers) Submitting Papers
-    - [FR2](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR2-Gathering-Paper-Metadata) Gathering Paper Metadata
-    - [FR3](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR3-Displaying-Statistics) Displaying Statistics
-    - [FR4](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR4-Exporting-Data) Exporting Data
+    - [FR2](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR2-Gathering-Paper-Metadata) Validating Papers
+    - [FR3]() Gathering Paper Metadata
+    - [FR4](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR3-Displaying-Statistics) Displaying Statistics
+    - [FR5](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR4-Exporting-Data) Exporting Data
     - [Non-Functional](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Non-Functional-Requirements)
     - [Constraints](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Constraints)
 - Technologies
