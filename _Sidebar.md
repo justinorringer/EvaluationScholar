@@ -14,3 +14,11 @@
     - [Non-Functional](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Non-Functional-Requirements)
     - [Constraints](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Constraints)
 - Technologies
+    - MySQL
+    - SQLAlchemy
+    - Docker
+    - Flask
+    - Scrapy
+    - ScraperAPI
+    - React
+    - 
