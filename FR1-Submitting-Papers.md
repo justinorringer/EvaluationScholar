@@ -1,3 +1,3 @@
 - FR 1.1. The system shall search for papers given the name of an author and add them to the database.
 - FR 1.2. Using a provided list of papers, the system shall populate the database with the entries.
--FR 1.3. The system may parse papers from other external files (i.e. a CV or BibTeX file) and add them to the database.
+- FR 1.3. The system may parse papers from other external files (i.e. a CV or BibTeX file) and add them to the database.
