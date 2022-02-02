@@ -2,3 +2,7 @@ Our system is a web-based application that will be accessible to our sponsor, as
 
 
 Current metrics to analyze the research performance of a faculty member provide value (things such as number of papers published or number of grants received), but do little to assist in helping someone to understand the impact of a professor’s research. With this being said, it is important to gather other information specifically about the papers a faculty member has published, and this information can be better used to project the “trajectory” of impact that a professor’s research has. Using citation information, most notably the number of times that a paper is cited, allows for a user to better analyze the reach of specific papers from a faculty member and therefore better understand their impact. Users of the system will be able to query for a faculty member’s paper and then the system will present such information, as well as statistics using this information to better showcase an individual’s “trajectory”.
+
+
+# **Basic Architecture**
+![Basic Architecture Design](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/blob/documentation/documents/Basic%20Architecture%20Design.png)
