@@ -1,16 +1,1 @@
-**Wiki Directory**
-- [Wiki To-Do List](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Wiki-ToDo-and-Notes)
-- [Project Prompt](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Project-Prompt)
-- [Ground Rules](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Ground-Rules)
-- Minutes
-    - [Week 1](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Week-1)
-    - Week 2
-- System Requirements
-    - [Overall View]()
-    - [FR1](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR1-Submitting-Papers) Submitting Papers
-    - [FR2](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR2-Gathering-Paper-Metadata) Gathering Paper Metadata
-    - [FR3](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR3-Displaying-Statistics) Displaying Statistics
-    - [FR4](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR4-Exporting-Data) Exporting Data
-    - [Non-Functional](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Non-Functional-Requirements)
-    - [Constraints](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Constraints)
-- Technologies
+Senior Design Team 6 Github Repo (Woo!)
