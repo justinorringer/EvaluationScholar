@@ -9,3 +9,9 @@ This will create and run two containers: the MySQL database and the Flask app. T
 ### Code Changes
 
 While in debug mode, Flask will automatically detect changes to the project code and rerun the app.
+
+### Testing
+
+From the `src/test` directory, install the testing requirements with `pip install -r requirements.txt`
+
+To run the tests, run `pytest` from `src/test`.

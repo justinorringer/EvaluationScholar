@@ -10,7 +10,6 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: password
 
-    #Exposes the service port to the host
     ports:
       - "3306:3306"
 
@@ -22,6 +21,12 @@ services:
     container_name: flask_app
     depends_on:
       - mysql-database
+
+    environment:
+      DB_USER: user
+      DB_PASSWORD: password
+      DB_DATABASE: default
+      DB_HOST: mysql
 
     #Builds the image from the Dockerfile in the current directory
     build: .
