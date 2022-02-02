@@ -5,4 +5,4 @@ Current metrics to analyze the research performance of a faculty member provide 
 
 
 # **Basic Architecture**
-![Basic Architecture Design](#00000 https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/blob/documentation/documents/Basic%20Architecture%20Design.png)
+![Basic Architecture Design](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/blob/documentation/documents/Basic%20Architecture%20Design.jpg)
