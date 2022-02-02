@@ -1,1 +1,0 @@
-Gathering Paper Metadata

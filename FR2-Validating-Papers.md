@@ -1,0 +1,2 @@
+FR 2.1. The software shall detect issues with data, such as papers that have had a change in title and papers that may not have citation data (i.e. fairly recently published papers, papers that have not been found online).
+FR 2.2. Title conflicts, duplicate papers, and other found issues can be handled by the user.
