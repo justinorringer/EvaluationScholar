@@ -1,1 +1,6 @@
-Constraints
+- C1. The system shall function on a MacOS system.
+- C2. The frontend and backend of the system shall be developed using Python.
+- C3. The system shall implement a relational database so that the amount of scraping and querying of the web for data is minimized.
+- C4. The system shall be accessible from any web browser once the application is launched.
+- C5. The system developed shall spend as little as possible on third-party APIs.
+- C6. The system shall run at full functionality on Google Chrome, Firefox, Safari, and Edge.
