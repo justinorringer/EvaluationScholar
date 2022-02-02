@@ -7,7 +7,7 @@
 - System Requirements
     - [Overall View](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Overall-View)
     - [FR1](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR1-Submitting-Papers) Submitting Papers
-    - [FR2](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR2-Gathering-Paper-Metadata) Validating Papers
+    - [FR2](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR2-Validating-Papers) Validating Papers
     - [FR3](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR3-Gathering-Paper-Metadata) Gathering Paper Metadata
     - [FR4](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR4-Displaying-Statistics) Displaying Statistics
     - [FR5](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR5-Exporting-Data) Exporting Data
