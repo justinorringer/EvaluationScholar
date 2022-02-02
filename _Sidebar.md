@@ -3,7 +3,7 @@
 - [Ground Rules](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Ground-Rules)
 - Minutes
     - [Week 1](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Week-1)
-    - Week 2
+    - [Week 2](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Week-2)
 - System Requirements
     - [Overall View]()
     - [FR1](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR1-Submitting-Papers) Submitting Papers
