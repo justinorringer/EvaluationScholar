@@ -1,1 +1,3 @@
-Non-Functional
+- NF1. The deliverable shall work with full functionality for all NC State faculty members.
+- NF2. The software may be scaled to include querying for faculty members at other institutions, allowing for a user to compare the contribution of different universities.
+- NF3. The system shall be accessible to users with disabilities through their text-to-speech software.
