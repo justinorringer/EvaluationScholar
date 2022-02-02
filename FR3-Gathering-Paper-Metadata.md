@@ -1,0 +1,5 @@
+- FR 3.1. The system shall be able to gather a faculty member’s citation information for their paper, regardless of the site that it is published on.
+- FR 3.2. The system can maintain the database and ensure that citation data for papers is regularly updated such that results on papers stay accurate.
+- FR 3.3. The system shall filter out data by similarly-named professors.
+- FR 3.4. Given a faculty member's name, the system may query Google Scholar, populating the system with found publications.
+- FR 3.5. The system shall, starting on demand or at a scheduled time, update the current citation counts and add newly published papers for all faculty members or an individual.
