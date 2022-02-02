@@ -21,4 +21,3 @@
     - Scrapy
     - ScraperAPI
     - React
-    - 
