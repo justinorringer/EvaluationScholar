@@ -8,7 +8,6 @@ from app.factory import create_app
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import pytest
-import os
 
 @pytest.fixture(scope="session")
 def app():
@@ -23,12 +22,14 @@ def app():
 def client(app):
     return app.test_client()
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def session(app):
     return app.session
 
 # This fixture will be automatically used by each test
 @pytest.fixture(autouse=True)
 def clean_db(app, session):
-    Base.metadata.drop_all(session.bind)
-    Base.metadata.create_all(session.bind)
+    for table in reversed(Base.metadata.sorted_tables):
+        session.execute(table.delete())
+
+    session.commit()
