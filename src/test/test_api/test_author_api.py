@@ -60,6 +60,8 @@ def test_crud(client):
     # Check that author2 was partially updated
     resp = client.get(f'/api/authors/{a2_id}')
     assert resp.status_code == 200
+    assert resp.json['name'] == 'name2_updated'
+    assert resp.json['institution'] == 'institution2'
 
     # Delete author1
     resp = client.delete(f'/api/authors/{a1_id}')
