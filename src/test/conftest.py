@@ -2,7 +2,7 @@
 import sys
 sys.path.append("..")
 
-from app.models import Base
+from app.api.models import Base
 from app.factory import create_app
 
 from sqlalchemy import create_engine

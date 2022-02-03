@@ -1,6 +1,6 @@
 import random
 from flask import Blueprint, current_app, json, request
-from app.models import Author, Paper
+from app.api.models import Author, Paper
 routes = Blueprint('routes', __name__, template_folder='templates')
 
 #API routes

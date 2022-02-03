@@ -6,3 +6,7 @@ views = Blueprint('views', __name__, template_folder='templates')
 @views.route('/')
 def index():
     return render_template('index.html')
+
+@views.route('/api/docs')
+def docs():
+    return render_template('swaggerui.html')

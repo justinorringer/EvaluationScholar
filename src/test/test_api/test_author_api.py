@@ -2,7 +2,7 @@
 import sys
 sys.path.append("..")
 
-from app.models import Author, Paper
+from app.api.models import Author, Paper
 from pytest import fail
 
 def test_crud(client):

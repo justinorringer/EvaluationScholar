@@ -2,7 +2,7 @@
 import sys
 sys.path.append("..")
 
-from app.models import *
+from app.api.models import *
 import pytest
 
 def test_citation(session):

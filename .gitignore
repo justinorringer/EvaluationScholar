@@ -5,3 +5,4 @@ src/test/__pycache__/
 src/test/.pytest_cache/
 src/test/.coverage
 src/test/test_api/__pycache__/
+src/app/api/__pycache__/
