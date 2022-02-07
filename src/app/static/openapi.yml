@@ -17,11 +17,14 @@ components:
           type: integer
         paper_id:
           type: integer
+        date:
+          type: string
+          format: date-time
       type: object
     Paper:
       properties:
         date:
-          type: string
+          type: integer
         id:
           type: integer
         name:

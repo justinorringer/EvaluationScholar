@@ -36,7 +36,7 @@ def get_paper(id):
 @paper_routes.route('/api/papers', methods=['POST'])
 def create_paper():
     data = request.get_json()
-    paper = Paper(data['name'], data['date'])
+    paper = Paper(data['name'], data['year'])
     current_app.session.add(paper)
     current_app.session.commit()
     return current_app.response_class(
@@ -60,8 +60,8 @@ def update_paper(id):
 
     if 'name' in data:
         paper.name = data['name']
-    if 'date' in data:
-        paper.date = data['date']
+    if 'year' in data:
+        paper.date = data['year']
 
     current_app.session.commit()
 

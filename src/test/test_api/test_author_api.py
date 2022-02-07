@@ -85,7 +85,7 @@ def test_paper_list(client):
     # fail("Paper routes are not implemented yet.")
 
     # Create a new paper
-    paper1 = Paper('name1', 'date1')
+    paper1 = Paper('name1', 2001)
     resp = client.post('/api/papers', json=paper1.to_dict())
     p1_id = resp.json['id']
 
@@ -104,10 +104,10 @@ def test_paper_list(client):
     assert len(resp.json) == 1
     assert resp.json[0]['id'] == p1_id
     assert resp.json[0]['name'] == 'name1'
-    assert resp.json[0]['date'] == 'date1'
+    assert resp.json[0]['year'] == 2001
 
     # Add another paper to author1
-    paper2 = Paper('name2', 'date2')
+    paper2 = Paper('name2', 2002)
     resp = client.post('/api/papers', json=paper2.to_dict())
     p2_id = resp.json['id']
 
@@ -148,7 +148,7 @@ def test_edge_cases(client):
     a1_id = resp.json['id']
 
     # Create a new paper
-    paper1 = Paper('name1', 'date1')
+    paper1 = Paper('name1', 2001)
     resp = client.post('/api/papers', json=paper1.to_dict())
     p1_id = resp.json['id']
 

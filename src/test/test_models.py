@@ -4,10 +4,11 @@ sys.path.append("..")
 
 from app.api.models import *
 import pytest
+from datetime import datetime
 
 def test_citation(session):
-    paper = Paper('name', 'date')
-    citation = Citation(1)
+    paper = Paper('name', 2000)
+    citation = Citation(1, datetime.now())
     paper.citations.append(citation)
 
     session.add(paper)
@@ -25,7 +26,7 @@ def test_citation(session):
     assert ret_citation.paper.id == ret_paper.id
 
 def test_paper(session):
-    paper = Paper('name', 'date')
+    paper = Paper('name', 2000)
     author = Author('name', 'institution')
 
     paper.authors.append(author)
@@ -45,4 +46,4 @@ def test_paper(session):
     assert author.papers[0].id == ret_paper.id
 
     assert ret_paper.name == 'name'
-    assert ret_paper.date == 'date'
+    assert ret_paper.year == 2000

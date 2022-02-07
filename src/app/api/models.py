@@ -1,5 +1,5 @@
 #Defines data Bases for the application
-from sqlalchemy import Table, Column, Integer, ForeignKey, String
+from sqlalchemy import Table, Column, Integer, ForeignKey, String, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -37,7 +37,7 @@ class Paper(Base):
     #Should we have the title be unique to handle duplicates?
     name = Column(String(100), unique=True, nullable=False)
     #Leave enough characters for 'dd/mm/yyyy', but can just do a year
-    date = Column(String(10), unique=False, nullable=False)
+    year = Column(Integer, unique=False, nullable=False)
     #I believe we were just linking these to the Citation table
     #num_cited=Column(Integer, nullable=False)
 
@@ -48,25 +48,28 @@ class Paper(Base):
         return {
             'id': self.id,
             'name': self.name,
-            'date': self.date,
+            'year': self.year
         }
 
-    def __init__(self, name, date):
+    def __init__(self, name, year):
         self.name = name
-        self.date = date
+        self.year = year
 
 class Citation(Base):
     __tablename__ = 'citation'
     id = Column(Integer, primary_key=True)
     paper_id = Column(Integer, ForeignKey('paper.id'), nullable=False)
     num_cited = Column(Integer, nullable=False)
+    date = Column(DateTime, nullable=False)
 
     def to_dict(self):
         return {
             'id': self.id,
             'paper_id': self.paper_id,
             'num_cited': self.num_cited,
+            'date': self.date,
         }
 
-    def __init__(self, num_cited):
+    def __init__(self, num_cited, date):
         self.num_cited = num_cited
+        self.date = date
