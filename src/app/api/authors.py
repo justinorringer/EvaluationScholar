@@ -113,7 +113,7 @@ def add_paper_to_author(author_id, paper_id):
             mimetype='application/json'
         )
 
-    author.papers.append(paper_id)
+    author.papers.append(paper)
     current_app.session.commit()
     return current_app.response_class(
         response=json.dumps({'message': 'paper added to author',
@@ -142,7 +142,7 @@ def remove_paper_from_author(author_id, paper_id):
             mimetype='application/json'
         )
 
-    author.papers.remove(paper_id)
+    author.papers.remove(paper)
     current_app.session.commit()
     return current_app.response_class(
         response=json.dumps({'message': 'paper removed from author',
