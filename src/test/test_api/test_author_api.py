@@ -82,7 +82,7 @@ def test_paper_list(client):
     resp = client.post('/api/authors', json=author1.to_dict())
     a1_id = resp.json['id']
 
-    fail("Paper routes are not implemented yet.")
+    # fail("Paper routes are not implemented yet.")
 
     # Create a new paper
     paper1 = Paper('name1', 'date1')
@@ -146,8 +146,6 @@ def test_edge_cases(client):
     author1 = Author('name1', 'institution1')
     resp = client.post('/api/authors', json=author1.to_dict())
     a1_id = resp.json['id']
-
-    fail("Paper routes are not implemented yet.")
 
     # Create a new paper
     paper1 = Paper('name1', 'date1')
