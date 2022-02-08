@@ -1,7 +1,8 @@
 import mimetypes
 from urllib import response
 from flask import Blueprint, current_app, json, request
-from app.api.models import Author, Paper
+from app.api.models import Author, Citation, Paper
+from sqlalchemy import desc
 paper_routes = Blueprint('paper_routes', __name__, template_folder='templates')
 
 # Routes starting with /api/papers
@@ -61,7 +62,7 @@ def update_paper(id):
     if 'name' in data:
         paper.name = data['name']
     if 'year' in data:
-        paper.date = data['year']
+        paper.year = data['year']
 
     current_app.session.commit()
 
@@ -114,7 +115,7 @@ def add_author_to_paper(author_id, paper_id):
             mimetype='application/json'
         )
 
-    paper.authors.append(author_id)
+    paper.authors.append(author)
     current_app.session.commit()
     return current_app.response_class(
         response=json.dumps({'message': 'author added to paper',
@@ -144,7 +145,7 @@ def remove_author_from_paper(author_id, paper_id):
             mimetype='application/json'
         )
 
-    paper.authors.remove(author_id)
+    paper.authors.remove(author)
     current_app.session.commit()
     return current_app.response_class(
         response=json.dumps({'message': 'author removed from paper',
@@ -167,4 +168,51 @@ def get_authors_in_paper(paper_id):
         response=json.dumps([author.to_dict() for author in paper.authors]),
         status=200,
         mimetype='application/json'
-    )                    
+    )
+
+@paper_routes.route('/api/papers/<int:paper_id>/citations', methods=['GET'])
+def get_citations(paper_id):
+    paper = current_app.session.query(Paper).get(paper_id)
+    if not paper:
+        return current_app.response_class(
+            response=json.dumps({'message': 'paper not found',
+                                 'status': 'error'}),
+            status=404,
+            mimetype='application/json'
+        )
+
+    return current_app.response_class(
+        response=json.dumps([citation.to_dict() for citation in paper.citations]),
+        status=200,
+        mimetype='application/json'
+    )
+
+@paper_routes.route('/api/papers/<int:paper_id>/latest-citations', methods=['GET'])
+def get_latest_citations(paper_id):
+    paper = current_app.session.query(Paper).get(paper_id)
+    if not paper:
+        return current_app.response_class(
+            response=json.dumps({'message': 'paper not found',
+                                 'status': 'error'}),
+            status=404,
+            mimetype='application/json'
+        )
+    latest = current_app.session.query(Citation).order_by(desc('date')).first()
+
+    return current_app.response_class(
+        response=json.dumps(latest),
+        status=200,
+        mimetype='application/json'
+    )
+
+@paper_routes.route('/api/papers/<int:paper_id>/citations', methods=['POST'])
+def new_citation(paper_id):
+    pass
+    # TODO
+
+
+
+@paper_routes.route('/api/papers/citations', methods=['POST'])        
+def new_citation_multiple_papers():
+    pass
+    # TODO

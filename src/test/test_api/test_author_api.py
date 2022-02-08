@@ -3,7 +3,6 @@ import sys
 sys.path.append("..")
 
 from app.api.models import Author, Paper
-from pytest import fail
 
 def test_crud(client):
     # Create a new author
@@ -81,8 +80,6 @@ def test_paper_list(client):
     author1 = Author('name1', 'institution1')
     resp = client.post('/api/authors', json=author1.to_dict())
     a1_id = resp.json['id']
-
-    # fail("Paper routes are not implemented yet.")
 
     # Create a new paper
     paper1 = Paper('name1', 2001)
