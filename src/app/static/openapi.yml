@@ -1,0 +1,296 @@
+components:
+  schemas:
+    Author:
+      properties:
+        id:
+          type: integer
+        institution:
+          type: string
+        name:
+          type: string
+      type: object
+    Citation:
+      properties:
+        id:
+          type: integer
+        num_cited:
+          type: integer
+        paper_id:
+          type: integer
+        date:
+          type: string
+          format: date-time
+      type: object
+    Paper:
+      properties:
+        year:
+          type: integer
+        id:
+          type: integer
+        name:
+          type: string
+      type: object
+info:
+  description: API Docs
+  title: API Docs
+  version: 1.0.0
+openapi: 3.0.2
+paths:
+  /api/authors:
+    post:
+      description: Create a new author
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Author'
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                type: integer
+    get:
+      description: Get all authors
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Author'
+    delete:
+      description: Delete an author
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted successfully
+        '404':
+          description: Author not found
+  /api/authors/{author_id}:
+    put:
+      description: Update an author
+      parameters:
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Author'
+      responses:
+        '200':
+          description: Updated successfully
+        '404':
+          description: Author not found
+  /api/authors/{author_id}/papers/{paper_id}:
+    put:
+      description: Add a paper to an author
+      parameters:
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: paper_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Added successfully
+        '404':
+          description: Author or paper not found
+    delete:
+      description: Remove a paper from an author
+      parameters:
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: paper_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Removed successfully
+        '404':
+          description: Author or paper not found
+  /api/papers:
+    post:
+      description: Create a new paper
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Paper'
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                type: integer
+    get:
+      description: Get all papers
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Paper'
+    delete:
+      description: Delete an paper
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted successfully
+        '404':
+          description: Author not found
+  /api/papers/{paper_id}:
+    put:
+      description: Update a paper
+      parameters:
+        - in: path
+          name: paper_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Paper'
+      responses:
+        '200':
+          description: Updated successfully
+        '404':
+          description: Paper not found
+  /api/papers/{paper_id}/authors/{author_id}:
+    put:
+      description: Add an author to a paper
+      parameters:
+        - in: path
+          name: paper_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Added successfully
+        '404':
+          description: Author or paper not found
+    delete:
+      description: Remove an author from a paper
+      parameters:
+        - in: path
+          name: paper_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Removed successfully
+        '404':
+          description: Author or paper not found
+  /api/papers/{paper_id}/citations:
+    get:
+      description: Get all citations for a paper
+      parameters:
+        - in: path
+          name: paper_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Citation'
+        '404':
+          description: Paper not found
+    post:
+      description: Triggers a new citation lookup for a paper
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Citation'
+  /api/papers/{paper_id}/latest-citations:
+    get:
+      description: Get the latest citations for a paper
+      parameters:
+        - in: path
+          name: paper_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Citation'
+        '404':
+          description: Paper not found
+  /api/papers/citations:
+    post:
+      description: Triggers a new citation lookup for a list of paper ids
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: integer
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Citation'

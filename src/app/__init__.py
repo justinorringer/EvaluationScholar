@@ -1,7 +1,7 @@
 from app.factory import create_app
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from app.models import Base
+from app.api.models import Base
 import os
 
 def start_app():
