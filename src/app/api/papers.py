@@ -1,8 +1,11 @@
-import mimetypes
-from urllib import response
 from flask import Blueprint, current_app, json, request
-from app.api.models import Author, Citation, Paper
 from sqlalchemy import desc
+
+from app.api.models import Author, Citation, Paper
+from scraping import scrape_citations
+
+from datetime import datetime
+
 paper_routes = Blueprint('paper_routes', __name__, template_folder='templates')
 
 # Routes starting with /api/papers
@@ -207,10 +210,35 @@ def get_latest_citations(paper_id):
 
 @paper_routes.route('/api/papers/<int:paper_id>/citations', methods=['POST'])
 def new_citation(paper_id):
-    pass
-    # TODO
+    data = request.get_json()
+    paper = current_app.session.query(Paper).get(paper_id)
+    if not paper:
+        return current_app.response_class(
+            response=json.dumps({'message': 'paper not found',
+                                 'status': 'error'}),
+            status=404,
+            mimetype='application/json'
+        )
+    
+    citation_count = scrape_citations(paper.name)
 
-
+    if citation_count == None:
+        return current_app.response_class(
+            response=json.dumps({'message': 'citation count not found',
+                                 'status': 'error'}),
+            status=404,
+            mimetype='application/json'
+        )
+    
+    citation = Citation(citation_count, datetime.now())
+    paper.citations.append(citation)
+    current_app.session.commit()
+    return current_app.response_class(
+        response=json.dumps({'message': 'citation added',
+                                'status': 'success'}),
+        status=200,
+        mimetype='application/json'
+    )
 
 @paper_routes.route('/api/papers/citations', methods=['POST'])        
 def new_citation_multiple_papers():
