@@ -1,8 +1,20 @@
 import requests
-from bs4 import BeautifulSoup
-import urllib.parse
 import os
 from typing import Optional
+import urllib.parse
+
+from bs4 import BeautifulSoup
+
+retry_count = 3
+
+class ApiError(Exception):
+    pass
+
+class ApiNoCreditsError(ApiError):
+    pass
+
+class ApiRequestsFailedError(ApiError):
+    pass
 
 # TODO: Handle api errors
 def scrape_citations(paper_title: str) -> Optional[int]:
@@ -14,14 +26,26 @@ def scrape_citations(paper_title: str) -> Optional[int]:
     url = base_link + encoded_title + base_link_end
 
     params = {'api_key': os.getenv('SCRAPER_API_KEY'), 'url': url}
-    response = requests.get('https://api.scraperapi.com/', params=params)
 
-    soup = BeautifulSoup(response.text, 'html.parser')
+    for _ in range(retry_count):
+        response = requests.get('https://api.scraperapi.com/', params=params)
 
-    links = soup.find('div', class_='gs_fl').find_all('a')
+        # Sometimes, ScraperAPI returns a 500 error. They ask that you retry at least three times.
+        if(response.status_code == 500):
+            continue
 
-    for link in links:
-        if '/scholar?cites' in link['href']:
-            return int(link.text.replace('Cited by ', ''))
+        if(response.status_code == 403):
+            raise ApiNoCreditsError
 
-    return None
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        links = soup.find_all('a')
+
+        # Just find the first citation link and get the count
+        for link in links:
+            if '/scholar?cites' in link['href']:
+                return int(link.text.replace('Cited by ', ''))
+
+        return None
+
+    raise ApiRequestsFailedError
