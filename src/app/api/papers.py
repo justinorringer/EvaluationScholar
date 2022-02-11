@@ -205,7 +205,7 @@ def get_latest_citations(paper_id):
     latest = current_app.session.query(Citation).order_by(desc('date')).first()
 
     return current_app.response_class(
-        response=json.dumps(latest),
+        response=json.dumps(latest.to_dict()),
         status=200,
         mimetype='application/json'
     )
@@ -250,7 +250,7 @@ def new_citation(paper_id):
     paper.citations.append(citation)
     current_app.session.commit()
     return current_app.response_class(
-        response=json.dumps(json.dumps(citation.to_dict())),
+        response=json.dumps(citation.to_dict()),
         status=200,
         mimetype='application/json'
     )
@@ -289,7 +289,7 @@ def new_citation_multiple_papers():
         created_citations.append(citation.to_dict())
     
     return current_app.response_class(
-        response=json.dumps(json.dumps(created_citations)),
+        response=created_citations,
         status=status_code,
         mimetype='application/json'
     )

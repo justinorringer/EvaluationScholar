@@ -52,8 +52,8 @@ def test_paper(session):
 
 def test_remove(session):
     #Create a paper, and have it be cited
-    paper = Paper('name', 'date')
-    citation = Citation(100)
+    paper = Paper('name', 2000)
+    citation = Citation(100, datetime.now())
     paper.citations.append(citation)
 
     #Create an author
@@ -84,7 +84,7 @@ def test_remove(session):
     assert author.papers[0].id == ret_paper.id
 
     assert ret_paper.name == 'name'
-    assert ret_paper.date == 'date'
+    assert ret_paper.year == 2000
 
     session.delete(author)
     session.delete(citation)

@@ -180,3 +180,30 @@ def test_citations(client):
     assert resp.status_code == 200
     assert len(resp.json) == 0
 
+def test_scraping(client):
+    # Create a new paper
+    paper1 = Paper("Autonomous Aerial Water Sampling", 2001)
+    resp = client.post('/api/papers', json=paper1.to_dict())
+    p1_id = resp.json['id']
+
+    # Request a citation scrape
+    resp = client.post(f'/api/papers/{p1_id}/citations')
+    assert resp.status_code == 200
+    c1_id = resp.json['id']
+
+    # Check that there are some citations
+    assert resp.json['num_cited'] > 0
+
+    # Check reference
+    assert resp.json['paper_id'] == p1_id
+
+    # Check citation list route
+    resp = client.get(f'/api/papers/{p1_id}/citations')
+    assert resp.status_code == 200
+    assert len(resp.json) == 1
+    assert resp.json[0]['id'] == c1_id
+
+    # Check latest citations route
+    resp = client.get(f'/api/papers/{p1_id}/latest-citations')
+    assert resp.status_code == 200
+    assert resp.json['id'] == c1_id
