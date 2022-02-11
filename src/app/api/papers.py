@@ -2,7 +2,8 @@ from flask import Blueprint, current_app, json, request
 from sqlalchemy import desc
 
 from app.api.models import Author, Citation, Paper
-from scraping import scrape_citations, ApiNoCreditsError, ApiRequestsFailedError
+from scraping import scrape_citations
+from scraping.errors import ApiNoCreditsError, ApiRequestsFailedError
 
 from datetime import datetime
 
