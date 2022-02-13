@@ -62,20 +62,24 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Author'
-    delete:
-      description: Delete an author
+  /api/authors/{author_id}:
+    get:
+      description: Get an author
       parameters:
         - in: path
-          name: id
+          name: author_id
           required: true
           schema:
             type: integer
       responses:
         '200':
-          description: Deleted successfully
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
         '404':
           description: Author not found
-  /api/authors/{author_id}:
     put:
       description: Update an author
       parameters:
@@ -92,6 +96,39 @@ paths:
       responses:
         '200':
           description: Updated successfully
+        '404':
+          description: Author not found
+    delete:
+      description: Delete an author
+      parameters:
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted successfully
+        '404':
+          description: Author not found
+  /api/authors/{author_id}/papers:
+    get:
+      description: Get all papers by author
+      parameters:
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Paper'
         '404':
           description: Author not found
   /api/authors/{author_id}/papers/{paper_id}:
@@ -157,20 +194,24 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Paper'
-    delete:
-      description: Delete an paper
+  /api/papers/{paper_id}:
+    get:
+      description: Get a paper
       parameters:
         - in: path
-          name: id
+          name: paper_id
           required: true
           schema:
             type: integer
       responses:
         '200':
-          description: Deleted successfully
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Paper'
         '404':
-          description: Author not found
-  /api/papers/{paper_id}:
+          description: Paper not found
     put:
       description: Update a paper
       parameters:
@@ -187,6 +228,39 @@ paths:
       responses:
         '200':
           description: Updated successfully
+        '404':
+          description: Paper not found
+    delete:
+      description: Delete a paper
+      parameters:
+        - in: path
+          name: paper_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted successfully
+        '404':
+          description: Paper not found
+  /api/papers/{paper_id}/authors:
+    get:
+      description: Get all authors for a paper
+      parameters:
+        - in: path
+          name: paper_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Author'
         '404':
           description: Paper not found
   /api/papers/{paper_id}/authors/{author_id}:
