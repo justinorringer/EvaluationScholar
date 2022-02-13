@@ -2,3 +2,4 @@ mysql-data/
 src/test/.pytest_cache/
 src/test/.coverage
 **/__pycache__/
+.idea/*
