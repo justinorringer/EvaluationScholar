@@ -248,6 +248,12 @@ paths:
           description: Paper not found
     post:
       description: Triggers a new citation lookup for a paper
+      parameters:
+        - in: path
+          name: paper_id
+          required: true
+          schema:
+            type: integer
       responses:
         '201':
           description: Created successfully
@@ -255,6 +261,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Citation'
+        '404':
+          description: Paper not found
+        '500':
+          description: Error retrieving citations
+        '403':
+          description: Not enough API credits
   /api/papers/{paper_id}/latest-citations:
     get:
       description: Get the latest citations for a paper
@@ -288,6 +300,22 @@ paths:
       responses:
         '201':
           description: Created successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Citation'
+        '500':
+          description: Error retrieving citations for one or more papers. Returns citations for all papers that were successfully retrieved.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Citation'
+        '403':
+          description: Ran out of API credits. Returns citations for all papers that were successfully retrieved.
           content:
             application/json:
               schema:

@@ -1,8 +1,12 @@
-import mimetypes
-from urllib import response
 from flask import Blueprint, current_app, json, request
-from app.api.models import Author, Citation, Paper
 from sqlalchemy import desc
+
+from app.api.models import Author, Citation, Paper
+from scraping import scrape_citations
+from scraping.errors import ApiNoCreditsError, ApiRequestsFailedError
+
+from datetime import datetime
+
 paper_routes = Blueprint('paper_routes', __name__, template_folder='templates')
 
 # Routes starting with /api/papers
@@ -197,22 +201,95 @@ def get_latest_citations(paper_id):
             status=404,
             mimetype='application/json'
         )
+
     latest = current_app.session.query(Citation).order_by(desc('date')).first()
 
     return current_app.response_class(
-        response=json.dumps(latest),
+        response=json.dumps(latest.to_dict()),
         status=200,
         mimetype='application/json'
     )
 
 @paper_routes.route('/api/papers/<int:paper_id>/citations', methods=['POST'])
 def new_citation(paper_id):
-    pass
-    # TODO
+    paper = current_app.session.query(Paper).get(paper_id)
+    if not paper:
+        return current_app.response_class(
+            response=json.dumps({'message': 'paper not found',
+                                 'status': 'error'}),
+            status=404,
+            mimetype='application/json'
+        )
+    
+    try:
+        citation_count = scrape_citations(paper.name)
+    except ApiNoCreditsError:
+        return current_app.response_class(
+            response=json.dumps({'message': 'API credits exceeded',
+                                 'status': 'error'}),
+            status=403,
+            mimetype='application/json'
+        )
+    except ApiRequestsFailedError:
+        return current_app.response_class(
+            response=json.dumps({'message': 'failed to scrape citations',
+                                 'status': 'error'}),
+            status=500,
+            mimetype='application/json'
+        )
 
-
+    if citation_count == None:
+        return current_app.response_class(
+            response=json.dumps({'message': 'paper title not found',
+                                 'status': 'error'}),
+            status=404,
+            mimetype='application/json'
+        )
+    
+    citation = Citation(citation_count, datetime.now())
+    paper.citations.append(citation)
+    current_app.session.commit()
+    return current_app.response_class(
+        response=json.dumps(citation.to_dict()),
+        status=200,
+        mimetype='application/json'
+    )
 
 @paper_routes.route('/api/papers/citations', methods=['POST'])        
 def new_citation_multiple_papers():
-    pass
-    # TODO
+
+    created_citations = []
+    status_code = 200
+
+    for paper_id in request.get_json():
+        print(request.get_json())
+        paper = current_app.session.query(Paper).get(paper_id)
+
+        if not paper:
+            continue
+
+        try:
+            citation_count = scrape_citations(paper.name)
+        except ApiNoCreditsError:
+            return current_app.response_class(
+                response=json.dumps(json.dumps(created_citations)),
+                status=403,
+                mimetype='application/json'
+            )
+        except ApiRequestsFailedError:
+            status_code = 500
+            continue
+
+        if citation_count == None:
+            continue
+            
+        citation = Citation(citation_count, datetime.now())
+        paper.citations.append(citation)
+        current_app.session.commit()
+        created_citations.append(citation.to_dict())
+    
+    return current_app.response_class(
+        response=created_citations,
+        status=status_code,
+        mimetype='application/json'
+    )
