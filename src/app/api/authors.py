@@ -208,7 +208,7 @@ def add_tag_to_author(author_id, tag_id):
             mimetype='application/json'
         )
 
-    if tag in author.tags:
+    if tag not in author.tags:
         author.tags.append(tag)
         current_app.session.commit()
     
