@@ -4,6 +4,7 @@ components:
       properties:
         id:
           type: integer
+          readOnly: true
         institution:
           type: string
         name:
@@ -13,22 +14,31 @@ components:
       properties:
         id:
           type: integer
+          readOnly: true
         num_cited:
           type: integer
         paper_id:
           type: integer
+          readOnly: true
         date:
           type: string
           format: date-time
       type: object
     Paper:
       properties:
-        year:
-          type: integer
         id:
+          type: integer
+          readOnly: true
+        year:
           type: integer
         name:
           type: string
+        latest_citation:
+          readOnly: true
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Citation'
+
       type: object
     Tag:
       properties:

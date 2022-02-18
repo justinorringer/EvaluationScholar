@@ -185,6 +185,7 @@ def test_scraping(client):
     paper1 = Paper("Autonomous Aerial Water Sampling", 2001)
     resp = client.post('/api/papers', json=paper1.to_dict())
     p1_id = resp.json['id']
+    assert resp.json['latest_citation'] == None
 
     # Request a citation scrape
     resp = client.post(f'/api/papers/{p1_id}/citations')
@@ -196,6 +197,10 @@ def test_scraping(client):
 
     # Check reference
     assert resp.json['paper_id'] == p1_id
+
+    # Check latest citation field
+    resp = client.get(f'/api/papers/{p1_id}')
+    assert resp.json['latest_citation']['id'] == c1_id
 
     # Check citation list route
     resp = client.get(f'/api/papers/{p1_id}/citations')
