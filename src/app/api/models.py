@@ -10,6 +10,11 @@ author_paper = Table('author_paper', Base.metadata,
     Column('paper_id', Integer, ForeignKey('paper.id'))
 )
 
+author_tag = Table('author_tag', Base.metadata,
+    Column('author_id', Integer, ForeignKey('author.id')),
+    Column('tag_id', Integer, ForeignKey('tag.id'))
+)
+
 class Author(Base):
     __tablename__ = 'author'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -19,6 +24,7 @@ class Author(Base):
     institution=Column(String(80), unique=False, nullable=False)
 
     papers = relationship('Paper', secondary=author_paper, back_populates='authors')
+    tags = relationship('Tag', secondary=author_tag, back_populates='authors')
 
     def to_dict(self):
         return {
@@ -73,3 +79,19 @@ class Citation(Base):
     def __init__(self, num_cited, date):
         self.num_cited = num_cited
         self.date = date
+
+class Tag(Base):
+    __tablename__ = 'tag'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(80), unique=True, nullable=False)
+
+    authors = relationship('Author', secondary=author_tag, back_populates='tags')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+        }
+    
+    def __init__(self, name):
+        self.name = name

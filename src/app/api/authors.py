@@ -1,5 +1,5 @@
 from flask import Blueprint, current_app, json, request
-from app.api.models import Author, Paper
+from app.api.models import Author, Paper, Tag
 author_routes = Blueprint('author_routes', __name__, template_folder='templates')
 
 # Routes starting with /api/authors
@@ -163,6 +163,90 @@ def get_papers_by_author(author_id):
         )
     return current_app.response_class(
         response=json.dumps([paper.to_dict() for paper in author.papers]),
+        status=200,
+        mimetype='application/json'
+    )
+
+# Tag list routes
+
+@author_routes.route('/api/authors/<int:author_id>/tags', methods=['GET'])
+def get_tags_by_author(author_id):
+    author = current_app.session.query(Author).get(author_id)
+
+    if not author:
+        return current_app.response_class(
+            response=json.dumps({'message': 'author not found',
+                                 'status': 'error'}),
+            status=404,
+            mimetype='application/json'
+        )
+        
+    return current_app.response_class(
+        response=json.dumps([tag.to_dict() for tag in author.tags]),
+        status=200,
+        mimetype='application/json'
+    )
+
+@author_routes.route('/api/authors/<int:author_id>/tags/<int:tag_id>', methods=['PUT'])
+def add_tag_to_author(author_id, tag_id):
+    author = current_app.session.query(Author).get(author_id)
+    tag = current_app.session.query(Tag).get(tag_id)
+
+    if not author:
+        return current_app.response_class(
+            response=json.dumps({'message': 'author not found',
+                                 'status': 'error'}),
+            status=404,
+            mimetype='application/json'
+        )
+
+    if not tag:
+        return current_app.response_class(
+            response=json.dumps({'message': 'tag not found',
+                                 'status': 'error'}),
+            status=404,
+            mimetype='application/json'
+        )
+
+    if tag not in author.tags:
+        author.tags.append(tag)
+        current_app.session.commit()
+    
+    return current_app.response_class(
+        response=json.dumps({'message': 'tag added to author',
+                                'status': 'success'}),
+        status=200,
+        mimetype='application/json'
+    )
+
+@author_routes.route('/api/authors/<int:author_id>/tags/<int:tag_id>', methods=['DELETE'])
+def remove_tag_from_author(author_id, tag_id):
+    author = current_app.session.query(Author).get(author_id)
+    tag = current_app.session.query(Tag).get(tag_id)
+
+    if not author:
+        return current_app.response_class(
+            response=json.dumps({'message': 'author not found',
+                                 'status': 'error'}),
+            status=404,
+            mimetype='application/json'
+        )
+
+    if not tag:
+        return current_app.response_class(
+            response=json.dumps({'message': 'tag not found',
+                                 'status': 'error'}),
+            status=404,
+            mimetype='application/json'
+        )
+
+    if tag in author.tags:
+        author.tags.remove(tag)
+        current_app.session.commit()
+    
+    return current_app.response_class(
+        response=json.dumps({'message': 'tag removed from author',
+                                'status': 'success'}),
         status=200,
         mimetype='application/json'
     )
