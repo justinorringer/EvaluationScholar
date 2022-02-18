@@ -1,6 +1,6 @@
 #Defines data Bases for the application
-from sqlalchemy import Table, Column, Integer, ForeignKey, String, DateTime
-from sqlalchemy.orm import relationship
+from sqlalchemy import Table, Column, Integer, ForeignKey, String, DateTime, desc
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -31,30 +31,6 @@ class Author(Base):
         self.name = name
         self.institution = institution
 
-class Paper(Base):
-    __tablename__ = 'paper'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    #Should we have the title be unique to handle duplicates?
-    name = Column(String(100), unique=True, nullable=False)
-    #Leave enough characters for 'dd/mm/yyyy', but can just do a year
-    year = Column(Integer, unique=False, nullable=False)
-    #I believe we were just linking these to the Citation table
-    #num_cited=Column(Integer, nullable=False)
-
-    authors = relationship('Author', secondary=author_paper, back_populates='papers')
-    citations = relationship('Citation', backref='paper')
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'year': self.year
-        }
-
-    def __init__(self, name, year):
-        self.name = name
-        self.year = year
-
 class Citation(Base):
     __tablename__ = 'citation'
     id = Column(Integer, primary_key=True)
@@ -73,3 +49,28 @@ class Citation(Base):
     def __init__(self, num_cited, date):
         self.num_cited = num_cited
         self.date = date
+
+class Paper(Base):
+    __tablename__ = 'paper'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    #Should we have the title be unique to handle duplicates?
+    name = Column(String(100), unique=True, nullable=False)
+    #Leave enough characters for 'dd/mm/yyyy', but can just do a year
+    year = Column(Integer, unique=False, nullable=False)
+    #I believe we were just linking these to the Citation table
+    #num_cited=Column(Integer, nullable=False)
+
+    authors = relationship('Author', secondary=author_paper, back_populates='papers')
+    citations = relationship('Citation', backref='paper', order_by='Citation.date.desc()')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'year': self.year,
+            'latest_citation': None if len(self.citations) == 0 else self.citations[0].to_dict()
+        }
+
+    def __init__(self, name, year):
+        self.name = name
+        self.year = year
