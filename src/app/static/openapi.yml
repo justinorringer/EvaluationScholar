@@ -40,6 +40,13 @@ components:
             - $ref: '#/components/schemas/Citation'
 
       type: object
+    Tag:
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+      type: object
 info:
   description: API Docs
   title: API Docs
@@ -178,6 +185,63 @@ paths:
           description: Removed successfully
         '404':
           description: Author or paper not found
+  /api/authors/{author_id}/tags:
+    get:
+      description: Get all tags by author
+      parameters:
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+        '404':
+          description: Author not found
+  /api/authors/{author_id}/tags/{tag_id}:
+    put:
+      description: Add a tag to an author
+      parameters:
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: tag_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Added successfully
+        '404':
+          description: Author or tag not found
+    delete:
+      description: Remove a tag from an author
+      parameters:
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: tag_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Removed successfully
+        '404':
+          description: Author or tag not found
   /api/papers:
     post:
       description: Create a new paper
@@ -406,3 +470,135 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Citation'
+  /api/tags:
+    post:
+      description: Create a new tag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tag'
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                type: integer
+    get:
+      description: Get all tags
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+  /api/tags/{tag_id}:
+    get:
+      description: Get a tag
+      parameters:
+        - in: path
+          name: tag_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '404':
+          description: Tag not found
+    put:
+      description: Update a tag
+      parameters:
+        - in: path
+          name: tag_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tag'
+      responses:
+        '200':
+          description: Updated successfully
+        '404':
+          description: Tag not found
+    delete:
+      description: Delete a tag
+      parameters:
+        - in: path
+          name: tag_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted successfully
+        '404':
+          description: Tag not found
+  /api/tags/{tag_id}/authors:
+    get:
+      description: Get all authors for a tag
+      parameters:
+        - in: path
+          name: tag_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Author'
+        '404':
+          description: Tag not found
+  /api/tags/{tag_id}/authors/{author_id}:
+    put:
+      description: Add an author to a tag
+      parameters:
+        - in: path
+          name: tag_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Added successfully
+        '404':
+          description: Author or tag not found
+    delete:
+      description: Remove an author from a tag
+      parameters:
+        - in: path
+          name: tag_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Removed successfully
+        '404':
+          description: Author or tag not found

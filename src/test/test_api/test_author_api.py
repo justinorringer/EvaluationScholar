@@ -2,7 +2,7 @@
 import sys
 sys.path.append("..")
 
-from app.api.models import Author, Paper
+from app.api.models import Author, Paper, Tag
 
 def test_crud(client):
     # Create a new author
@@ -164,3 +164,46 @@ def test_edge_cases(client):
     # Add non-existing paper to author
     resp = client.put(f'/api/authors/{a1_id}/papers/{p1_id - 1}')
     assert resp.status_code == 404
+
+def test_tag_list(client):
+    # Create a new author
+    author1 = Author('name1', 'institution1')
+    resp = client.post('/api/authors', json=author1.to_dict())
+    assert resp.status_code == 201
+    a1_id = resp.json['id']
+
+    # Create a new tag
+    tag1 = Tag('name1')
+    resp = client.post('/api/tags', json=tag1.to_dict())
+    assert resp.status_code == 201
+    t1_id = resp.json['id']
+
+    # Check empty tag list
+    resp = client.get(f'/api/authors/{a1_id}/tags')
+    assert resp.status_code == 200
+    assert len(resp.json) == 0
+
+    # Add tag to author1
+    resp = client.put(f'/api/authors/{a1_id}/tags/{t1_id}')
+    assert resp.status_code == 200
+
+    # Check that tag was added
+    resp = client.get(f'/api/authors/{a1_id}/tags')
+    assert resp.status_code == 200
+    assert len(resp.json) == 1
+    assert resp.json[0]['id'] == t1_id
+
+    # Check the tag's author list
+    resp = client.get(f'/api/tags/{t1_id}/authors')
+    assert resp.status_code == 200
+    assert len(resp.json) == 1
+    assert resp.json[0]['id'] == a1_id
+
+    # Remove tag from author1
+    resp = client.delete(f'/api/authors/{a1_id}/tags/{t1_id}')
+    assert resp.status_code == 200
+
+    # Check that tag was removed
+    resp = client.get(f'/api/authors/{a1_id}/tags')
+    assert resp.status_code == 200
+    assert len(resp.json) == 0
