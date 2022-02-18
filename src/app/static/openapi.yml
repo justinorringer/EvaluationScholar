@@ -5,8 +5,6 @@ components:
         id:
           type: integer
           readOnly: true
-        institution:
-          type: string
         name:
           type: string
       type: object
