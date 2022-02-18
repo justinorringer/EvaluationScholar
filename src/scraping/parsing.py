@@ -1,15 +1,17 @@
 from typing import Optional
-
 from bs4 import BeautifulSoup
+import re
 
-def parse_citations(scholar_search_html: str) -> Optional[int]:
+def parse_papers(scholar_search_html: str) -> list[str]:
     soup = BeautifulSoup(scholar_search_html, 'html.parser')
 
-    links = soup.find_all('a')
+    return soup.find_all("div", {"class": "gs_ri"})
 
-    # Just find the first citation link and get the count
-    for link in links:
-        if '/scholar?cites' in link['href']:
-            return int(link.text.replace('Cited by ', ''))
+def parse_citations(paper: str) -> Optional[int]:
+    link = paper.find("a", href=lambda href: href and href.startswith("/scholar?cites"))
 
-    return None
+    if link is None:
+        return None
+
+    return link.text.replace('Cited by ', '')
+    
