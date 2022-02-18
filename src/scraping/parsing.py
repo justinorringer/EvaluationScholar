@@ -11,7 +11,7 @@ def parse_citations(paper: str) -> Optional[int]:
     link = paper.find("a", href=lambda href: href and href.startswith("/scholar?cites"))
 
     if link is None:
-        return -1
+        return None
 
     return link.text.replace('Cited by ', '')
     
