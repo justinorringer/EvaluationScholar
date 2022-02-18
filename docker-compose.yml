@@ -37,3 +37,14 @@ services:
       - '.:/app'
     ports:
       - "5000:5000"
+  react-frontend:
+    container_name: react_front
+
+    #Builds the image from the Dockerfile in the current directory
+    build: ./src/frontend
+
+    #Shares the container volume with the host so code changes are immediately available
+    volumes:
+      - './src/frontend/:/src/frontend/'
+    ports:
+      - "3000:3000"
