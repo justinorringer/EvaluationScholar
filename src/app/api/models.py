@@ -80,3 +80,19 @@ class Paper(Base):
     def __init__(self, name, year):
         self.name = name
         self.year = year
+
+class Tag(Base):
+    __tablename__ = 'tag'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(80), unique=True, nullable=False)
+
+    authors = relationship('Author', secondary=author_tag, back_populates='tags')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+        }
+
+    def __init__(self, name):
+        self.name = name 
