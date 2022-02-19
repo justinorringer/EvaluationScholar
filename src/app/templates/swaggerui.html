@@ -1,0 +1,33 @@
+<html lang="en">
+    <head>
+        <!-- Swagger UI -->
+        <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@3.52.1/swagger-ui.css">
+        <script src="https://unpkg.com/swagger-ui-dist@3/swagger-ui-bundle.js" charset="UTF-8"></script>
+        <script src="https://unpkg.com/swagger-ui-dist@3.52.1/swagger-ui-standalone-preset.js"></script>
+        <title>API Docs</title>
+    </head>
+
+    <!-- Swagger UI -->
+    <div id="swagger-ui"></div>
+    <script>
+        window.onload = async () => {
+    const ui = SwaggerUIBundle({
+        "dom_id": "#swagger-ui",
+        deepLinking: true,
+        presets: [
+            SwaggerUIBundle.presets.apis,
+            SwaggerUIStandalonePreset
+        ],
+        plugins: [
+            SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: "StandaloneLayout",
+        validatorUrl: null,
+        url: "/static/openapi.yml",
+    });
+
+    window.ui = ui;
+}
+    </script>
+  </body>
+</html>

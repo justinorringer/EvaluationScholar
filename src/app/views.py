@@ -7,4 +7,9 @@ views = Blueprint('views', __name__, template_folder='templates')
 @views.route('/')
 @cross_origin()
 def index():
-    return jsonify(render_template('index.html'))
+    return render_template('index.html')
+
+@views.route('/api/docs')
+def docs():
+    return render_template('swaggerui.html')
+

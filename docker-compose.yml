@@ -27,6 +27,7 @@ services:
       DB_PASSWORD: password
       DB_DATABASE: default
       DB_HOST: mysql
+      SCRAPER_API_KEY: d6192cc3a39162bfbd4f531554834dda
 
     #Builds the image from the Dockerfile in the current directory
     build: .
