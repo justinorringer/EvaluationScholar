@@ -38,34 +38,61 @@ function Query() {
 
   return (
     <div className="query">
+
+      <div class="bg-color"></div>
       <div class="container">
-        <div class="row align-items-center my-5">
-          <div class="col-lg-5">
-            <h1 class="font-weight-light">Write a Query</h1>
-            <p>
-              Lorem Ipsum is simply dummy text of the printing and typesetting
-              industry. Lorem Ipsum has been the industry's standard dummy text
-              ever since the 1500s, when an unknown printer took a galley of
-              type and scrambled it to make a type specimen book.
-            </p>
+          <div class="justify-content-center page-header">Search Author</div>
+          <div class="form-group">
+              <input type="author" class="form-control" placeholder="G. Rothermel" />
           </div>
-          <div class="col-lg-3">
-              <table>
+          <div class="row">
+              <div class="col-10 gx-4 gy-4">
+                  <div class="form-group">
+                      <br />
+                      <select multiple class="form-control" id="exampleFormControlSelect1">
+                        <option>G. Rothermel</option>
+                        <option>P. Davis</option>
+                        <option>B. Baggins</option>
+                        <option>S. Smith</option>
+                      </select>
+                  </div>
+              </div>
+              <div class="col-2 gy-4 gx-4 justify-content-right">
+                  <br />
+                  <button type="button" class="btn btn-danger">Query</button>
+              </div>
+          </div>
+      </div>
+      <hr />
+
+      <div class="container">
+          <table class="table table-borderless table-striped">
+              <thead class="thead-dark">
                   <tr>
-                      <td>Test</td>
-                      <td>----</td>
-                      <td>
-                          <input type="text" placeholder="test"></input>
-                      </td>
-                  </tr> 
-              </table>
-          </div>
+                      <th scope="col-6">Article</th>
+                      <th scope="col-2">Year</th>
+                      <th scope="col-4">Authors</th>
+                      <th scope="col-2">Citations</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <tr>
+                      <th scope="row">Lorem ipsum, dolor sit amet consectetur adipisicing elit.
+                      </th>
+                      <td>801</td>
+                      <td>P. Picasso</td>
+                      <td>100</td>
+                  </tr>
+              </tbody>
+          </table>
+      </div>
+      <div class="container">
+          
           <div class="col-lg-3">
               <button class="btn btn-primary" onClick={test}>Search</button>
               <p id="test">{state.value}</p>
           </div>
         </div>
-      </div>
     </div>
   );
 }
