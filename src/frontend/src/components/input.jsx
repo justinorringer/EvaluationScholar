@@ -16,7 +16,7 @@ function Input() {
         </div>
         <div class="row">
             <form action="/action_page.php">
-                <label for="myfile">Select a file:</label>
+                <label for="myfile">Select a file:&nbsp;</label>
                 <input type="file" id="myfile" name="myfile" />
                 <input type="submit" />
             </form>
