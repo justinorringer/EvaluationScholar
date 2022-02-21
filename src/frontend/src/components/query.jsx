@@ -37,19 +37,17 @@ function Query() {
     }, [])
 
   return (
-    <div className="query">
-
-      <div class="bg-color"></div>
-      <div class="container">
-          <div class="justify-content-center page-header">Search Author</div>
-          <div class="form-group">
-              <input type="author" class="form-control" placeholder="G. Rothermel" />
+    <div className="body">
+      <div className="container pt-5">
+          <div className="justify-content-center page-header">Search Author</div>
+          <div className="form-group">
+              <input type="author" className="form-control" placeholder="G. Rothermel" />
           </div>
-          <div class="row">
-              <div class="col-10 gx-4 gy-4">
-                  <div class="form-group">
+          <div className="row">
+              <div className="col-10 gx-4 gy-4">
+                  <div className="form-group">
                       <br />
-                      <select multiple class="form-control" id="exampleFormControlSelect1">
+                      <select multiple className="form-control" id="exampleFormControlSelect1">
                         <option>G. Rothermel</option>
                         <option>P. Davis</option>
                         <option>B. Baggins</option>
@@ -57,17 +55,17 @@ function Query() {
                       </select>
                   </div>
               </div>
-              <div class="col-2 gy-4 gx-4 justify-content-right">
+              <div className="col-2 gy-4 gx-4 justify-content-right">
                   <br />
-                  <button type="button" class="btn btn-danger">Query</button>
+                  <button type="button" className="btn btn-danger">Query</button>
               </div>
           </div>
       </div>
       <hr />
 
-      <div class="container">
-          <table class="table table-borderless table-striped">
-              <thead class="thead-dark">
+      <div className="container">
+          <table className="table table-borderless table-striped">
+              <thead className="thead-dark">
                   <tr>
                       <th scope="col-6">Article</th>
                       <th scope="col-2">Year</th>
@@ -86,10 +84,10 @@ function Query() {
               </tbody>
           </table>
       </div>
-      <div class="container">
+      <div className="container">
           
-          <div class="col-lg-3">
-              <button class="btn btn-primary" onClick={test}>Search</button>
+          <div className="col-lg-3">
+              <button className="btn btn-primary" onClick={test}>Search</button>
               <p id="test">{state.value}</p>
           </div>
         </div>
