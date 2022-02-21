@@ -76,7 +76,7 @@ def test_crud(client):
 
 def test_authors_paper_list(client):
     # Create a new author
-    author1 = Author('name1', 'institution1')
+    author1 = Author('name1')
     resp = client.post('/api/authors', json=author1.to_dict())
     a1_id = resp.json['id']
 
@@ -105,10 +105,9 @@ def test_authors_paper_list(client):
     assert len(resp.json) == 1
     assert resp.json[0]['id'] == a1_id
     assert resp.json[0]['name'] == 'name1'
-    assert resp.json[0]['institution'] == 'institution1'
 
     # Add another author to paper1
-    author2 = Author('name2', 'institution2')
+    author2 = Author('name2')
     resp = client.post('/api/authors', json=author2.to_dict())
     a2_id = resp.json['id']
 
@@ -144,7 +143,7 @@ def test_edge_cases(client):
     assert resp.status_code == 404
 
     # Create a new author
-    author1 = Author('name1', 'institution1')
+    author1 = Author('name1')
     resp = client.post('/api/authors', json=author1.to_dict())
     a1_id = resp.json['id']
 

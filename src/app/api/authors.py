@@ -34,7 +34,7 @@ def get_author(id):
 @author_routes.route('/api/authors', methods=['POST'])
 def create_author():
     data = request.get_json()
-    author = Author(data['name'], data['institution'])
+    author = Author(data['name'])
     current_app.session.add(author)
     current_app.session.commit()
     return current_app.response_class(

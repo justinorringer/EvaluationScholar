@@ -13,5 +13,17 @@ def parse_citations(paper: str) -> Optional[int]:
     if link is None:
         return None
 
-    return link.text.replace('Cited by ', '')
-    
+    return int(link.text.replace('Cited by ', ''))
+
+def parse_year(paper: str) -> Optional[int]:
+    year_div = paper.find("div", {"class": "gs_a"})
+
+    if year_div is None:
+        return None
+
+    year_match = re.search(r'(\d+) - .+$', year_div.text)
+
+    if year_match is None:
+        return None
+
+    return int(year_match.group(1))

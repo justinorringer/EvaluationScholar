@@ -20,9 +20,6 @@ class Author(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(80), unique=False, nullable=False)
 
-    #Won't allow null, but can keep the most recent institution, regardless of if they're still teaching
-    institution=Column(String(80), unique=False, nullable=False)
-
     papers = relationship('Paper', secondary=author_paper, back_populates='authors')
     tags = relationship('Tag', secondary=author_tag, back_populates='authors')
 
@@ -30,12 +27,10 @@ class Author(Base):
         return {
             'id': self.id,
             'name': self.name,
-            'institution': self.institution,
         }
 
-    def __init__(self, name, institution):
+    def __init__(self, name):
         self.name = name
-        self.institution = institution
 
 class Citation(Base):
     __tablename__ = 'citation'

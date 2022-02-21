@@ -5,8 +5,6 @@ components:
         id:
           type: integer
           readOnly: true
-        institution:
-          type: string
         name:
           type: string
       type: object
@@ -470,6 +468,31 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Citation'
+  /api/scraping/papers:
+    get:
+      description: Returns the year and citation count for a given paper title.
+      parameters:
+        - in: query
+          name: title
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  year:
+                    type: integer
+                  citations:
+                    type: integer
+        '500':
+          description: Error retrieving citations
+        '403':
+          description: Not enough API credits
   /api/tags:
     post:
       description: Create a new tag
