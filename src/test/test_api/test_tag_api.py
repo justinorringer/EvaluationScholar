@@ -61,7 +61,7 @@ def test_author_list(client):
     t2_id = resp.json['id']
 
     # Create a new author
-    author1 = Author('name1', 'institution1')
+    author1 = Author('name1')
     resp = client.post('/api/authors', json=author1.to_dict())
     assert resp.status_code == 201
     a1_id = resp.json['id']
