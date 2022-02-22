@@ -1,96 +1,103 @@
 import React, { useEffect, useState } from "react";
+import axios from 'axios';
 
 function Query() {
-    const [getMessage, setGetMessage] = useState({})
-    let state = {
-        value: "",
+    let authors = [];
+    let papers = [];
+    let parentForm = document.getElementById("authorForm");
+    let paperTableBody = document.getElementById("paperTableBody");
+
+    const getAuthors = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/api/authors', {mode:'cors'});
+            if (response.ok) {
+                authors = response.json();
+            }
+            console.log({response, authors})
+        }
+        catch (e) {
+            console.log(e.getMessage);
+        }
+        console.log(authors)
+        authors.forEach(author => {
+            let option = document.createElement("option");
+            option.innerText = author.name;
+            option.value = author.id;
+            parentForm.appendChild(option);
+        });
     }
-    
-    //Method to link to a button
-    function test(){
-        //Test info
-        console.log("hi")
-        //Connect to the API
-        makeAPICall();
-        //setGetMessage(api_ret);
-        console.log(getMessage);
-        state.value = getMessage.data;
-        document.getElementById("test").innerHTML = state.value;
-    } 
-    
-    //Example function to gather from Flask
-    const makeAPICall = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/', {mode:'cors'});
-        const data = await response.json();
-        console.log({response, data})
-        //return {response, data}
-        setGetMessage({response, data})
-        console.log(getMessage.response.status)
-      }
-      catch (e) {
-        console.log(e)
-      }
+
+    function query() {
+        if (parentForm === null) {
+            return;
+        }
+        var authorID = parentForm.value;
+        const getPapersByAuthor = async () => {
+            try {
+                const response = await axios.get(`http://localhost:5000/api/authors/${authorID}/papers`, {mode:'cors'});
+                if (response.ok) {
+                    papers = response.json();
+                }    
+                console.log({response, papers});
+            }
+            catch (e) {
+                console.log(e.getMessage);
+            }
+        }
+        getPapersByAuthor();
+        papers.forEach(paper => {
+            var row = document.createElement("tr");
+            var article = document.createElement("td");
+            var year = document.createElement("td");
+            var citations = document.createElement("td");
+            article.innerText = paper.name;
+            year.innerText = paper.year;
+            citations.innerText = paper.latest_citation.num_cited;
+            row.appendChild(article);
+            row.appendChild(year);
+            row.appendChild(citations);
+            paperTableBody.appendChild(row);
+        });
     }
-    useEffect(() => {
-      makeAPICall();
-    }, [])
+
+    getAuthors();
 
   return (
     <div className="body">
       <div className="container pt-5">
-          <div className="justify-content-center page-header">Search Author</div>
-          <div className="form-group">
+          <div className="justify-content-center page-header">Select Author</div>
+          {/* <div className="form-group">
               <input type="author" className="form-control" placeholder="G. Rothermel" />
-          </div>
+          </div> */}
           <div className="row">
               <div className="col-10 gx-4 gy-4">
                   <div className="form-group">
                       <br />
-                      <select multiple className="form-control" id="exampleFormControlSelect1">
-                        <option>G. Rothermel</option>
-                        <option>P. Davis</option>
-                        <option>B. Baggins</option>
-                        <option>S. Smith</option>
+                      <select multiple className="form-control" id="authorForm">
                       </select>
                   </div>
               </div>
               <div className="col-2 gy-4 gx-4 justify-content-right">
                   <br />
-                  <button type="button" className="btn btn-danger">Query</button>
+                  <button type="button" className="btn btn-danger" onClick={query}>Query</button>
               </div>
           </div>
       </div>
       <hr />
 
       <div className="container">
-          <table className="table table-borderless table-striped">
+          <table className="table table-borderless table-striped" >
               <thead className="thead-dark">
                   <tr>
                       <th scope="col-6">Article</th>
                       <th scope="col-2">Year</th>
-                      <th scope="col-4">Authors</th>
                       <th scope="col-2">Citations</th>
                   </tr>
               </thead>
-              <tbody>
-                  <tr>
-                      <th scope="row">Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-                      </th>
-                      <td>801</td>
-                      <td>P. Picasso</td>
-                      <td>100</td>
-                  </tr>
+              <tbody id = "paperTableBody">
               </tbody>
           </table>
       </div>
-      <div className="container">
-          
-          <div className="col-lg-3">
-              <button className="btn btn-primary" onClick={test}>Search</button>
-              <p id="test">{state.value}</p>
-          </div>
-        </div>
     </div>
   );
 }
