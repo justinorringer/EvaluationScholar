@@ -1,6 +1,11 @@
-from flask import Blueprint, current_app, json, request
+from flask import Blueprint, current_app, json, request, Flask
+from flask_cors import CORS, cross_origin
 from app.api.models import Author, Paper, Tag
 author_routes = Blueprint('author_routes', __name__, template_folder='templates')
+
+#app=Flask(__name__)
+#cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+
 
 # Routes starting with /api/authors
 
@@ -32,6 +37,8 @@ def get_author(id):
         
 
 @author_routes.route('/api/authors', methods=['POST'])
+@cross_origin(methods=['POST'], allow_headers=['Content-Type', 'Accept', 'Access-Control-Allow-Origin'],
+ expose_headers=['Content-Type', 'Accept', 'Access-Control-Allow-Origin'], origin='http://localhost:3000')
 def create_author():
     data = request.get_json()
     author = Author(data['name'])
