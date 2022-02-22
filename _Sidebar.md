@@ -1,15 +1,5 @@
-- [Wiki To-Do List](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Wiki-ToDo-and-Notes)
 - [Project Prompt](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Project-Prompt)
 - [Ground Rules](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Ground-Rules)
-- [Interim Project Report]
-- Minutes
-    - [Week 1](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Week-1)
-    - [Week 2](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Week-2)
-    - [Week 3](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Week-3)
-    - [Week 4](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Week-4)
-    - [Week 5](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Week-5)
-    - [Week 6](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Week-6)
-    - [Week 7](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Week-7)
 - System Requirements
     - [Overall View](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Overall-View)
     - [FR1](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR1-Submitting-Papers) Submitting Papers
@@ -20,6 +10,11 @@
     - [FR6](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR6-Exporting-Data) Exporting Data
     - [Non-Functional](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Non-Functional-Requirements)
     - [Constraints](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Constraints)
+- Iteration Contents
+    - [Iteration 1](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Iteration1)
+    - [Iteration 2](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Iteration2)
+    - [Iteration 3](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Iteration3)
+    - [Iteration 4](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Iteration4)
 - Technologies
     - MySQL
     - SQLAlchemy
@@ -29,3 +24,14 @@
     - ScraperAPI
     - Nginx (?)
     - React
+- Minutes
+    - [Week 1](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Week-1)
+    - [Week 2](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Week-2)
+    - [Week 3](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Week-3)
+    - [Week 4](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Week-4)
+    - [Week 5](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Week-5)
+    - [Week 6](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Week-6)
+    - [Week 7](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Week-7)
+- [Interim Project Report]()
+
+- [Wiki To-Do List](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Wiki-ToDo-and-Notes)
