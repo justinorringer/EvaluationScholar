@@ -1,0 +1,2 @@
+- FR 4.1. The system shall keep 'tag' objects for the user to better classify authors, and these will be maintained by the database.
+- FR 4.2. The system shall allow the user to create tags (i.e. institution, academic position, research area) for authors, and assign any number of tags on an author.
