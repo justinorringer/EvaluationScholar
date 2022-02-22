@@ -1,15 +1,23 @@
 version: '3.4'
 
 services:
-  mysql-database:
-    container_name: flask_database
-    image: mysql
-    environment:
-      MYSQL_RANDOM_ROOT_PASSWORD: "true"
-      MYSQL_DATABASE: default
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
+  nginx:
+    image: nginx
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+    restart: unless-stopped
 
+  database:
+    container_name: database
+    image: mysql
+    env_file:
+      - .env
     ports:
       - "3306:3306"
 
@@ -17,34 +25,32 @@ services:
     #Otherwise, the container will create a new volume on each run and lose data
     volumes:
       - ./mysql-data:/var/lib/mysql
-  flask-app:
-    container_name: flask_app
+  backend:
+    container_name: backend
     depends_on:
-      - mysql-database
+      - database
+
+    env_file:
+      - .env
+
+    #Builds the image from the Dockerfile in the current directory
+    build: ./backend
+
+    #Shares the container volume with the host so code changes are immediately available
+    volumes:
+      - './backend:/app'
+  frontend:
+    container_name: frontend
+
+    #Builds the image from the Dockerfile in the current directory
+    build: ./frontend
 
     environment:
-      DB_USER: user
-      DB_PASSWORD: password
-      DB_DATABASE: default
-      DB_HOST: mysql
-      SCRAPER_API_KEY: d6192cc3a39162bfbd4f531554834dda
-
-    #Builds the image from the Dockerfile in the current directory
-    build: .
+      - "FAST_REFRESH=false"
+      - "CHOKIDAR_USEPOLLING=true"
+      - "WDS_SOCKET_PORT=80"
 
     #Shares the container volume with the host so code changes are immediately available
     volumes:
-      - '.:/app'
-    ports:
-      - "5000:5000"
-  react-frontend:
-    container_name: react_front
-
-    #Builds the image from the Dockerfile in the current directory
-    build: ./src/frontend
-
-    #Shares the container volume with the host so code changes are immediately available
-    volumes:
-      - './src/frontend/:/src/frontend/'
-    ports:
-      - "3000:3000"
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
