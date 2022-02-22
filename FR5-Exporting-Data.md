@@ -1,2 +1,0 @@
-- FR 5.1. The system shall output data to CSV files.
-- FR 5.2. The system may export graphs to images or PDFs.
