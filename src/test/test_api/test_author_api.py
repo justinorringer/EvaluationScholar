@@ -6,7 +6,7 @@ from app.api.models import Author, Paper, Tag
 
 def test_crud(client):
     # Create a new author
-    author1 = Author('name1', 'institution1')
+    author1 = Author('name1')
     resp = client.post('/api/authors', json=author1.to_dict())
 
     assert resp.status_code == 201
@@ -17,10 +17,9 @@ def test_crud(client):
     assert resp.status_code == 200
     assert len(resp.json) == 1
     assert resp.json[0]['name'] == 'name1'
-    assert resp.json[0]['institution'] == 'institution1'
 
     # Create another author
-    author2 = Author('name2', 'institution2')
+    author2 = Author('name2')
     resp = client.post('/api/authors', json=author2.to_dict())
     assert resp.status_code == 201
     a2_id = resp.json['id']
@@ -34,23 +33,21 @@ def test_crud(client):
     resp = client.get(f'/api/authors/{a1_id}')
     assert resp.status_code == 200
     assert resp.json['name'] == 'name1'
-    assert resp.json['institution'] == 'institution1'
 
     #Check author2
     resp = client.get(f'/api/authors/{a2_id}')
     assert resp.status_code == 200
     assert resp.json['name'] == 'name2'
-    assert resp.json['institution'] == 'institution2'
 
     # Update author1
-    resp = client.put(f'/api/authors/{a1_id}', json={'name': 'name1_updated', 'institution': 'institution1_updated'})
+    resp = client.put(f'/api/authors/{a1_id}', json={'name': 'name1_updated'})
     assert resp.status_code == 200
 
     # Check that author1 was updated
     resp = client.get(f'/api/authors/{a1_id}')
     assert resp.status_code == 200
     assert resp.json['name'] == 'name1_updated'
-    assert resp.json['institution'] == 'institution1_updated'
+
 
     # Partially update author2
     resp = client.put(f'/api/authors/{a2_id}', json={'name': 'name2_updated'})
@@ -60,7 +57,6 @@ def test_crud(client):
     resp = client.get(f'/api/authors/{a2_id}')
     assert resp.status_code == 200
     assert resp.json['name'] == 'name2_updated'
-    assert resp.json['institution'] == 'institution2'
 
     # Delete author1
     resp = client.delete(f'/api/authors/{a1_id}')
@@ -77,7 +73,7 @@ def test_crud(client):
 
 def test_paper_list(client):
     # Create a new author
-    author1 = Author('name1', 'institution1')
+    author1 = Author('name1')
     resp = client.post('/api/authors', json=author1.to_dict())
     a1_id = resp.json['id']
 
@@ -132,7 +128,7 @@ def test_edge_cases(client):
     assert resp.status_code == 404
 
     # Update non-existing author
-    resp = client.put('/api/authors/1', json={'name': 'name1_updated', 'institution': 'institution1_updated'})
+    resp = client.put('/api/authors/1', json={'name': 'name1_updated'})
     assert resp.status_code == 404
 
     # Get non-existing author
@@ -140,7 +136,7 @@ def test_edge_cases(client):
     assert resp.status_code == 404
 
     # Create a new author
-    author1 = Author('name1', 'institution1')
+    author1 = Author('name1')
     resp = client.post('/api/authors', json=author1.to_dict())
     a1_id = resp.json['id']
 
@@ -167,7 +163,7 @@ def test_edge_cases(client):
 
 def test_tag_list(client):
     # Create a new author
-    author1 = Author('name1', 'institution1')
+    author1 = Author('name1')
     resp = client.post('/api/authors', json=author1.to_dict())
     assert resp.status_code == 201
     a1_id = resp.json['id']
