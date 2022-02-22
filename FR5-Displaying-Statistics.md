@@ -1,0 +1,7 @@
+- FR 5.1. The system shall show a table of each faculty member’s publications with citation counts, year, co-authors, and the paper title.
+- FR 5.2. The system shall create boxplots representing each author’s full distribution of papers and their respective citation counts.
+- FR 5.3. The system shall produce line graphs to evaluate an author’s trajectory through their evolving citation counts.
+- FR 5.4. The system shall create tables or graphs showing each faculty member’s calculated h-index or i10-index.
+- FR 5.5. The system shall present statistics of multiple faculty at the same time for comparison.
+- FR 5.6. The system shall filter by the user-defined search criteria, including authors by tags and papers by year range, to have the software provide data based on metrics such as a time frame or highly ranked papers.
+- FR 5.7. The system shall filter faculty members by an inputted h-index or i10-index.
