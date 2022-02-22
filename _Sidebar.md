@@ -15,7 +15,7 @@
     - [FR1](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR1-Submitting-Papers) Submitting Papers
     - [FR2](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR2-Validating-Papers) Validating Papers
     - [FR3](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR3-Gathering-Paper-Metadata) Gathering Paper Metadata
-    - [FR4](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR4-Editing Author Tags) Editing Author Tags
+    - [FR4](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR4-Editing-Author-Tags) Editing Author Tags
     - [FR5](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR5-Displaying-Statistics) Displaying Statistics
     - [FR6](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/FR6-Exporting-Data) Exporting Data
     - [Non-Functional](https://github.ncsu.edu/engr-csc-sdc/2022SpringTeam06-CSC-Dept-1/wiki/Non-Functional-Requirements)
