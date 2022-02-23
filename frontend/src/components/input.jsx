@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import axios from 'axios';
 
 function Input() {
   const [getMessage, setGetMessage] = useState({})
@@ -6,14 +7,14 @@ function Input() {
   //Base file reading works!
   
   let fileInput = null;
-  let lines = "";
+  let titles = [];
 
   let data = {
     name: "",
     institution: ""
   }
 
-  function getFile(){
+  function upload(){
     //console.log(document.getElementById("authName").value);
 
     let test = document.getElementById('myfile')
@@ -23,23 +24,32 @@ function Input() {
     var fr = new FileReader();
 
     fr.addEventListener("load", () => {
-      
-      console.log(fr.result);
       fileInput = fr.result;
-      let testing = "";
       //Branch to handle different operating system line endings (Windows v. Linux)
       if(fileInput.includes("\r")){
-        testing = fileInput.split("\r\n");
-        console.log(testing);
+        titles = fileInput.split("\r\n");
       } else {
-        testing = fileInput.split("\n");
-        console.log(testing);
+        titles = fileInput.split("\n");
       }
-      lines = testing;
-
       document.getElementById("text").innerHTML = fileInput;
 
-      makeAPICall();
+      const fullsend = async () => {
+        const authorId = await makeAuthor();
+        console.log(authorId);
+        for (const title of titles) {
+          const paper = await getScrapedPaper(title);
+          console.log(paper);
+          const paperId = await postPaper(paper, title);
+          console.log(paperId);
+          await postCitation(paperId, paper);
+          await joinAuthorToPaper(paperId, authorId);
+          await joinPaperToAuthor(paperId, authorId);
+        }
+        document.getElementById("success").style = "display: block !important"
+      }
+
+      fullsend();
+
     }, false);
 
     //This call activates the listener, and helps it to parse the file.
@@ -47,11 +57,11 @@ function Input() {
   }
 
   //Example function to gather from Flask
-  const makeAPICall = async () => {
+  const makeAuthor = async () => {
     try {
-
-      const response = await fetch('http://localhost/api/authors', {
-        method: "POST",
+      const response = await axios({
+        method: "post",
+        url: '/api/authors',
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json',
@@ -59,33 +69,130 @@ function Input() {
         },
       
         //make sure to serialize your JSON body
-        body: JSON.stringify({
+        data: JSON.stringify({
           name: document.getElementById("authName").value,
-          institution: ""
         }), mode: 'cors'
       }, true);      
       
       console.log(response);
+      const data = await response.data;
+      //setGetMessage({response, data})
+      return data.id;
+    }
+    catch (e) {
+      console.log(e)
+      return null;
+    }
+  }
+
+  const getScrapedPaper = async (paperTitle) => {
+    try {
+        const response = await axios.get(`/api/scraping/papers?title=${paperTitle}`, {
+            mode:'cors'});
+        if (response.status === 200) {
+          console.log(response);
+          return response.data;
+        }
+    }
+    catch (e) {
+        console.log(e.getMessage);
+    }
+  }
+
+  const postPaper = async (paper, title) => {
+    try {
+      const response = await axios({
+        method: "post",
+        url: '/api/papers',
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json',
+
+        },
       
-      const data = await response.json();
-      //console.log({response, data})
-      //return {response, data}
-      setGetMessage({response, data})
-      //console.log(getMessage.response.status)
+        //make sure to serialize your JSON body
+        data: JSON.stringify({
+          name: title,
+          year: paper.year
+        }), mode: 'cors'
+      }, true);      
+      
+      console.log(response);
+      const data = await response.data;
+      //setGetMessage({response, data})
+      return data.id;
     }
     catch (e) {
       console.log(e)
     }
   }
-  useEffect(() => {
-    makeAPICall();
-  }, [])
+
+  const postCitation = async (paperId, paper) => {
+    try {
+      const response = await axios({
+        method: "post",
+        url: `/api/papers/${paperId}/citations/${paper.citation_count}`,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json',
+
+        },
+        mode: 'cors'
+      }, true);      
+      
+      console.log(response);
+    }
+    catch (e) {
+      console.log(e)
+    }
+  }
+
+  const joinAuthorToPaper = async (paperId, authorId) => {
+    try {
+      const response = await axios({
+        method: "put",
+        url: `/api/papers/${paperId}/authors/${authorId}`,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json',
+
+        },
+        mode: 'cors'
+      }, true);      
+      
+      console.log(response);
+    }
+    catch (e) {
+      console.log(e)
+    }
+  }
+
+  const joinPaperToAuthor = async (paperId, authorId) => {
+    try {
+      const response = await axios({
+        method: "put",
+        url: `/api/authors/${authorId}/papers/${paperId}`,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json',
+
+        },
+        mode: 'cors'
+      }, true);      
+      
+      console.log(response);
+    }
+    catch (e) {
+      console.log(e)
+    }
+  }
+
 
   return (
     <div className="body">
       <div className="container pt-5">
         <div className="row">
-            <div className="alert alert-success alert-dismissible" role="alert">
+            <div className="alert alert-success alert-dismissible" role="alert" id="success" style={{display: "none"}}>
                 <button className="close" type="button" data-dismiss="alert"><span>&times;</span></button> Articles scraped successfully
             </div>
         </div>
@@ -100,10 +207,10 @@ function Input() {
         <div className="row">
                 <label for="myfile">Select a file:&nbsp;</label>
                 <input type="file" id="myfile" name="myfile"/>
-                <input type="submit" onClick={getFile}/>
+                <input type="submit" onClick={upload}/>
         </div>
         <div className="row">
-          <p id="text">{lines}</p>
+          <p id="text">{titles}</p>
         </div>
     </div>
     </div>

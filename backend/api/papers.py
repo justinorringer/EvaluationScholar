@@ -255,6 +255,52 @@ def new_citation(paper_id):
         mimetype='application/json'
     )
 
+@paper_routes.route('/papers/<int:paper_id>/citations/<int:citation_count>', methods=['POST'])
+def new_citation_with_count(paper_id, citation_count):
+    paper = current_app.session.query(Paper).get(paper_id)
+    if not paper:
+        return current_app.response_class(
+            response=json.dumps({'message': 'paper not found',
+                                 'status': 'error'}),
+            status=404,
+            mimetype='application/json'
+        )
+    
+    # try:
+    #     citation_count = scrape_citations(paper.name)
+    # except ApiNoCreditsError:
+    #     return current_app.response_class(
+    #         response=json.dumps({'message': 'API credits exceeded',
+    #                              'status': 'error'}),
+    #         status=403,
+    #         mimetype='application/json'
+    #     )
+    # except ApiRequestsFailedError:
+    #     return current_app.response_class(
+    #         response=json.dumps({'message': 'failed to scrape citations',
+    #                              'status': 'error'}),
+    #         status=500,
+    #         mimetype='application/json'
+    #     )
+
+    if citation_count == None:
+        return current_app.response_class(
+            response=json.dumps({'message': 'invalid citation count',
+                                 'status': 'error'}),
+            status=404,
+            mimetype='application/json'
+        )
+    
+    citation = Citation(citation_count, datetime.now())
+    paper.citations.append(citation)
+    current_app.session.commit()
+    return current_app.response_class(
+        response=json.dumps(citation.to_dict()),
+        status=200,
+        mimetype='application/json'
+    )
+
+
 @paper_routes.route('/papers/citations', methods=['POST'])        
 def new_citation_multiple_papers():
 
