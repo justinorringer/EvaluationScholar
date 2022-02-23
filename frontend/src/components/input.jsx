@@ -31,19 +31,29 @@ function Input() {
       } else {
         titles = fileInput.split("\n");
       }
-      document.getElementById("text").innerHTML = fileInput;
-
+      const titleList = document.getElementById("titleList");
       const fullsend = async () => {
         const authorId = await makeAuthor();
         console.log(authorId);
         for (const title of titles) {
-          const paper = await getScrapedPaper(title);
-          console.log(paper);
-          const paperId = await postPaper(paper, title);
-          console.log(paperId);
-          await postCitation(paperId, paper);
-          await joinAuthorToPaper(paperId, authorId);
-          await joinPaperToAuthor(paperId, authorId);
+          try {
+            const paper = await getScrapedPaper(title);
+            console.log(paper);
+            const paperId = await postPaper(paper, title);
+            console.log(paperId);
+            await postCitation(paperId, paper);
+            await joinAuthorToPaper(paperId, authorId);
+            await joinPaperToAuthor(paperId, authorId);
+            var titleItem = document.createElement("li");
+            titleItem.className = "list-group-item list-group-item-success";
+            titleItem.innerText = title + ": Added successfully!"
+            titleList.appendChild(titleItem);
+          } catch (e) {
+            var titleItem = document.createElement("li");
+            titleItem.className = "list-group-item list-group-item-danger";
+            titleItem.innerText = title + ": Failed to add!"
+            titleList.appendChild(titleItem);
+          }
         }
         document.getElementById("success").style = "display: block !important"
       }
@@ -58,7 +68,7 @@ function Input() {
 
   //Example function to gather from Flask
   const makeAuthor = async () => {
-    try {
+    // try {
       const response = await axios({
         method: "post",
         url: '/api/authors',
@@ -78,29 +88,29 @@ function Input() {
       const data = await response.data;
       //setGetMessage({response, data})
       return data.id;
-    }
-    catch (e) {
-      console.log(e)
-      return null;
-    }
+    // }
+    // catch (e) {
+      // console.log(e)
+      // return null;
+    // }
   }
 
   const getScrapedPaper = async (paperTitle) => {
-    try {
+    // try {
         const response = await axios.get(`/api/scraping/papers?title=${paperTitle}`, {
             mode:'cors'});
         if (response.status === 200) {
           console.log(response);
           return response.data;
         }
-    }
-    catch (e) {
-        console.log(e.getMessage);
-    }
+    // }
+    // catch (e) {
+        // console.log(e.getMessage);
+    // }
   }
 
   const postPaper = async (paper, title) => {
-    try {
+    // try {
       const response = await axios({
         method: "post",
         url: '/api/papers',
@@ -121,14 +131,14 @@ function Input() {
       const data = await response.data;
       //setGetMessage({response, data})
       return data.id;
-    }
-    catch (e) {
-      console.log(e)
-    }
+    // }
+    // catch (e) {
+      // console.log(e)
+    // }
   }
 
   const postCitation = async (paperId, paper) => {
-    try {
+    // try {
       const response = await axios({
         method: "post",
         url: `/api/papers/${paperId}/citations/${paper.citation_count}`,
@@ -141,14 +151,14 @@ function Input() {
       }, true);      
       
       console.log(response);
-    }
-    catch (e) {
-      console.log(e)
-    }
+    // }
+    // catch (e) {
+      // console.log(e)
+    // }
   }
 
   const joinAuthorToPaper = async (paperId, authorId) => {
-    try {
+    // try {
       const response = await axios({
         method: "put",
         url: `/api/papers/${paperId}/authors/${authorId}`,
@@ -161,14 +171,14 @@ function Input() {
       }, true);      
       
       console.log(response);
-    }
-    catch (e) {
-      console.log(e)
-    }
+    // }
+    // catch (e) {
+      // console.log(e)
+    // }
   }
 
   const joinPaperToAuthor = async (paperId, authorId) => {
-    try {
+    // try {
       const response = await axios({
         method: "put",
         url: `/api/authors/${authorId}/papers/${paperId}`,
@@ -181,10 +191,10 @@ function Input() {
       }, true);      
       
       console.log(response);
-    }
-    catch (e) {
-      console.log(e)
-    }
+    // }
+    // catch (e) {
+      // console.log(e)
+    // }
   }
 
 
@@ -193,7 +203,7 @@ function Input() {
       <div className="container pt-5">
         <div className="row">
             <div className="alert alert-success alert-dismissible" role="alert" id="success" style={{display: "none"}}>
-                <button className="close" type="button" data-dismiss="alert"><span>&times;</span></button> Articles scraped successfully
+                <button className="close" type="button" data-dismiss="alert"><span>&times;</span></button> Articles done scraping
             </div>
         </div>
         <div className="row">
@@ -209,10 +219,11 @@ function Input() {
                 <input type="file" id="myfile" name="myfile"/>
                 <input type="submit" onClick={upload}/>
         </div>
-        <div className="row">
-          <p id="text">{titles}</p>
-        </div>
-    </div>
+      </div>
+      <div className="container">
+        <ul className="list-group" id="titleList">
+        </ul>
+      </div>
     </div>
     
   );
