@@ -15,7 +15,6 @@ import {
 ReactDOM.render(
   <Router>
     <Header />
-    <h1>hello</h1>
     <Routes>
       <Route path="/" element={<Query />} />
       <Route path="/input" element={<Input />} />
