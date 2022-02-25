@@ -1,21 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import axios from 'axios';
 
 //Function to create an HTML representation for the Input page of the app.
 //Authors: Gage Fringer, Carter Thunes, Justin Orringer
 function Input() {
-  const [getMessage, setGetMessage] = useState({})
-  
   //Variable to hold data from a file selected to be read in.
   let fileInput = null;
   //Variable to handle holding titles of papers for parsing/messages
   let titles = [];
 
   //Object to hold the data getting pulled, both a name string and institution string
-  let data = {
-    name: "",
-    institution: ""
-  }
 
   //Method to handle the upload of a file
   //and also call other functions necessary for this page

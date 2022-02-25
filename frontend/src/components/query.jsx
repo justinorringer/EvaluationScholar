@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import axios from 'axios';
 
 //Function to create an HTML representation of the Query page for the app
