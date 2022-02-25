@@ -1,6 +1,9 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 
+//Function to create an HTML representation of a Header/Navbar for the application
+//which includes routes to the different pages of the application.
+
 function Header() {
   return (
     <div className="navigation">

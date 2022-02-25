@@ -1,28 +1,33 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
 
+//Function to create an HTML representation for the Input page of the app.
+//Authors: Gage Fringer, Carter Thunes, Justin Orringer
 function Input() {
   const [getMessage, setGetMessage] = useState({})
   
-  //Base file reading works!
-  
+  //Variable to hold data from a file selected to be read in.
   let fileInput = null;
+  //Variable to handle holding titles of papers for parsing/messages
   let titles = [];
 
+  //Object to hold the data getting pulled, both a name string and institution string
   let data = {
     name: "",
     institution: ""
   }
 
+  //Method to handle the upload of a file
+  //and also call other functions necessary for this page
   function upload(){
-    //console.log(document.getElementById("authName").value);
-
+    //Pull the value of the file being input
     let test = document.getElementById('myfile')
     fileInput = test.files[0];
-    //console.log(fileInput)
-
+    //Create a variable to read it
     var fr = new FileReader();
 
+    //Add an event listener to handle getting the contents of the .txt or .csv
+    //file when it is loaded
     fr.addEventListener("load", () => {
       fileInput = fr.result;
       //Branch to handle different operating system line endings (Windows v. Linux)
@@ -31,6 +36,7 @@ function Input() {
       } else {
         titles = fileInput.split("\n");
       }
+      //Work to gather the titles of papers
       const titleList = document.getElementById("titleList");
       const fullsend = async () => {
         const authorId = await makeAuthor();
@@ -66,9 +72,8 @@ function Input() {
     fr.readAsText(fileInput);
   }
 
-  //Example function to gather from Flask
+  //Function to create an author in the database through an axios call.
   const makeAuthor = async () => {
-    // try {
       const response = await axios({
         method: "post",
         url: '/api/authors',
@@ -82,35 +87,25 @@ function Input() {
         data: JSON.stringify({
           name: document.getElementById("authName").value,
         }), mode: 'cors'
-      }, true);      
+      }, true);
       
       console.log(response);
       const data = await response.data;
-      //setGetMessage({response, data})
       return data.id;
-    // }
-    // catch (e) {
-      // console.log(e)
-      // return null;
-    // }
   }
 
+  //Function to handle making a call to the scraper to get information based on a title.
   const getScrapedPaper = async (paperTitle) => {
-    // try {
         const response = await axios.get(`/api/scraping/papers?title=${paperTitle}`, {
             mode:'cors'});
         if (response.status === 200) {
           console.log(response);
           return response.data;
         }
-    // }
-    // catch (e) {
-        // console.log(e.getMessage);
-    // }
   }
 
+  //Function to take a scraped paper and add it to the database
   const postPaper = async (paper, title) => {
-    // try {
       const response = await axios({
         method: "post",
         url: '/api/papers',
@@ -125,20 +120,15 @@ function Input() {
           name: title,
           year: paper.year
         }), mode: 'cors'
-      }, true);      
+      }, true);
       
       console.log(response);
       const data = await response.data;
-      //setGetMessage({response, data})
       return data.id;
-    // }
-    // catch (e) {
-      // console.log(e)
-    // }
   }
 
+  //Function to create the citation associated with a certain paper.
   const postCitation = async (paperId, paper) => {
-    // try {
       const response = await axios({
         method: "post",
         url: `/api/papers/${paperId}/citations/${paper.citation_count}`,
@@ -148,17 +138,13 @@ function Input() {
 
         },
         mode: 'cors'
-      }, true);      
+      }, true);
       
       console.log(response);
-    // }
-    // catch (e) {
-      // console.log(e)
-    // }
   }
 
+  //Function to handle creating an entry in the Author-Paper join table in the database.
   const joinAuthorToPaper = async (paperId, authorId) => {
-    // try {
       const response = await axios({
         method: "put",
         url: `/api/papers/${paperId}/authors/${authorId}`,
@@ -168,17 +154,13 @@ function Input() {
 
         },
         mode: 'cors'
-      }, true);      
+      }, true);
       
       console.log(response);
-    // }
-    // catch (e) {
-      // console.log(e)
-    // }
   }
 
+  //Function to handle creating an entry in the Paper-Author join table in the database.
   const joinPaperToAuthor = async (paperId, authorId) => {
-    // try {
       const response = await axios({
         method: "put",
         url: `/api/authors/${authorId}/papers/${paperId}`,
@@ -188,16 +170,12 @@ function Input() {
 
         },
         mode: 'cors'
-      }, true);      
+      }, true);
       
       console.log(response);
-    // }
-    // catch (e) {
-      // console.log(e)
-    // }
   }
 
-
+  //Return the related HTML of the page.
   return (
     <div className="body">
       <div className="container pt-5">
@@ -208,7 +186,7 @@ function Input() {
         </div>
         <div className="row">
           <label>Author name: &nbsp;</label>
-          <input type="text" id="authName"></input> 
+          <input type="text" id="authName"></input>
         </div>
         <div className="row">
             <div className="justify-content-center page-header">Upload File <small>as a .CSV or .TXT file</small></div>

@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
 
+//Function to create an HTML representation of the Query page for the app
+//while also handling dynamic calls to the API.
+//Authors: Gage Fringer, Carter Thunes, Justin Orringer
 function Query() {
+    //Variable to hold list of current authors in the system
     let authors = [];
+    //Variable to hold list of papers related to an author
     let papers = [];
 
+    //Function to make an API call to gather a list of all current authors.
     const getAuthors = async () => {
         try {
             const response = await axios.get('/api/authors', {mode:'cors'});
@@ -28,6 +34,7 @@ function Query() {
         });
     }
 
+    //Function to make the API call to gather the papers of a specific author.
     function query() {
         const parentForm = document.getElementById("authorForm");
         if (parentForm === null) {
@@ -81,6 +88,7 @@ function Query() {
 
     getAuthors();
 
+  //Return the related HTML of the page.
   return (
     <div className="body">
       <div className="container pt-5" id="container">

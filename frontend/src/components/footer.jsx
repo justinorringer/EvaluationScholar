@@ -1,5 +1,7 @@
 import React from "react";
 
+//Basic HTML representation of a footer for the webpage.
+
 function Footer() {
   return (
     <div className="footer">
