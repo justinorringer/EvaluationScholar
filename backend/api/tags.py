@@ -5,7 +5,8 @@ from api.models import Tag, Author
 
 tag_routes = Blueprint('tag_routes', __name__, template_folder='templates')
 
-# Routes starting with /api/tags
+# Routes to handle CRUD actions for the Tag model
+# Author(s): Tyler Maxwell, Abhinav Kulhari
 
 @tag_routes.route('/tags', methods=['POST'])
 def create_tag():

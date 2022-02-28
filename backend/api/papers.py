@@ -7,6 +7,9 @@ from scraping.errors import ApiNoCreditsError, ApiRequestsFailedError
 
 from datetime import datetime
 
+# Routes to handle CRUD actions for the Paper model
+# Author(s): Tyler Maxwell, Abhinav Kulhari
+
 paper_routes = Blueprint('paper_routes', __name__, template_folder='templates')
 
 # Routes starting with /api/papers

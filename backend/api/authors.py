@@ -1,10 +1,10 @@
 from flask import Blueprint, current_app, json, request, Flask
 from flask_cors import CORS, cross_origin 
-# @cross_origins have been added in an attempt to solve CORS error, can remove if NGINX is successful
 from api.models import Author, Paper, Tag
 author_routes = Blueprint('author_routes', __name__, template_folder='templates')
 
-# Routes starting with /api/authors
+# Routes to handle CRUD actions for the Author model
+# Author(s): Tyler Maxwell, Abhinav Kulhari
 
 @author_routes.route('/authors', methods=['GET'])
 def get_authors():

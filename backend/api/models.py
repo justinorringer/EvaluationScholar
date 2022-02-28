@@ -1,7 +1,9 @@
-#Defines data Bases for the application
 from sqlalchemy import Table, Column, Integer, ForeignKey, String, DateTime, desc
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
+
+# File to handle the creation of different models/tables stored in the MySQL database
+# Author(s): Tyler Maxwell, Gage Fringer
 
 Base = declarative_base()
 

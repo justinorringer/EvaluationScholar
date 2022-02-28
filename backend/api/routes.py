@@ -2,7 +2,8 @@ from flask import Blueprint, current_app, json, request
 from api.models import Author, Paper
 routes = Blueprint('routes', __name__, template_folder='templates')
 
-#API routes
+# File to link all API routes
+# Author(s): Tyler Maxwell, Abhinav Kulhari
 
 from api.authors import author_routes
 from api.papers import paper_routes
