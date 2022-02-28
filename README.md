@@ -12,6 +12,6 @@ While in debug mode, Flask will automatically detect changes to the project code
 
 ### Testing
 
-From the `src/test` directory, install the testing requirements with `pip install -r requirements.txt`
+From the `backend/test` directory, install the testing requirements with `pip install -r requirements.txt`
 
-To run the tests, run `pytest` from `src/test`.
+To run the tests, run `python -m pytest` from `backend`.

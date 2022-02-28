@@ -1,5 +1,6 @@
 mysql-data/
-src/test/.pytest_cache/
-src/test/.coverage
+**/.pytest_cache/
+**/.coverage
 **/__pycache__/
+.env
 .idea/*
