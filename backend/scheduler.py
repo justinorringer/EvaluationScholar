@@ -91,7 +91,6 @@ def scheduler_loop():
                             create_paper(session, job.paper_title)
                         elif job.job_type == JobType.UPDATE_CITATIONS:
                             update_citations(session, job.paper)
-                            create_citation_update_job(session, job.paper)
 
                         session.delete(job)
 
