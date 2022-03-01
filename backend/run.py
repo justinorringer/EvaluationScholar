@@ -14,8 +14,7 @@ connection_string = "mysql://" + db_user + ":" + db_pass  + "@" + db_host + ":33
 engine = create_engine(connection_string)
 
 Session = sessionmaker(bind=engine)
-session = Session()
-app = create_app(session)
+app = create_app(Session)
 Base.metadata.create_all(engine)
 
 app.run(debug=True, host='0.0.0.0', port=5000)

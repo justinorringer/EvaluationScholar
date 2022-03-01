@@ -4,7 +4,7 @@ import sys
 
 sys.path.append("..")
 
-from api.models import *
+from backend.api.models import *
 import pytest
 from datetime import datetime
 

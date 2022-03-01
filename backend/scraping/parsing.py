@@ -1,8 +1,8 @@
-from typing import Optional
+from typing import Optional, List
 from bs4 import BeautifulSoup
 import re
 
-def parse_papers(scholar_search_html: str) -> list[str]:
+def parse_papers(scholar_search_html: str) -> List[str]:
     soup = BeautifulSoup(scholar_search_html, 'html.parser')
 
     return soup.find_all("div", {"class": "gs_ri"})

@@ -1,6 +1,6 @@
 from flask import Flask
 
-def create_app(session):
+def create_app(session_maker):
     app = Flask(__name__)
 
     from api.routes import routes
@@ -9,6 +9,6 @@ def create_app(session):
     app.register_blueprint(routes)
     app.register_blueprint(views)
 
-    app.session = session
+    app.session_maker = session_maker
 
     return app
