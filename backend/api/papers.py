@@ -1,10 +1,10 @@
 from flask import Blueprint, current_app, json, request
 from sqlalchemy import desc
 
-from backend.api.models import Author, Citation, Paper
+from api.models import Author, Citation, Paper
 from scraping import scrape_citations
 from scraping.errors import ApiNoCreditsError, ApiRequestsFailedError
-from backend.api.templates import db_session
+from api.templates import db_session
 
 from datetime import datetime
 

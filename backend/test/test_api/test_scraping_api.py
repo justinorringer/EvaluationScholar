@@ -1,5 +1,4 @@
 def test_scraping(client):
-    return
     # Scrape a paper
     response = client.get('/scraping/papers?title=Autonomous%20Aerial%20Water%20Sampling')
     assert response.status_code == 200

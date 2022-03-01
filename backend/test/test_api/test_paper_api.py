@@ -180,7 +180,6 @@ def test_citations(client):
     assert len(resp.json) == 0
 
 def test_scraping(client):
-    return
     # Create a new paper
     paper1 = Paper("Autonomous Aerial Water Sampling", 2001)
     resp = client.post('/papers', json=paper1.to_dict())

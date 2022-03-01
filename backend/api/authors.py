@@ -1,6 +1,6 @@
 from flask import Blueprint, current_app, json, request, Flask
-from backend.api.models import Author, Paper, Tag
-from backend.api.templates import db_session
+from api.models import Author, Paper, Tag
+from api.templates import db_session
 author_routes = Blueprint('author_routes', __name__, template_folder='templates')
 
 # Routes to handle CRUD actions for the Author model
