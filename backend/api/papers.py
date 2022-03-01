@@ -258,6 +258,7 @@ def new_citation(paper_id):
         
         citation = Citation(citation_count, datetime.now())
         paper.citations.append(citation)
+        session.flush()
         return current_app.response_class(
             response=json.dumps(citation.to_dict()),
             status=200,
