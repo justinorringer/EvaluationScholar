@@ -2,8 +2,8 @@
 import sys
 sys.path.append("..")
 
-from api.models import Base
-from factory import create_app
+from backend.api.models import Base
+from backend.factory import create_app
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -15,7 +15,7 @@ def app():
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
 
-    app = create_app(Session())
+    app = create_app(Session)
     return app
 
 @pytest.fixture(scope="session")
@@ -24,11 +24,11 @@ def client(app):
 
 @pytest.fixture(scope="function")
 def session(app):
-    return app.session
+    return app.session_maker()
 
 # This fixture will be automatically used by each test
 @pytest.fixture(autouse=True)
-def clean_db(app, session):
+def clean_db(session):
     for table in reversed(Base.metadata.sorted_tables):
         session.execute(table.delete())
 

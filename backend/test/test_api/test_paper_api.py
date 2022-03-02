@@ -1,7 +1,7 @@
 import sys
 sys.path.append("..")
 
-from api.models import Author, Paper
+from backend.api.models import Author, Paper
 
 def test_crud(client):
     # Create a new paper

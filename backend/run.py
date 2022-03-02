@@ -9,8 +9,7 @@ import threading
 engine = create_engine(create_connection_string())
 
 Session = sessionmaker(bind=engine)
-session = Session()
-app = create_app(session)
+app = create_app(Session)
 Base.metadata.create_all(engine)
 
 from scheduler import scheduler_loop
