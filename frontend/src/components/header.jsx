@@ -7,7 +7,7 @@ import { NavLink } from "react-router-dom";
 function Header() {
   return (
     <div className="navigation">
-      <nav className="navbar static-top navbar-expand-sm navbar-dark bg-dark">
+      <nav className="navbar fixed-top navbar-expand-sm navbar-dark bg-dark">
         <div className="container">
           <NavLink className="navbar-brand" to="/">
             EvaluationScholar
@@ -23,6 +23,16 @@ function Header() {
               <li className="nav-item">
                 <NavLink className="nav-link" to="/input">
                   Input
+                </NavLink>
+              </li>
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/issues">
+                  Issues
+                </NavLink>
+              </li>
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/jobs">
+                  Jobs
                 </NavLink>
               </li>
             </ul>
