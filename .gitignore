@@ -4,3 +4,4 @@ mysql-data/
 **/__pycache__/
 .env
 .idea/*
+**/.vscode/*

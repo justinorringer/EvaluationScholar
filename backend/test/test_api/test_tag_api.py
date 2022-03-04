@@ -1,7 +1,7 @@
 import sys
 sys.path.append("..")
 
-from api.models import Tag, Author
+from backend.api.models import Tag, Author
 
 def test_crud(client):
     # Create a new tag

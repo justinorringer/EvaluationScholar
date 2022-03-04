@@ -1,7 +1,10 @@
-#Defines data Bases for the application
-from sqlalchemy import Table, Column, Integer, ForeignKey, String, DateTime, desc
+import enum
+from sqlalchemy import Table, Column, Integer, ForeignKey, String, DateTime, desc, Enum
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
+
+# File to handle the creation of different models/tables stored in the MySQL database
+# Author(s): Tyler Maxwell, Gage Fringer
 
 Base = declarative_base()
 
@@ -63,6 +66,7 @@ class Paper(Base):
 
     authors = relationship('Author', secondary=author_paper, back_populates='papers')
     citations = relationship('Citation', backref='paper', order_by='Citation.date.desc()')
+    jobs = relationship('Job', back_populates='paper')
 
     def to_dict(self):
         return {
@@ -90,4 +94,37 @@ class Tag(Base):
         }
 
     def __init__(self, name):
-        self.name = name 
+        self.name = name
+
+class JobType(enum.Enum):
+    CREATE_PAPER = 1
+    UPDATE_CITATIONS = 2
+    SCRAPE_AUTHORS = 3
+
+class Job(Base):
+    __tablename__ = 'job'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    job_type = Column(Enum(JobType), nullable=False)
+    paper_title = Column(String(200), nullable=True)
+    paper_id = Column(Integer, ForeignKey('paper.id'), nullable=True)
+    priority = Column(Integer, nullable=False)
+    date = Column(DateTime, nullable=True)
+
+    paper = relationship('Paper', back_populates='jobs')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'job_type': self.job_type,
+            'paper_title': self.paper_title,
+            'paper_id': self.paper_id,
+            'priority': self.priority,
+            'date': self.date,
+        }
+    
+    def __init__(self, job_type, paper_title=None, paper_id=None, priority=0, date=None):
+        self.job_type = job_type
+        self.paper_title = paper_title
+        self.paper_id = paper_id
+        self.priority = priority
+        self.date = date

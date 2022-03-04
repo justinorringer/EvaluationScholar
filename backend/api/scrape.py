@@ -5,7 +5,9 @@ from scraping.errors import ApiNoCreditsError, ApiRequestsFailedError
 
 scraping_routes = Blueprint('scraping_routes', __name__, template_folder='templates')
 
-# Routes starting with /api/scraping
+# Routes to handle interaction with ScraperAPI
+# Author(s): Tyler Maxwell, Abhinav Kulhari
+
 @scraping_routes.route('/scraping/papers', methods=['GET'])
 def scrape_paper():
     paper_title = request.args.get('title')
