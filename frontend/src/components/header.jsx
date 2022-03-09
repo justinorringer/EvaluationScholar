@@ -9,7 +9,7 @@ function Header() {
     <div className="navigation">
       <nav className="navbar static-top navbar-expand-sm navbar-dark bg-dark">
         <div className="container">
-          <NavLink className="navbar-brand" to="/">
+          <NavLink id="PageTitle" className="navbar-brand" to="/">
             EvaluationScholar
           </NavLink>
           <div>
