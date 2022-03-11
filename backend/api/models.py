@@ -63,6 +63,7 @@ class Paper(Base):
     year = Column(Integer, unique=False, nullable=False)
     #I believe we were just linking these to the Citation table
     #num_cited=Column(Integer, nullable=False)
+    scholar_id = Column(String(100), unique=False, nullable=True)
 
     authors = relationship('Author', secondary=author_paper, back_populates='papers')
     citations = relationship('Citation', backref='paper', order_by='Citation.date.desc()')
@@ -73,6 +74,7 @@ class Paper(Base):
             'id': self.id,
             'name': self.name,
             'year': self.year,
+            'scholar_id': self.scholar_id,
             'latest_citation': None if len(self.citations) == 0 else self.citations[0].to_dict()
         }
 
