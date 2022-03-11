@@ -39,7 +39,4 @@ def parse_paper_id(paper: str) -> Optional[str]:
     if a is None:
         return None
     
-    if not a.has_attr('id'):
-        return None
-    
     return a['id']
