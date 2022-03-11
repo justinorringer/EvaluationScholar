@@ -130,3 +130,56 @@ class Job(Base):
         self.paper_id = paper_id
         self.priority = priority
         self.date = date
+
+class Issue(Base):
+    __tablename__ = "issue"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    type = Column(String(80), nullable=False)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'issue',
+        'polymorphic_on':type
+    }
+
+class AmbiguousPaperIssue(Issue):
+    __tablename__ = "ambiguous_paper_issue"
+    id = Column(Integer, ForeignKey('issue.id'), primary_key=True)
+    __mapper_args__ = {
+        'polymorphic_identity': 'ambiguous_paper_issue',
+    }
+
+    gid_1 = Column(String(80), nullable=False)
+    gid_2 = Column(String(80), nullable=False)
+    gid_3 = Column(String(80), nullable=True)
+    title_1 = Column(String(200), nullable=False)
+    title_2 = Column(String(200), nullable=False)
+    title_3 = Column(String(200), nullable=True)
+    count_1 = Column(Integer, nullable=False)
+    count_2 = Column(Integer, nullable=False)
+    count_3 = Column(Integer, nullable=True)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'type': self.type,
+            'gid_1': self.gid_1,
+            'gid_2': self.gid_2,
+            'gid_3': self.gid_3,
+            'title_1': self.title_1,
+            'title_2': self.title_2,
+            'title_3': self.title_3,
+            'count_1': self.count_1,
+            'count_2': self.count_2,
+            'count_3': self.count_3,
+        }
+    
+    def __init__(self, gid_1, gid_2, gid_3, title_1, title_2, title_3, count_1, count_2, count_3):
+        self.gid_1 = gid_1
+        self.gid_2 = gid_2
+        self.gid_3 = gid_3
+        self.title_1 = title_1
+        self.title_2 = title_2
+        self.title_3 = title_3
+        self.count_1 = count_1
+        self.count_2 = count_2
+        self.count_3 = count_3

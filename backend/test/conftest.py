@@ -33,3 +33,22 @@ def clean_db(session):
         session.execute(table.delete())
 
     session.commit()
+
+def pytest_addoption(parser):
+    parser.addoption(
+        "--scraping", action="store_true", default=False, help="run scraping tests"
+    )
+
+
+def pytest_configure(config):
+    config.addinivalue_line("markers", "slow: mark test as a scraping test")
+
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--scraping"):
+        # --scraping given in cli: do not skip slow tests
+        return
+    skip_slow = pytest.mark.skip(reason="need --scraping option to run")
+    for item in items:
+        if "scraping" in item.keywords:
+            item.add_marker(skip_slow)

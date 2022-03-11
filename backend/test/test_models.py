@@ -111,3 +111,30 @@ def test_duplicate_paper(session):
         print("Papers can't match")
         session.rollback()
         assert paper1.name == 'name'
+
+def test_issues(session):
+    issue = AmbiguousPaperIssue('gid1', 'gid2', 'gid3', 'title1', 'title2', 'title3', 1, 2, 3)
+    session.add(issue)
+    session.commit()
+
+    assert session.query(AmbiguousPaperIssue).count() == 1
+
+    ret_issue = session.query(AmbiguousPaperIssue).all()[0]
+
+    assert ret_issue.gid_1 == 'gid1'
+    assert ret_issue.gid_2 == 'gid2'
+    assert ret_issue.title_1 == 'title1'
+    assert ret_issue.count_1 == 1
+    assert ret_issue.type == 'ambiguous_paper_issue'
+
+    assert session.query(Issue).count() == 1
+
+    ret_generic_issue = session.query(Issue).all()[0]
+
+    assert ret_generic_issue.type == 'ambiguous_paper_issue'
+
+    session.delete(ret_generic_issue)
+    session.commit()
+
+    assert session.query(AmbiguousPaperIssue).count() == 0
+    assert session.query(Issue).count() == 0
