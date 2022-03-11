@@ -57,3 +57,7 @@ nav a {
     list-style: none;
     margin-bottom: 0;
 }
+
+input.checkbox {
+    transform: scale(1.2);
+}

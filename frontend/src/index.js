@@ -10,7 +10,8 @@ import {
   Query,
   Input,
   Issues,
-  Jobs
+  Jobs,
+  Tags
 } from "./components";
 
 
@@ -22,6 +23,7 @@ ReactDOM.render(
       <Route path="/input" element={<Input />} />
       <Route path="/issues" element={<Issues />} />
       <Route path="/jobs" element={<Jobs />} />
+      <Route path="/tags" element={<Tags />} />
     </Routes>
     <Footer />
   </Router>,

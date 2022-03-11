@@ -35,6 +35,11 @@ function Header() {
                   Jobs
                 </NavLink>
               </li>
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/tags">
+                  Tags
+                </NavLink>
+              </li>
             </ul>
           </div>
         </div>
