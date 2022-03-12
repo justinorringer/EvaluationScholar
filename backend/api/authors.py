@@ -253,3 +253,42 @@ def remove_tag_from_author(author_id, tag_id):
             status=200,
             mimetype='application/json'
         )
+
+
+@author_routes.route('/authors/tags', methods=['PUT'])
+def batch_add_tags():
+    with db_session(current_app) as session:
+        data = request.get_json()
+        authors = session.query(Author).filter(Author.id.in_(data['authors']))
+        tags = session.query(Tag).filter(Tag.id.in_(data['tags']))
+
+        for author in authors:
+            for tag in tags:
+                if tag not in author.tags:
+                    author.tags.append(tag)
+
+        return current_app.response_class(
+            response=json.dumps({'message': 'tags added to authors',
+                                    'status': 'success'}),
+            status=200,
+            mimetype='application/json'
+        )
+
+@author_routes.route('/authors/tags', methods=['DELETE'])
+def batch_remove_tags():
+    with db_session(current_app) as session:
+        data = request.get_json()
+        authors = session.query(Author).filter(Author.id.in_(data['authors']))
+        tags = session.query(Tag).filter(Tag.id.in_(data['tags']))
+
+        for author in authors:
+            for tag in tags:
+                if tag in author.tags:
+                    author.tags.remove(tag)
+
+        return current_app.response_class(
+            response=json.dumps({'message': 'tags removed from authors',
+                                    'status': 'success'}),
+            status=200,
+            mimetype='application/json'
+        )

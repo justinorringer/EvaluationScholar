@@ -203,3 +203,60 @@ def test_tag_list(client):
     resp = client.get(f'/authors/{a1_id}/tags')
     assert resp.status_code == 200
     assert len(resp.json) == 0
+
+def test_batch(client):
+    tag_ids = []
+    for i in range(10):
+        tag = Tag(f'name{i}')
+        resp = client.post('/tags', json=tag.to_dict())
+        assert resp.status_code == 201
+        tag_ids.append(resp.json['id'])
+    
+    author_ids = []
+    for i in range(10):
+        author = Author(f'name{i}')
+        resp = client.post('/authors', json=author.to_dict())
+        assert resp.status_code == 201
+        author_ids.append(resp.json['id'])
+    
+    # Add tags to authors
+    add_tag_list = list(map(lambda x: tag_ids[x], [1, 3, 4, 5, 6]))
+    add_author_list = list(map(lambda x: author_ids[x], [5, 6, 4, 2]))
+
+    client.put('/authors/tags', json={'tags': add_tag_list, 'authors': add_author_list})
+
+    # Check that tags were added to authors
+    for author_id in author_ids:
+        resp = client.get(f'/authors/{author_id}/tags')
+        assert resp.status_code == 200
+
+        if author_id in add_author_list:
+            assert len(resp.json) == 5
+
+            for tag_id in add_tag_list:
+                assert tag_id in [t['id'] for t in resp.json]
+        else:
+            assert len(resp.json) == 0
+    
+    # Remove tags from authors
+    remove_tag_list = list(map(lambda x: tag_ids[x], [0, 1, 3]))
+    remove_author_list = list(map(lambda x: author_ids[x], [5, 6]))
+
+    client.delete('/authors/tags', json={'tags': remove_tag_list, 'authors': remove_author_list})
+
+    # Check that tags were removed from authors
+    resp = client.get(f'/authors/{author_ids[5]}/tags')
+    assert resp.status_code == 200
+    assert len(resp.json) == 3
+
+    resp = client.get(f'/authors/{author_ids[6]}/tags')
+    assert resp.status_code == 200
+    assert len(resp.json) == 3
+
+    resp = client.get(f'/authors/{author_ids[4]}/tags')
+    assert resp.status_code == 200
+    assert len(resp.json) == 5
+
+    resp = client.get(f'/authors/{author_ids[0]}/tags')
+    assert resp.status_code == 200
+    assert len(resp.json) == 0
