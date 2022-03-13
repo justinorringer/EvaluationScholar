@@ -28,3 +28,22 @@ def get_issue(id):
             status=200,
             mimetype='application/json'
         )
+
+@issue_routes.route('/issues/<int:id>', methods=['DELETE'])
+def delete_issue(id):
+    with db_session(current_app) as session:
+        issue = session.query(Issue).get(id)
+        if issue is None:
+            return current_app.response_class(
+                response=json.dumps({'message': 'Issue not found',
+                                     'status': 'error'}),
+                status=404,
+                mimetype='application/json'
+            )
+        session.delete(issue)
+        return current_app.response_class(
+            response=json.dumps({'message': 'Issue deleted',
+                                 'status': 'success'}),
+            status=200,
+            mimetype='application/json'
+        )

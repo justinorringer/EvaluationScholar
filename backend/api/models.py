@@ -148,38 +148,27 @@ class AmbiguousPaperIssue(Issue):
         'polymorphic_identity': 'ambiguous_paper_issue',
     }
 
-    gid_1 = Column(String(80), nullable=False)
-    gid_2 = Column(String(80), nullable=False)
-    gid_3 = Column(String(80), nullable=True)
-    title_1 = Column(String(200), nullable=False)
-    title_2 = Column(String(200), nullable=False)
-    title_3 = Column(String(200), nullable=True)
-    count_1 = Column(Integer, nullable=False)
-    count_2 = Column(Integer, nullable=False)
-    count_3 = Column(Integer, nullable=True)
+    author_name = Column(String(80), nullable=False)
+    paper_id_1 = Column(Integer, ForeignKey('paper.id'), nullable=False)
+    paper_id_2 = Column(Integer, ForeignKey('paper.id'), nullable=False)
+    paper_id_3 = Column(Integer, ForeignKey('paper.id'), nullable=True)
+
+    paper_1 = relationship('Paper', foreign_keys=[paper_id_1])
+    paper_2 = relationship('Paper', foreign_keys=[paper_id_2])
+    paper_3 = relationship('Paper', foreign_keys=[paper_id_3])
 
     def to_dict(self):
         return {
             'id': self.id,
             'type': self.type,
-            'gid_1': self.gid_1,
-            'gid_2': self.gid_2,
-            'gid_3': self.gid_3,
-            'title_1': self.title_1,
-            'title_2': self.title_2,
-            'title_3': self.title_3,
-            'count_1': self.count_1,
-            'count_2': self.count_2,
-            'count_3': self.count_3,
+            'author_name': self.author_name,
+            'paper_1': self.paper_1.to_dict(),
+            'paper_2': self.paper_2.to_dict(),
+            'paper_3': None if self.paper_3 is None else self.paper_3.to_dict(),
         }
     
-    def __init__(self, gid_1, gid_2, gid_3, title_1, title_2, title_3, count_1, count_2, count_3):
-        self.gid_1 = gid_1
-        self.gid_2 = gid_2
-        self.gid_3 = gid_3
-        self.title_1 = title_1
-        self.title_2 = title_2
-        self.title_3 = title_3
-        self.count_1 = count_1
-        self.count_2 = count_2
-        self.count_3 = count_3
+    def __init__(self, author_name, paper_id_1, paper_id_2, paper_id_3 = None):
+        self.author_name = author_name
+        self.paper_id_1 = paper_id_1
+        self.paper_id_2 = paper_id_2
+        self.paper_id_3 = paper_id_3

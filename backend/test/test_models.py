@@ -113,7 +113,16 @@ def test_duplicate_paper(session):
         assert paper1.name == 'name'
 
 def test_issues(session):
-    issue = AmbiguousPaperIssue('gid1', 'gid2', 'gid3', 'title1', 'title2', 'title3', 1, 2, 3)
+    paper_1 = Paper("paper1", 2001)
+    paper_2 = Paper("paper2", 2002)
+    paper_3 = Paper("paper3", 2003)
+
+    session.add(paper_1)
+    session.add(paper_2)
+    session.add(paper_3)
+    session.commit()
+
+    issue = AmbiguousPaperIssue('author', paper_1.id, paper_2.id, paper_3.id)
     session.add(issue)
     session.commit()
 
@@ -121,10 +130,9 @@ def test_issues(session):
 
     ret_issue = session.query(AmbiguousPaperIssue).all()[0]
 
-    assert ret_issue.gid_1 == 'gid1'
-    assert ret_issue.gid_2 == 'gid2'
-    assert ret_issue.title_1 == 'title1'
-    assert ret_issue.count_1 == 1
+    assert ret_issue.paper_1.name == 'paper1'
+    assert ret_issue.paper_2.year == 2002
+    assert ret_issue.author_name == 'author'
     assert ret_issue.type == 'ambiguous_paper_issue'
 
     assert session.query(Issue).count() == 1
