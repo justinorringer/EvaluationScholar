@@ -1,6 +1,8 @@
 import backend.scraping as scraping
 import backend.scraping.parsing as parsing
+import pytest
 
+@pytest.mark.scraping
 def test_scraping():
     html = scraping.search_paper("Autonomous Aerial Water Sampling")
     papers = parsing.parse_papers(html)
