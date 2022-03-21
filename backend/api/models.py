@@ -63,6 +63,7 @@ class Paper(Base):
     year = Column(Integer, unique=False, nullable=False)
     #I believe we were just linking these to the Citation table
     #num_cited=Column(Integer, nullable=False)
+    scholar_id = Column(String(100), unique=False, nullable=True)
 
     authors = relationship('Author', secondary=author_paper, back_populates='papers')
     citations = relationship('Citation', backref='paper', order_by='Citation.date.desc()')
@@ -73,6 +74,7 @@ class Paper(Base):
             'id': self.id,
             'name': self.name,
             'year': self.year,
+            'scholar_id': self.scholar_id,
             'latest_citation': None if len(self.citations) == 0 else self.citations[0].to_dict()
         }
 
@@ -128,3 +130,45 @@ class Job(Base):
         self.paper_id = paper_id
         self.priority = priority
         self.date = date
+
+class Issue(Base):
+    __tablename__ = "issue"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    type = Column(String(80), nullable=False)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'issue',
+        'polymorphic_on':type
+    }
+
+class AmbiguousPaperIssue(Issue):
+    __tablename__ = "ambiguous_paper_issue"
+    id = Column(Integer, ForeignKey('issue.id'), primary_key=True)
+    __mapper_args__ = {
+        'polymorphic_identity': 'ambiguous_paper_issue',
+    }
+
+    author_name = Column(String(80), nullable=False)
+    paper_id_1 = Column(Integer, ForeignKey('paper.id'), nullable=False)
+    paper_id_2 = Column(Integer, ForeignKey('paper.id'), nullable=False)
+    paper_id_3 = Column(Integer, ForeignKey('paper.id'), nullable=True)
+
+    paper_1 = relationship('Paper', foreign_keys=[paper_id_1])
+    paper_2 = relationship('Paper', foreign_keys=[paper_id_2])
+    paper_3 = relationship('Paper', foreign_keys=[paper_id_3])
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'type': self.type,
+            'author_name': self.author_name,
+            'paper_1': self.paper_1.to_dict(),
+            'paper_2': self.paper_2.to_dict(),
+            'paper_3': None if self.paper_3 is None else self.paper_3.to_dict(),
+        }
+    
+    def __init__(self, author_name, paper_id_1, paper_id_2, paper_id_3 = None):
+        self.author_name = author_name
+        self.paper_id_1 = paper_id_1
+        self.paper_id_2 = paper_id_2
+        self.paper_id_3 = paper_id_3

@@ -1,3 +1,6 @@
+import pytest
+
+@pytest.mark.scraping
 def test_scraping(client):
     # Scrape a paper
     response = client.get('/scraping/papers?title=Autonomous%20Aerial%20Water%20Sampling')
