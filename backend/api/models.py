@@ -67,7 +67,6 @@ class Paper(Base):
 
     authors = relationship('Author', secondary=author_paper, back_populates='papers')
     citations = relationship('Citation', backref='paper', order_by='Citation.date.desc()')
-    jobs = relationship('Job', back_populates='paper')
 
     def to_dict(self):
         return {
@@ -98,38 +97,72 @@ class Tag(Base):
     def __init__(self, name):
         self.name = name
 
-class JobType(enum.Enum):
-    CREATE_PAPER = 1
-    UPDATE_CITATIONS = 2
-    SCRAPE_AUTHORS = 3
-
-class Job(Base):
-    __tablename__ = 'job'
+class Task(Base):
+    __tablename__ = 'task'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    job_type = Column(Enum(JobType), nullable=False)
-    paper_title = Column(String(200), nullable=True)
-    paper_id = Column(Integer, ForeignKey('paper.id'), nullable=True)
+    type = Column(String(80), nullable=False)
     priority = Column(Integer, nullable=False)
     date = Column(DateTime, nullable=True)
 
-    paper = relationship('Paper', back_populates='jobs')
+    __mapper_args__ = {
+        'polymorphic_identity': 'task',
+        'polymorphic_on':type
+    }
+
+class CreatePaperTask(Task):
+    __tablename__ = 'create_paper_task'
+    id = Column(Integer, ForeignKey('task.id'), primary_key=True)
+    paper_title = Column(String(200), nullable=False)
+    author_name = Column(String(80), nullable=False)
+    paper_scholar_id = Column(String(40), nullable=True)
 
     def to_dict(self):
         return {
             'id': self.id,
-            'job_type': self.job_type,
-            'paper_title': self.paper_title,
-            'paper_id': self.paper_id,
+            'type': self.type,
             'priority': self.priority,
             'date': self.date,
+            'paper_title': self.paper_title,
+            'author_name': self.author_name,
+            'paper_scholar_id': self.paper_scholar_id,
         }
-    
-    def __init__(self, job_type, paper_title=None, paper_id=None, priority=0, date=None):
-        self.job_type = job_type
+
+    def __init__(self, paper_title, author_name, paper_scholar_id=None, priority=0, date=None):
         self.paper_title = paper_title
+        self.author_name = author_name
+        self.paper_scholar_id = paper_scholar_id
+        self.priority = priority
+        self.date = date
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'create_paper_task'
+    }
+
+class UpdateCitationsTask(Task):
+    __tablename__ = 'update_citations_task'
+    id = Column(Integer, ForeignKey('task.id'), primary_key=True)
+    paper_id = Column(Integer, ForeignKey('paper.id'), nullable=False)
+
+    paper = relationship('Paper', foreign_keys=[paper_id])
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'type': self.type,
+            'priority': self.priority,
+            'date': self.date,
+            'paper': self.paper.to_dict(),
+        }
+
+    def __init__(self, paper_id, priority=0, date=None):
         self.paper_id = paper_id
         self.priority = priority
         self.date = date
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'update_citations_task'
+    }
+
 
 class Issue(Base):
     __tablename__ = "issue"
