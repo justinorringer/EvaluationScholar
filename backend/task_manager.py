@@ -42,14 +42,12 @@ class TaskManager():
 
                 with db_session(self.Session) as session:
                     task = session.query(Task).filter(or_(Task.date == None, Task.date <= datetime.now())).order_by(Task.priority).first()
-                    print("here0")
 
                     if task is not None:
                         print(task.type)
                         if task.type == "create_paper_task":
                             self.create_paper(session, task.paper_title)
                         elif task.type == "update_citations_task":
-                            print("here3")
                             self.update_citations(session, task.paper)
 
                         session.delete(task)
@@ -63,18 +61,15 @@ class TaskManager():
                 session.add(UpdateCitationsTask(paper.id, 0, datetime.now() + citation_update_period))
 
     def update_citations(self, session, paper):
-        print("here")
         if paper is None:
             print("[Task Manager] Paper is None")
             return
 
         citations = scrape_citations(paper.name)
-        print("here1")
         if citations is None:
             print(f"[Task Manager] Failed to scrape citations for paper: '{paper.name}'")
             return
         
-        print("here2")
         paper.citations.append(Citation(citations, datetime.now()))
 
         print(f"[Task Manager] Updated citations for paper: '{paper.name}'")
