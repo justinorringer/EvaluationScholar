@@ -33,4 +33,4 @@ def test_profiles():
     assert institution == "Centre for Statistics in Medicine, University of Oxford"
 
     id = parsing.parse_profile_id(profile)
-    assert id == "QnLm3kAAAAJ"
+    assert id == "_QnLm3kAAAAJ"
