@@ -2,6 +2,7 @@ import sys
 sys.path.append("..")
 
 from backend.api.models import Author, Paper
+import pytest
 
 def test_crud(client):
     # Create a new paper
@@ -179,6 +180,7 @@ def test_citations(client):
     assert resp.status_code == 200
     assert len(resp.json) == 0
 
+@pytest.mark.scraping
 def test_scraping(client):
     # Create a new paper
     paper1 = Paper("Autonomous Aerial Water Sampling", 2001)

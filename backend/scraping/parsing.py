@@ -27,3 +27,16 @@ def parse_year(paper: str) -> Optional[int]:
         return None
 
     return int(year_match.group(1))
+
+def parse_paper_id(paper: str) -> Optional[str]:
+    h3 = paper.find("h3")
+
+    if h3 is None:
+        return None
+
+    a = h3.find("a")
+
+    if a is None:
+        return None
+    
+    return a['id']

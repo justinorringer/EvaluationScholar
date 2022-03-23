@@ -31,8 +31,8 @@ function Header() {
                 </NavLink>
               </li>
               <li className="nav-item">
-                <NavLink className="nav-link" to="/jobs">
-                  Jobs
+                <NavLink className="nav-link" to="/tasks">
+                  Tasks
                 </NavLink>
               </li>
               <li className="nav-item">
