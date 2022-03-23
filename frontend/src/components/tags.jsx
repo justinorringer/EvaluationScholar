@@ -8,6 +8,9 @@ function Tags() {
     //Variable to hold list of papers related to an author
     let tags = [];
 
+    let checkedAuthors = [];
+    let checkedTags = [];
+
     //Function to make an API call to gather a list of all current authors.
     const getAuthors = async () => {
         try {
@@ -31,6 +34,8 @@ function Tags() {
             let input = document.createElement("input");
             input.className = "checkbox";
             input.type = "checkbox";
+            input.id = "a" + author.id;
+            input.onclick = function() { checkedAuthor(input.id) };
             let span = document.createElement("span");
             span.className = "checkmark";
             span.style = "padding-left: 8px";
@@ -38,7 +43,6 @@ function Tags() {
             label.appendChild(input);
             label.appendChild(span);
             span.innerText = author.name;
-            label.value = author.id;
             authorList.appendChild(option);
         });
     }
@@ -66,6 +70,8 @@ function Tags() {
             let input = document.createElement("input");
             input.className = "checkbox";
             input.type = "checkbox";
+            input.id = "t" + tag.id;
+            input.onclick = function() { checkedTag(input.id) };
             let span = document.createElement("span");
             span.className = "checkmark";
             span.style = "padding-left: 8px";
@@ -73,7 +79,6 @@ function Tags() {
             label.appendChild(input);
             label.appendChild(span);
             span.innerText = tag.name;
-            label.value = tag.id;
             tagList.appendChild(option);
         });
     }
@@ -110,6 +115,108 @@ function Tags() {
         document.getElementById("tagBox").value = "";
     }
 
+    function checkedAuthor(id) {
+        var checkBox = document.getElementById(id);
+        console.log(checkedAuthors);
+        if (checkBox.checked == true){
+            checkedAuthors.push(id.substring(1));
+            console.log(checkedAuthors);
+        } else {
+            const index = checkedAuthors.indexOf(id.substring(1));
+            checkedAuthors.splice(index, 1);
+            console.log(checkedAuthors);
+        }
+    }
+
+    function checkedTag(id) {
+        var checkBox = document.getElementById(id);
+        console.log(checkedTags);
+        if (checkBox.checked == true){
+            checkedTags.push(id.substring(1));
+            console.log(checkedTags);
+        } else {
+            const index = checkedTags.indexOf(id.substring(1));
+            checkedTags.splice(index, 1);
+            console.log(checkedTags);
+        }
+    }
+
+    function assignTags() {
+        const assign = async () => {
+            const response = await axios({
+                method: "put",
+                url: `/api/tags/authors`,
+                headers: {
+                  'Access-Control-Allow-Origin': '*',
+                  'Content-Type': 'application/json',
+                },
+                data: JSON.stringify({
+                    authors: checkedAuthors,
+                    tags: checkedTags
+                  }),
+                mode: 'cors'
+              }, true);
+            console.log(response);
+            if (response.status === 200) {
+                document.getElementById("success").style = "display: block !important";
+            }
+            checkedAuthors.forEach((id) => {
+                var elementid = "a" + id;
+                var checkBox = document.getElementById(elementid);
+                checkBox.checked = false;
+            });
+            checkedTags.forEach((id) => {
+                var elementid = "t" + id;
+                var checkBox = document.getElementById(elementid);
+                checkBox.checked = false;
+            });
+        }
+        assign();
+    }
+
+    function unassignTags() {
+        const unassign = async () => {
+            const response = await axios({
+                method: "delete",
+                url: `/api/tags/authors`,
+                headers: {
+                  'Access-Control-Allow-Origin': '*',
+                  'Content-Type': 'application/json',
+                },
+                data: JSON.stringify({
+                    authors: checkedAuthors,
+                    tags: checkedTags
+                  }),
+                mode: 'cors'
+              }, true);
+            console.log(response);
+            if (response.status === 200) {
+                document.getElementById("success2").style = "display: block !important";
+            }
+            checkedAuthors.forEach((id) => {
+                var elementid = "a" + id;
+                var checkBox = document.getElementById(elementid);
+                checkBox.checked = false;
+            });
+            checkedTags.forEach((id) => {
+                var elementid = "t" + id;
+                var checkBox = document.getElementById(elementid);
+                checkBox.checked = false;
+            });
+            checkedAuthors = [];
+            checkedTags = [];
+        }
+        unassign();
+    }
+
+    function hideAlert() {
+        document.getElementById("success").style = "display: none !important";
+    }
+
+    function hideAlert2() {
+        document.getElementById("success2").style = "display: none !important";
+    }
+
     getAuthors();
     getTags();
 
@@ -119,6 +226,16 @@ function Tags() {
         <div className="container pt-4">
             <h2>Assign Tags to Authors</h2>
         </div>
+        <div className="row">
+            <div className="alert alert-success alert-dismissible" role="alert" id="success" style={{display: "none"}}>
+                <button className="close" type="button" onClick={hideAlert}><span>&times;</span></button> Tags were assigned to authors
+            </div>
+        </div>
+        <div className="row">
+            <div className="alert alert-success alert-dismissible" role="alert" id="success2" style={{display: "none"}}>
+                <button className="close" type="button" onClick={hideAlert2}><span>&times;</span></button> Tags were removed from authors
+            </div>
+        </div>
         <div className="container border border-dark my-3 p-4 rounded">
             <h3>
                 Authors
@@ -126,30 +243,16 @@ function Tags() {
             <div className="row">
                 <div className="col-12">
                     <ul className="col-count-3" id="authorList">
-                        <li>
-                            <label className="container">
-                                <input type="checkbox" />
-                                <span className="checkmark"></span>
-                                Author 1
-                            </label>
-                        </li>
-                        <li>
-                            <label className="container">
-                                <input type="checkbox" />
-                                <span className="checkmark"></span>
-                                Author 2
-                            </label>
-                        </li>
                     </ul>
                 </div>
             </div>
         </div>
         <div className="container border border-dark my-3 p-4 rounded">
-            <div className="row">
+            <div className="row px-2">
                 <h3>
                     Tags
                 </h3>
-                <div className="form-group px-5" >
+                <div className="form-group px-3">
                     <input type="type" className="form-control" id="tagBox" placeholder="Tag" />
                 </div>
                 <button type="button" className="btn btn-danger btn-sm" onClick={createTag}>Create</button>
@@ -158,25 +261,14 @@ function Tags() {
             <div className="row">
                 <div className="col-12">
                     <ul className="col-count-3" id="tagList">
-                        <li>
-                            <label className="container">Tag 1
-                                <input type="checkbox" />
-                                <span className="checkmark"></span>
-                            </label>
-                        </li>
-                        <li>
-                            <label className="container">Tag 2
-                                <input type="checkbox" />
-                                <span className="checkmark"></span>
-                            </label>
-                        </li>
                     </ul>
                 </div>
             </div>
         </div>
-
+        
         <div className="container">
-            <button type="button" className="btn btn-danger btn-sm float-right">Submit</button>
+            <button type="button" className="btn btn-danger btn-sm float-right" onClick={assignTags}>Assign Tags</button>
+            <button type="button" className="btn btn-danger btn-sm float-right" onClick={unassignTags}>Unassign Tags</button>
         </div>
     </div>
   );
