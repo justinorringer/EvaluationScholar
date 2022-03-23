@@ -170,6 +170,8 @@ function Tags() {
                 var checkBox = document.getElementById(elementid);
                 checkBox.checked = false;
             });
+            checkedAuthors = [];
+            checkedTags = [];
         }
         assign();
     }
