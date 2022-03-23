@@ -29,7 +29,7 @@ def test_citation(session):
 
 def test_paper(session):
     paper = Paper('name', 2000)
-    author = Author('name')
+    author = Author('name', 'q1236AG15KB7')
 
     paper.authors.append(author)
 
@@ -57,7 +57,7 @@ def test_remove(session):
     paper.citations.append(citation)
 
     #Create an author
-    author = Author('name')
+    author = Author('name', 'q1236AG15KB7')
 
     paper.authors.append(author)
 
