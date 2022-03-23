@@ -6,7 +6,7 @@ from backend.api.models import Author, Paper, Tag
 
 def test_crud(client):
     # Create a new author
-    author1 = Author('name1')
+    author1 = Author('name1', 'q1124AA12BD4')
     resp = client.post('/authors', json=author1.to_dict())
 
     assert resp.status_code == 201
@@ -17,9 +17,10 @@ def test_crud(client):
     assert resp.status_code == 200
     assert len(resp.json) == 1
     assert resp.json[0]['name'] == 'name1'
+    assert resp.json[0]['scholar_id'] == 'q1124AA12BD4'
 
     # Create another author
-    author2 = Author('name2')
+    author2 = Author('name2', 'q1364BT15HD4')
     resp = client.post('/authors', json=author2.to_dict())
     assert resp.status_code == 201
     a2_id = resp.json['id']
@@ -40,13 +41,14 @@ def test_crud(client):
     assert resp.json['name'] == 'name2'
 
     # Update author1
-    resp = client.put(f'/authors/{a1_id}', json={'name': 'name1_updated'})
+    resp = client.put(f'/authors/{a1_id}', json={'name': 'name1_updated', 'scholar_id': 'q1376BY15UD4'})
     assert resp.status_code == 200
 
     # Check that author1 was updated
     resp = client.get(f'/authors/{a1_id}')
     assert resp.status_code == 200
     assert resp.json['name'] == 'name1_updated'
+    assert resp.json['scholar_id'] == 'q1376BY15UD4'
 
 
     # Partially update author2
@@ -73,7 +75,7 @@ def test_crud(client):
 
 def test_paper_list(client):
     # Create a new author
-    author1 = Author('name1')
+    author1 = Author('name1', 'q1236AG15KB7')
     resp = client.post('/authors', json=author1.to_dict())
     a1_id = resp.json['id']
 
@@ -136,7 +138,7 @@ def test_edge_cases(client):
     assert resp.status_code == 404
 
     # Create a new author
-    author1 = Author('name1')
+    author1 = Author('name1', 'q1236AG15KB7')
     resp = client.post('/authors', json=author1.to_dict())
     a1_id = resp.json['id']
 
@@ -163,7 +165,7 @@ def test_edge_cases(client):
 
 def test_tag_list(client):
     # Create a new author
-    author1 = Author('name1')
+    author1 = Author('name1', 'q1236AG15KB7')
     resp = client.post('/authors', json=author1.to_dict())
     assert resp.status_code == 201
     a1_id = resp.json['id']
@@ -214,7 +216,7 @@ def test_batch(client):
     
     author_ids = []
     for i in range(10):
-        author = Author(f'name{i}')
+        author = Author(f'name{i}', f'scholar_id{i}')
         resp = client.post('/authors', json=author.to_dict())
         assert resp.status_code == 201
         author_ids.append(resp.json['id'])
