@@ -61,3 +61,7 @@ nav a {
 input.checkbox {
     transform: scale(1.2);
 }
+
+#profile {
+    width: 80%;
+}
