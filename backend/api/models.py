@@ -205,3 +205,20 @@ class AmbiguousPaperIssue(Issue):
         self.paper_id_1 = paper_id_1
         self.paper_id_2 = paper_id_2
         self.paper_id_3 = paper_id_3
+
+class Variable(Base):
+    __tablename__ = "variable"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(80), unique=True, nullable=False)
+    value = Column(String(80), nullable=False)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'value': self.value,
+        }
+    
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value
