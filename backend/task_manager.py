@@ -8,7 +8,7 @@ from api.models import Task, Paper, Citation, UpdateCitationsTask
 from scraping import scrape_paper, scrape_citations
 
 # How often a paper's citation count should be updated
-citation_update_period = timedelta(seconds = 10)
+citation_update_period = timedelta(days = 3)
 
 @contextmanager
 def db_session(Session):
