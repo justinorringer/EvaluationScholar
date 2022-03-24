@@ -7,6 +7,10 @@ from contextlib import contextmanager
 from api.models import Task, Paper, Citation, UpdateCitationsTask, Variable
 from scraping import scrape_paper, scrape_citations
 
+
+# How often a paper's citation count should be updated
+citation_update_period = timedelta(days = 3)
+
 @contextmanager
 def db_session(Session):
     session = Session()
