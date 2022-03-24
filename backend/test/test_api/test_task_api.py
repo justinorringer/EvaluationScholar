@@ -1,3 +1,5 @@
+import io
+import os
 import sys
 sys.path.append("..")
 
@@ -103,3 +105,12 @@ def test_delete(client, session):
     resp = client.get('/tasks')
     assert resp.status_code == 200
     assert len(resp.json) == 0
+
+def test_create(client):
+        author = "JP Ore"
+        data = dict(
+            file = io.open('/home/abhinav/Desktop/SeniorDesign/2022SpringTeam06-CSC-Dept-1/backend/test/Ore.txt', 'rb', buffering=0)
+        )
+        resp = client.post(f'/tasks/{author}', data=data, content_type='multipart/form-data')
+        assert len(resp.json) == 16
+        assert resp.status_code == 201
