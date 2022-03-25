@@ -109,7 +109,7 @@ def test_delete(client, session):
 def test_create(client):
         author = "JP Ore"
         data = dict(
-            file = io.open('/home/abhinav/Desktop/SeniorDesign/2022SpringTeam06-CSC-Dept-1/backend/test/Ore.txt', 'rb', buffering=0)
+            file = io.open(f'{os.getcwd()}/test/test_files/Ore.txt', 'rb', buffering=0)
         )
         resp = client.post(f'/tasks/{author}', data=data, content_type='multipart/form-data')
         assert len(resp.json) == 16

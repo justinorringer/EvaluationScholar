@@ -1,5 +1,4 @@
 from datetime import datetime
-import os
 from flask import Blueprint, current_app, json, request, Flask
 from api.models import CreatePaperTask, Task
 from api.templates import db_session
