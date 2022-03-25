@@ -14,7 +14,7 @@ Base.metadata.create_all(engine)
 
 from task_manager import TaskManager
 task_manager = TaskManager(timedelta(seconds = 1), timedelta(seconds = 1), Session)
-p = Process(taget=task_manager.scheduler_loop)
+p = Process(target=task_manager.scheduler_loop)
 p.start()
 
 app.run(debug=True, host='0.0.0.0', port=5000, use_reloader=False)
