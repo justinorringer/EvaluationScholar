@@ -116,8 +116,10 @@ class CreatePaperTask(Task):
     __tablename__ = 'create_paper_task'
     id = Column(Integer, ForeignKey('task.id'), primary_key=True)
     paper_title = Column(String(200), nullable=False)
-    author_name = Column(String(80), nullable=False)
+    author_id = Column(Integer, ForeignKey('author.id'), nullable=False)
     paper_scholar_id = Column(String(40), nullable=True)
+
+    author = relationship('Author')
 
     def to_dict(self):
         return {
@@ -126,13 +128,13 @@ class CreatePaperTask(Task):
             'priority': self.priority,
             'date': self.date,
             'paper_title': self.paper_title,
-            'author_name': self.author_name,
             'paper_scholar_id': self.paper_scholar_id,
+            'author': self.author.to_dict()
         }
 
-    def __init__(self, paper_title, author_name, paper_scholar_id=None, priority=0, date=None):
+    def __init__(self, paper_title, author_id, paper_scholar_id=None, priority=0, date=None):
         self.paper_title = paper_title
-        self.author_name = author_name
+        self.author_id = author_id
         self.paper_scholar_id = paper_scholar_id
         self.priority = priority
         self.date = date

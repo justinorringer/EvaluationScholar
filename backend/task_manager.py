@@ -46,7 +46,7 @@ class TaskManager():
 
                     if task is not None:
                         if task.type == "create_paper_task":
-                            self.create_paper(session, task.paper_title)
+                            self.create_paper(session, task.paper_title, task.author)
                         elif task.type == "update_citations_task":
                             self.update_citations(session, task.paper)
 
@@ -83,7 +83,7 @@ class TaskManager():
 
         print(f"[Task Manager] Updated citations for paper: '{paper.name}'")
 
-    def create_paper(self, session, paper_title):
+    def create_paper(self, session, paper_title, author):
         if paper_title == None:
             print("[Task Manager] Paper title is None")
             return
@@ -99,6 +99,7 @@ class TaskManager():
 
         paper = Paper(paper_title, year)
         paper.citations.append(Citation(citations, datetime.now()))
+        paper.authors.append(author)
         session.add(paper)
 
         print(f"[Task Manager] Created paper: '{paper_title}'")
