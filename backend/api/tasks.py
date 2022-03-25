@@ -1,5 +1,6 @@
+from datetime import datetime
 from flask import Blueprint, current_app, json, request, Flask
-from api.models import Task
+from api.models import CreatePaperTask, Task, Author
 from api.templates import db_session
 task_routes = Blueprint('task_routes', __name__, template_folder='templates')
 
@@ -74,3 +75,25 @@ def delete_task(id):
             status=200,
             mimetype='application/json'
         )
+
+@task_routes.route("/tasks/create-papers", methods=['POST'])
+def create_task():    
+    with db_session(current_app) as session:
+        author_id = request.args.get('author_id')
+        author = session.query(Author).get(author_id)
+
+        list_of_tasks = []
+
+        file = request.files['file']
+        with open(file.filename) as f:
+            for line in f:
+                task = CreatePaperTask(paper_title = line[0:-1], author_name = author.name, date = datetime.now())
+                list_of_tasks.append(task.to_dict())
+        session.add(task)
+        session.flush()
+
+        return current_app.response_class(
+            response=json.dumps(list_of_tasks),
+                status=201,
+                mimetype='application/json'
+            )  
