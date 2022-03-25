@@ -1,6 +1,6 @@
 from datetime import datetime
 from flask import Blueprint, current_app, json, request, Flask
-from api.models import CreatePaperTask, Task
+from api.models import CreatePaperTask, Task, Author
 from api.templates import db_session
 task_routes = Blueprint('task_routes', __name__, template_folder='templates')
 
@@ -76,10 +76,11 @@ def delete_task(id):
             mimetype='application/json'
         )
 
-@task_routes.route("/tasks/<string:author_name>", methods=['POST'])
-def create_task(author_name):    
+@task_routes.route("/tasks/create-papers", methods=['POST'])
+def create_task():    
     with db_session(current_app) as session:
-        author = author_name
+        author_id = request.args.get('author_id')
+        author = session.query(Author).get(author_id)
 
         list_of_tasks = []
 
@@ -88,7 +89,7 @@ def create_task(author_name):
             for line in f:
                 size = len(line)
                 substring = line[0:size - 1]
-                task = CreatePaperTask(paper_title = substring, author_name = author,date = datetime.now())
+                task = CreatePaperTask(paper_title = substring, author_name = author.name, date = datetime.now())
                 list_of_tasks.append(task.to_dict())
         session.add(task)
         session.flush()

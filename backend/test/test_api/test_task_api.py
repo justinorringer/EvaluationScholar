@@ -3,7 +3,7 @@ import os
 import sys
 sys.path.append("..")
 
-from backend.api.models import Task, CreatePaperTask, UpdateCitationsTask, Paper
+from backend.api.models import Author, Task, CreatePaperTask, UpdateCitationsTask, Paper
 
 def test_read(client, session):
     resp = client.get('/tasks')
@@ -107,10 +107,12 @@ def test_delete(client, session):
     assert len(resp.json) == 0
 
 def test_create(client):
-        author = "JP Ore"
-        data = dict(
-            file = io.open(f'{os.getcwd()}/test/test_files/Ore.txt', 'rb', buffering=0)
-        )
-        resp = client.post(f'/tasks/{author}', data=data, content_type='multipart/form-data')
-        assert len(resp.json) == 16
-        assert resp.status_code == 201
+    author = Author('JP Ore', 'q1124AA12BD4')
+    resp = client.post('/authors', json=author.to_dict())
+    author_id = resp.json['id']
+    data = dict(
+        file = io.open(f'{os.getcwd()}/test/test_files/Ore.txt', 'rb', buffering=0)
+    )
+    resp = client.post(f'/tasks/create-papers?author_id={author_id}', data=data, content_type='multipart/form-data')
+    assert len(resp.json) == 16
+    assert resp.status_code == 201
