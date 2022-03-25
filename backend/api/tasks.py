@@ -87,9 +87,7 @@ def create_task():
         file = request.files['file']
         with open(file.filename) as f:
             for line in f:
-                size = len(line)
-                substring = line[0:size - 1]
-                task = CreatePaperTask(paper_title = substring, author_name = author.name, date = datetime.now())
+                task = CreatePaperTask(paper_title = line[0:-1], author_name = author.name, date = datetime.now())
                 list_of_tasks.append(task.to_dict())
         session.add(task)
         session.flush()
