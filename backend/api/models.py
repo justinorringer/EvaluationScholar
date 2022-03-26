@@ -22,6 +22,7 @@ class Author(Base):
     __tablename__ = 'author'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(80), unique=False, nullable=False)
+    scholar_id = Column(String(12), unique=False, nullable=False)
 
     papers = relationship('Paper', secondary=author_paper, back_populates='authors')
     tags = relationship('Tag', secondary=author_tag, back_populates='authors')
@@ -30,10 +31,12 @@ class Author(Base):
         return {
             'id': self.id,
             'name': self.name,
+            'scholar_id': self.scholar_id
         }
 
-    def __init__(self, name):
+    def __init__(self, name, scholar_id):
         self.name = name
+        self.scholar_id = scholar_id
 
 class Citation(Base):
     __tablename__ = 'citation'
@@ -113,8 +116,10 @@ class CreatePaperTask(Task):
     __tablename__ = 'create_paper_task'
     id = Column(Integer, ForeignKey('task.id'), primary_key=True)
     paper_title = Column(String(200), nullable=False)
-    author_name = Column(String(80), nullable=False)
+    author_id = Column(Integer, ForeignKey('author.id'), nullable=False)
     paper_scholar_id = Column(String(40), nullable=True)
+
+    author = relationship('Author')
 
     def to_dict(self):
         return {
@@ -123,13 +128,13 @@ class CreatePaperTask(Task):
             'priority': self.priority,
             'date': self.date,
             'paper_title': self.paper_title,
-            'author_name': self.author_name,
             'paper_scholar_id': self.paper_scholar_id,
+            'author': self.author.to_dict()
         }
 
-    def __init__(self, paper_title, author_name, paper_scholar_id=None, priority=0, date=None):
+    def __init__(self, paper_title, author_id, paper_scholar_id=None, priority=0, date=None):
         self.paper_title = paper_title
-        self.author_name = author_name
+        self.author_id = author_id
         self.paper_scholar_id = paper_scholar_id
         self.priority = priority
         self.date = date
@@ -205,3 +210,20 @@ class AmbiguousPaperIssue(Issue):
         self.paper_id_1 = paper_id_1
         self.paper_id_2 = paper_id_2
         self.paper_id_3 = paper_id_3
+
+class Variable(Base):
+    __tablename__ = "variable"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(80), unique=True, nullable=False)
+    value = Column(String(80), nullable=False)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'value': self.value,
+        }
+    
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value

@@ -61,7 +61,7 @@ def test_author_list(client):
     t2_id = resp.json['id']
 
     # Create a new author
-    author1 = Author('name1')
+    author1 = Author('name1', 'q1236AG15KB7')
     resp = client.post('/authors', json=author1.to_dict())
     assert resp.status_code == 201
     a1_id = resp.json['id']
@@ -100,7 +100,7 @@ def test_batch(client):
     
     author_ids = []
     for i in range(10):
-        author = Author(f'name{i}')
+        author = Author(f'name{i}', f'scholar_id{i}')
         resp = client.post('/authors', json=author.to_dict())
         assert resp.status_code == 201
         author_ids.append(resp.json['id'])
