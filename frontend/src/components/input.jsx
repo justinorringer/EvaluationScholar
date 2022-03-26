@@ -189,7 +189,7 @@ function Input() {
         <div className="row">
                 <label for="myfile">Select a file:&nbsp;</label>
                 <input type="file" id="myfile" name="myfile"/>
-                <input type="submit" onClick={upload}/>
+                <input type="submit" onClick="location.href='www.yoursite.com'"/>
         </div>
       </div>
       <div className="container">

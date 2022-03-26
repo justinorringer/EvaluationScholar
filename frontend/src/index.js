@@ -5,54 +5,38 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import {
-    Header,
-    Footer,
-    Query,
-    Input,
-    Issues,
-    Tasks,
-    Tags,
-    Author
+  Header,
+  Footer,
+  Query,
+  Input,
+  Issues,
+  Tasks,
+  Tags,
+  Author
 } from "./components";
 
 
-ReactDOM.render( <
-    Router >
-    <
-    Header / >
-    <
-    Routes >
-    <
-    Route path = "/"
-    element = { < Query / > }
-    /> <
-    Route path = "/input"
-    element = { < Input / > }
-    /> <
-    Route path = "/issues"
-    element = { < Issues / > }
-    /> <
-    Route path = "/tasks"
-    element = { < Tasks / > }
-    /> <
-    Route path = "/tags"
-    element = { < Tags / > }
-    /> <
-    Route path = "/author"
-    element = { < Author / > }
-    /> <
-    /Routes> <
-    Footer / >
-    <
-    /Router>,
+ReactDOM.render(
+  <Router>
+    <Header />
+    <Routes>
+      <Route path="/" element={<Query />} />
+      <Route path="/input" element={<Input />} />
+      <Route path="/issues" element={<Issues />} />
+      <Route path="/tasks" element={<Tasks />} />
+      <Route path="/tags" element={<Tags />} />
+      <Route path="/author/:id" element={<Author />} />
+    </Routes>
+    <Footer />
+  </Router>,
 
-    document.getElementById("root")
+  document.getElementById("root")
 );
 //ReactDOM.render(
-//<React.StrictMode>
-//<App />
-//</React.StrictMode>,
-//document.getElementById('root')
+  //<React.StrictMode>
+    //<App />
+  //</React.StrictMode>,
+  //document.getElementById('root')
 //);
 
 // If you want to start measuring performance in your app, pass a function
