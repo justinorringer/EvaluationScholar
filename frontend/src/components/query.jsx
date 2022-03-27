@@ -49,7 +49,7 @@ function Query() {
   //Return the related HTML of the page.
   return (
     <div className="body">
-        <div className="container pt-5" id="container">
+        <div className="container" id="container">
             <div className="justify-content-center page-header">Select Author</div>
             {/* <div className="form-group">
                 <input type="author" className="form-control" placeholder="G. Rothermel" />
@@ -64,7 +64,7 @@ function Query() {
                 </div>
                 <div className="col-2 gy-4 gx-4 justify-content-right">
                     <br />
-                    <button type="button" className="btn btn-danger" onClick={viewAuthor}>View Author</button>
+                    <button type="button" className="btn btn-danger" onClick={viewAuthor}>Select</button>
                 </div>
             </div>
             <div className="row">

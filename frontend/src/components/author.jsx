@@ -7,8 +7,13 @@ function Author() {
 
     const authorID = useParams().id;
 
+    let authorName = "";
+
+    let authorScholarID = "";
+
     //Variable to hold list of papers related to an author
     let papers = [];
+    let tags = [];
 
     //Function to make the API call to gather the papers of a specific author.
     function getAuthor() {
@@ -58,101 +63,82 @@ function Author() {
             try {
                 const response = await axios.get(`/api/authors/${authorID}/tags`, {mode:'cors'});
                 if (response.status === 200)
-                    papers = response.data;
-                console.log({response, papers});
+                    tags = response.data;
+                console.log({response, tags});
             }
             catch (e) {
                 console.log(e);
             }
-            const paperTableBody = document.getElementById("paperTableBody");
-            const paperTable = document.getElementById("paperTable");
-            if (document.getElementById("alertid")) {
-                document.getElementById("alertid").remove();
-            }
-            if (papers.length > 0) {
-                paperTableBody.innerHTML = "";
-                paperTable.style = "display: block !important";
-            } else {
-                paperTable.style = "display: none !important";
-                var alert = document.createElement("div");
-                alert.className = "alert alert-warning alert-dismissable";
-                alert.role="alert";
-                alert.innerText = "No papers found for this author!";
-                alert.id = "alertid";
-                document.getElementById("container").appendChild(alert);
-                return;
-            }
-            papers.forEach(paper => {
-                var row = document.createElement("tr");
-                var article = document.createElement("td");
-                var year = document.createElement("td");
-                var citations = document.createElement("td");
-                article.innerText = paper.name;
-                year.innerText = paper.year;
-                citations.innerText = paper.latest_citation.num_cited;
-                row.appendChild(article);
-                row.appendChild(year);
-                row.appendChild(citations);
-                paperTableBody.appendChild(row);
+            let tagList = document.getElementById("Tags");
+            tags.forEach(tag => {
+                // fill in the list of tags
+                var tagElement = document.createElement("li");
+                tagElement.innerText = tag.name;
+                tagList.appendChild(tagElement);
             });
         }
-        const getAuthorName = async () => {
+        const getAuthorInfo = async () => {
             try {
                 const response = await axios.get(`/api/authors/${authorID}`, {mode:'cors'});
-                if (response.status === 200)
-                    papers = response.data;
-                console.log({response, papers});
+                if (response.status === 200) {
+                    authorName = response.data.name;
+                    authorScholarID = response.data.scholar_id; 
+                    
+                    //create HTML link element for this, do same thing as author name.
+
+                    var authorHeader = document.getElementById("authorName");
+                    authorHeader.innerText = authorName;
+                }
+                console.log({response});
             }
             catch (e) {
                 console.log(e);
             }
-            const paperTableBody = document.getElementById("paperTableBody");
-            const paperTable = document.getElementById("paperTable");
-            if (document.getElementById("alertid")) {
-                document.getElementById("alertid").remove();
-            }
-            if (papers.length > 0) {
-                paperTableBody.innerHTML = "";
-                paperTable.style = "display: block !important";
-            } else {
-                paperTable.style = "display: none !important";
-                var alert = document.createElement("div");
-                alert.className = "alert alert-warning alert-dismissable";
-                alert.role="alert";
-                alert.innerText = "No papers found for this author!";
-                alert.id = "alertid";
-                document.getElementById("container").appendChild(alert);
-                return;
-            }
-            papers.forEach(paper => {
-                var row = document.createElement("tr");
-                var article = document.createElement("td");
-                var year = document.createElement("td");
-                var citations = document.createElement("td");
-                article.innerText = paper.name;
-                year.innerText = paper.year;
-                citations.innerText = paper.latest_citation.num_cited;
-                row.appendChild(article);
-                row.appendChild(year);
-                row.appendChild(citations);
-                paperTableBody.appendChild(row);
-            });
         }
         getPapers();
         getTags();
-        getAuthorName();
+        getAuthorInfo();
     }
 
     getAuthor();
-    
+
+    // Function for adding new articles on click
+    //Variable to hold data from a file selected to be read in.
+
+    //Object to hold the data getting pulled, both a name string and institution string
+
+    //Method to handle the upload of a file
+    //and also call other functions necessary for this page
+
+    function upload(){
+        var formData = new FormData();
+        formData.append("file", document.getElementById('myfile').files[0])
+        const postPaperTasks = async () => {
+            try {
+                const response = await axios.post(`/api/tasks/create-papers?author_id=${authorID}`, formData, {
+                    headers: {
+                      'Access-Control-Allow-Origin': '*',
+                      'Content-Type': 'multipart/form-data',
+                    },
+                    mode: 'cors'
+                  }, true);
+                console.log({response});
+            }
+            catch (e) {
+                console.log(e);
+            }
+        }
+        postPaperTasks();
+    }
+        
     // HTML by Justin Orringer
     return (
       <div className="body">
         <div className="container">
-            <div className="row" id="authorSidebar">
+            <div className="row d-flex" id="authorSidebar">
                 <div className="col-3" id="authorSidebar">
                     <div className="row">
-                        <img className="border" id="profile" src="src\generic.png" alt="" />
+                        <img className="border" id="profile" src="/images/generic.png" alt="" />
                     </div>
                     <div className="row pt-4" id="tagHeader">
                         <h4>Tags</h4>
@@ -165,16 +151,42 @@ function Author() {
                     </div>
 
                     <div className="row pt-2">
-                        <form action="/action_page.php">
-                            <h4 for="myfile">Upload Articles</h4>
-                            <input type="file" id="myfile" name="myfile" />
-                            <input type="submit" />
-                        </form>
+                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#uploadPapersModal">
+                            Upload Papers
+                        </button>
                     </div>
+
+                    <div className="modal fade" id="uploadPapersModal" tabindex="-1" role="dialog" aria-labelledby="uploadPapersModalTitle" aria-hidden="true">
+                        <div className="modal-dialog modal-dialog-centered" role="document">
+                            <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title" id="uploadPapersModalLongTitle">Upload File with Paper Titles</h5>
+                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                <div className="row">
+                                    <label for="myfile">Select a file:&nbsp;</label>
+                                    <input type="file" id="myfile" name="myfile"/>
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                <button type="button" className="btn btn-success" onClick={upload}>Upload</button>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+
+
                 </div>
                 <div className="col-9" id="mainColumn">
-                    <div className="row pt-5">
-                        <h3 className="px-0">{{authorName}}</h3>
+                    <div className="row">
+                        <h3 className="px-0" id="authorName"></h3>
+                        <div className = "ml-auto">
+                            <a target="_blank" rel="noreferrer noopener" href={`https://scholar.google.com/citations?hl=en&oi=ao&user=${authorScholarID}`}>Google Scholar profile</a>
+                        </div>
                     </div>
                     <div className="row pt-2" id="articles">
                         <table className="table table-borderless table-striped" id="paperTable" style={{display: "none"}}>

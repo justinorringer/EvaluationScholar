@@ -172,7 +172,7 @@ function Input() {
   //Return the related HTML of the page.
   return (
     <div className="body">
-      <div className="container pt-5">
+      <div className="container">
         <div className="row">
             <div className="alert alert-success alert-dismissible" role="alert" id="success" style={{display: "none"}}>
                 <button className="close" type="button" data-dismiss="alert"><span>&times;</span></button> Articles done scraping
@@ -189,7 +189,7 @@ function Input() {
         <div className="row">
                 <label for="myfile">Select a file:&nbsp;</label>
                 <input type="file" id="myfile" name="myfile"/>
-                <input type="submit" onClick="location.href='www.yoursite.com'"/>
+                <input type="submit" onClick={upload}/>
         </div>
       </div>
       <div className="container">
