@@ -67,10 +67,10 @@ function Query() {
                     <button type="button" className="btn btn-danger" onClick={viewAuthor}>Select</button>
                 </div>
             </div>
-            <div className="row">
-                <label>Author name: &nbsp;</label>
-                <input type="text" id="authName"></input>
-                <input type="button" onClick={""} value="Create Author" />
+            <div className="row pl-3">
+                <label>Don't see your author?</label>
+                <pre> </pre>
+                <a href="/createauthor">Make a new author.</a>
             </div>
         </div>
         <hr />
