@@ -163,6 +163,10 @@ def test_edge_cases(client):
     resp = client.put(f'/authors/{a1_id}/papers/{p1_id - 1}')
     assert resp.status_code == 404
 
+    # Add author with missing name
+    resp = client.post('/authors', json={'scholar_id': 'q1236AG15KB7'})
+    assert resp.status_code == 400
+
 def test_tag_list(client):
     # Create a new author
     author1 = Author('name1', 'q1236AG15KB7')

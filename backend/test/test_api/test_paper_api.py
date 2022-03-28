@@ -169,6 +169,10 @@ def test_edge_cases(client):
     resp = client.put(f'/papers/{p1_id}/authors/{a1_id - 1}')
     assert resp.status_code == 404
 
+    # Create paper with no name
+    resp = client.post('/papers', json={'year': 2001})
+    assert resp.status_code == 400
+
 def test_citations(client):
     # Create a new paper
     paper1 = Paper('name1', 2001)
