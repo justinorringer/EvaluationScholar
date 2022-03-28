@@ -17,6 +17,7 @@ function Tasks() {
       let papers = [];
       //Function to make an API call to gather a list of all current authors.
       const getTasks = async () => {
+        console.log("getTasks starts");
         try {
             const response = await axios.get('/api/tasks?type=update_citations_task', {mode:'cors'});
             console.log(response.data);
@@ -25,7 +26,7 @@ function Tasks() {
             console.log({response, papers})
         }
         catch (e) {
-            console.log(e.getMessage);
+            console.log(e);
         }
 
         
@@ -55,8 +56,8 @@ function Tasks() {
           //row.appendChild(deleteButton);
           taskTableBody.appendChild(row);
         });
-
-      }
+        console.log("getTasks ends");
+      } 
 
       getTasks();
   return (

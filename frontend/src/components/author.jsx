@@ -122,6 +122,11 @@ function Author() {
                     },
                     mode: 'cors'
                   }, true);
+                if (response.status === 201) {
+                    document.getElementById("success").style = "display: block !important";
+                } else {
+                    document.getElementById("fail").style = "display: block !important";
+                }
                 console.log({response});
             }
             catch (e) {
@@ -129,6 +134,14 @@ function Author() {
             }
         }
         postPaperTasks();
+    }
+
+    function hideSuccessAlert() {
+        document.getElementById("success").style = "display: none !important";
+    }
+
+    function hideFailAlert() {
+        document.getElementById("fail").style = "display: none !important";
     }
         
     // HTML by Justin Orringer
@@ -166,20 +179,31 @@ function Author() {
                                 </button>
                             </div>
                             <div className="modal-body">
-                                <div className="row">
+                                <div className="row pl-3">
                                     <label for="myfile">Select a file:&nbsp;</label>
                                     <input type="file" id="myfile" name="myfile"/>
                                 </div>
                             </div>
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                <button type="button" className="btn btn-success" onClick={upload}>Upload</button>
+                                <button type="button" className="btn btn-success" data-dismiss="modal" onClick={upload}>Upload</button>
                             </div>
                             </div>
                         </div>
+                    </div>
+                    <div className="row pt-3 pr-3">
+                        <div className="alert alert-success alert-dismissible" role="alert" id="success" style={{display: "none"}}>
+                            <button className="close" type="button" onClick={hideSuccessAlert}><span>&times;</span></button>File uploaded successfully.
+                            <pre>
+                            </pre>
+                            <a href="/tasks">View in 'Tasks'</a>
                         </div>
-
-
+                    </div>
+                    <div className="row pt-3 pr-3">
+                        <div className="alert alert-danger alert-dismissible pt-2" role="alert" id="fail" style={{display: "none"}}>
+                            <button className="close" type="button" onClick={hideFailAlert}><span>&times;</span></button> Error uploading file.
+                        </div>
+                    </div>
                 </div>
                 <div className="col-9" id="mainColumn">
                     <div className="row">
