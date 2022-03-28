@@ -36,6 +36,29 @@ def get_author(id):
 def create_author():
     with db_session(current_app) as session:
         data = request.get_json()
+
+        if data is None:
+            return current_app.response_class(
+                response=json.dumps({'message': 'invalid request body',
+                                     'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+        if 'name' not in data:
+            return current_app.response_class(
+                response=json.dumps({'message': 'missing name',
+                                     'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+        if 'scholar_id' not in data:
+            return current_app.response_class(
+                response=json.dumps({'message': 'missing scholar_id',
+                                     'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+
         author = Author(name=data['name'], scholar_id=data['scholar_id'])
         session.add(author)
         session.flush()

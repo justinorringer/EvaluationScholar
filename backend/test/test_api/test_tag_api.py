@@ -47,6 +47,10 @@ def test_crud(client):
     assert resp.status_code == 200
     assert len(resp.json) == 1
 
+    # Create tag with no name
+    resp = client.post('/tags', json={})
+    assert resp.status_code == 400
+
 def test_author_list(client):
     # Create a new tag
     tag1 = Tag('name1')
