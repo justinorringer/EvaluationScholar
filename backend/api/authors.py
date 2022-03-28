@@ -36,7 +36,7 @@ def get_author(id):
 def create_author():
     with db_session(current_app) as session:
         data = request.get_json()
-        author = Author(name=data['name'])
+        author = Author(name=data['name'], scholar_id=data['scholar_id'])
         session.add(author)
         session.flush()
         return current_app.response_class(
@@ -63,6 +63,8 @@ def update_author(id):
             author.name = data['name']
         if 'institution' in data:
             author.institution = data['institution']
+        if 'scholar_id' in data:
+            author.scholar_id = data['scholar_id']    
 
         return current_app.response_class(
             response=json.dumps({'message': 'author updated',

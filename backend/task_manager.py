@@ -4,11 +4,12 @@ import time
 from datetime import datetime, timedelta
 from contextlib import contextmanager
 
-from api.models import Task, Paper, Citation, UpdateCitationsTask
+from api.models import Task, Paper, Citation, UpdateCitationsTask, Variable
 from scraping import scrape_paper, scrape_citations
 
+
 # How often a paper's citation count should be updated
-citation_update_period = timedelta(seconds = 10)
+citation_update_period = timedelta(days = 3)
 
 @contextmanager
 def db_session(Session):
@@ -44,9 +45,8 @@ class TaskManager():
                     task = session.query(Task).filter(or_(Task.date == None, Task.date <= datetime.now())).order_by(Task.priority).first()
 
                     if task is not None:
-                        print(task.type)
                         if task.type == "create_paper_task":
-                            self.create_paper(session, task.paper_title)
+                            self.create_paper(session, task.paper_title, task.author)
                         elif task.type == "update_citations_task":
                             self.update_citations(session, task.paper)
 
@@ -56,9 +56,18 @@ class TaskManager():
 
     def check_update_tasks(self):
         with db_session(self.Session) as session:
+            citaion_update_period = session.query(Variable).filter(Variable.name == "citation_update_period").first()
+
+            if citaion_update_period is None:
+                citaion_update_period = "3"
+                session.add(Variable("citation_update_period", citaion_update_period))
+            else:
+                citaion_update_period = citaion_update_period.value
+
+            update_delta = timedelta(days = int(citaion_update_period))
             papers = session.query(Paper).filter(~exists().where(Paper.id == UpdateCitationsTask.paper_id))
             for paper in papers:
-                session.add(UpdateCitationsTask(paper.id, 0, datetime.now() + citation_update_period))
+                session.add(UpdateCitationsTask(paper.id, 0, datetime.now() + update_delta))
 
     def update_citations(self, session, paper):
         if paper is None:
@@ -74,7 +83,7 @@ class TaskManager():
 
         print(f"[Task Manager] Updated citations for paper: '{paper.name}'")
 
-    def create_paper(self, session, paper_title):
+    def create_paper(self, session, paper_title, author):
         if paper_title == None:
             print("[Task Manager] Paper title is None")
             return
@@ -90,6 +99,7 @@ class TaskManager():
 
         paper = Paper(paper_title, year)
         paper.citations.append(Citation(citations, datetime.now()))
+        paper.authors.append(author)
         session.add(paper)
 
         print(f"[Task Manager] Created paper: '{paper_title}'")
