@@ -14,9 +14,17 @@ def create_tag():
     with db_session(current_app) as session:
         data = request.get_json()
 
-        if not data['name']:
+        if data is None:
             return current_app.response_class(
-                response=json.dumps({'message': 'no name provided',
+                response=json.dumps({'message': 'invalid request body',
+                                     'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+
+        if 'name' not in data:
+            return current_app.response_class(
+                response=json.dumps({'message': 'missing name',
                                     'status': 'error'}),
                 status=400,
                 mimetype='application/json'

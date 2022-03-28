@@ -29,6 +29,21 @@ function Header() {
                   Tags
                 </NavLink>
               </li>
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/issues">
+                  Issues
+                </NavLink>
+              </li>
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/tasks">
+                  Tasks
+                </NavLink>
+              </li>
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/tags">
+                  Tags
+                </NavLink>
+              </li>
             </ul>
           </div>
         </div>

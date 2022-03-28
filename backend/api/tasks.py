@@ -84,16 +84,15 @@ def create_task():
         list_of_tasks = []
 
         file = request.files['file']
-        with open(file.filename) as f:
-            for line in f:
-                task = CreatePaperTask(paper_title = line[0:-1], author_id = author_id, date = datetime.now())
-                session.add(task)
-                session.flush()
-                list_of_tasks.append(task.to_dict())
-        
+
+        for line in file:
+            task = CreatePaperTask(paper_title = line[0:-1].decode('utf-8'), author_id = author_id, date = datetime.now())
+            session.add(task)
+            session.flush()
+            list_of_tasks.append(task.to_dict())
 
         return current_app.response_class(
             response=json.dumps(list_of_tasks),
                 status=201,
                 mimetype='application/json'
-            )  
+            )
