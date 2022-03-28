@@ -11,7 +11,8 @@ import {
   Input,
   Issues,
   Tasks,
-  Tags
+  Tags,
+  Author
 } from "./components";
 
 
@@ -24,6 +25,7 @@ ReactDOM.render(
       <Route path="/issues" element={<Issues />} />
       <Route path="/tasks" element={<Tasks />} />
       <Route path="/tags" element={<Tags />} />
+      <Route path="/author/:id" element={<Author />} />
     </Routes>
     <Footer />
   </Router>,

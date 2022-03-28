@@ -18,10 +18,16 @@ function Tags() {
             console.log(response.data);
             if (response.status === 200)
                 authors = response.data;
+            else {
+                document.getElementById("fail").style = "display: block !important";
+                document.getElementById("fail").innerText = "Error Connecting to the Database";
+            }
             console.log({response, authors})
         }
         catch (e) {
             console.log(e.getMessage);
+            document.getElementById("fail").style = "display: block !important";
+            document.getElementById("fail").innerText = "Error Connecting to the Database";
         }
         console.log(authors);
         const authorList = document.getElementById("authorList");
@@ -52,12 +58,19 @@ function Tags() {
         try {
             const response = await axios.get('/api/tags', {mode:'cors'});
             console.log(response.data);
-            if (response.status === 200)
+            if (response.status === 200) {
                 tags = response.data;
+            }
+            else {
+                document.getElementById("fail").style = "display: block !important";
+                document.getElementById("fail").innerText = "Error Connecting to the Database";
+            }
             console.log({response, tags})
         }
         catch (e) {
             console.log(e.getMessage);
+            document.getElementById("fail").style = "display: block !important";
+            document.getElementById("fail").innerText = "Error Connecting to the Database";
         }
         console.log(tags);
         const tagList = document.getElementById("tagList");
@@ -107,6 +120,14 @@ function Tags() {
             }), mode: 'cors'
             }, true);
             
+            if (response.status === 200) {
+                document.getElementById("success").style = "display: block !important";
+                document.getElementById("success").innerText = "Tags Created Successfully";
+            }
+            else {
+                document.getElementById("fail").style = "display: none !important";
+                document.getElementById("fail").innerText = "Error Creating Tag";
+            }
             console.log(response);
             const data = await response.data;
             getTags();
@@ -159,6 +180,11 @@ function Tags() {
             console.log(response);
             if (response.status === 200) {
                 document.getElementById("success").style = "display: block !important";
+                document.getElementById("success").innerText = "Tags Assigned Successfully";
+            }
+            else {
+                document.getElementById("fail").style = "display: block !important";
+                document.getElementById("fail").innerText = "Error: Failed to Assign Tags";
             }
             checkedAuthors.forEach((id) => {
                 var elementid = "a" + id;
@@ -193,7 +219,12 @@ function Tags() {
               }, true);
             console.log(response);
             if (response.status === 200) {
-                document.getElementById("success2").style = "display: block !important";
+                document.getElementById("success").style = "display: block !important";
+                document.getElementById("success").innerText = "Tags Assigned Successfully";
+            }
+            else {
+                document.getElementById("fail").style = "display: block !important";
+                document.getElementById("fail").innerText = "Error: Failed to Unassign Tags";
             }
             checkedAuthors.forEach((id) => {
                 var elementid = "a" + id;
@@ -211,12 +242,12 @@ function Tags() {
         unassign();
     }
 
-    function hideAlert() {
+    function hideSuccessAlert() {
         document.getElementById("success").style = "display: none !important";
     }
 
-    function hideAlert2() {
-        document.getElementById("success2").style = "display: none !important";
+    function hideFailAlert() {
+        document.getElementById("fail").style = "display: none !important";
     }
 
     getAuthors();
@@ -225,17 +256,17 @@ function Tags() {
   //Return the related HTML of the page.
   return (
     <div className="container">
-        <div className="container pt-4">
-            <h2>Assign Tags to Authors</h2>
+        <div className="container">
+            <h3>Assign Tags to Authors</h3>
         </div>
         <div className="row">
             <div className="alert alert-success alert-dismissible" role="alert" id="success" style={{display: "none"}}>
-                <button className="close" type="button" onClick={hideAlert}><span>&times;</span></button> Tags were assigned to authors
+                <button className="close" type="button" onClick={hideSuccessAlert}><span>&times;</span></button> Tags Assigned Successfully.
             </div>
         </div>
         <div className="row">
-            <div className="alert alert-success alert-dismissible" role="alert" id="success2" style={{display: "none"}}>
-                <button className="close" type="button" onClick={hideAlert2}><span>&times;</span></button> Tags were removed from authors
+            <div className="alert alert-danger alert-dismissible" role="alert" id="fail" style={{display: "none"}}>
+                <button className="close" type="button" onClick={hideFailAlert}><span>&times;</span></button> Error: No Tags Assigned.
             </div>
         </div>
         <div className="container border border-dark my-3 p-4 rounded">
@@ -250,14 +281,14 @@ function Tags() {
             </div>
         </div>
         <div className="container border border-dark my-3 p-4 rounded">
-            <div className="row px-2">
+            <div className="row px-2 pb-2 d-flex">
                 <h3>
                     Tags
                 </h3>
-                <div className="form-group px-3">
-                    <input type="type" className="form-control" id="tagBox" placeholder="Tag" />
+                <div className="d-flex px-3 align-items-right ml-auto">
+                    <input type="type" className="form-control mr-2" id="tagBox" placeholder="New Tag" />
+                    <button type="button" className="btn btn-danger btn-sm" onClick={createTag}>Create</button>
                 </div>
-                <button type="button" className="btn btn-danger btn-sm" onClick={createTag}>Create</button>
             </div>
 
             <div className="row">
@@ -268,9 +299,9 @@ function Tags() {
             </div>
         </div>
         
-        <div className="container">
-            <button type="button" className="btn btn-danger btn-sm float-right" onClick={assignTags}>Assign Tags</button>
-            <button type="button" className="btn btn-danger btn-sm float-right" onClick={unassignTags}>Unassign Tags</button>
+        <div className="container d-flex justify-content-end">
+            <button type="button" className="btn btn-danger btn-sm mr-2" onClick={assignTags}>Assign</button>
+            <button type="button" className="btn btn-danger btn-sm" onClick={unassignTags}>Unassign</button>
         </div>
     </div>
   );

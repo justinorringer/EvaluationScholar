@@ -5,7 +5,7 @@ function Issues() {
   //Return the related HTML of the page.
   return (
     <div className="body">
-        <div className="container pt-4">
+        <div className="container">
             <h2>Issues</h2>
         </div>
         <div className="container my-3 p-4 border border-5 border-dark">
