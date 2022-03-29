@@ -262,3 +262,69 @@ def test_batch(client):
     resp = client.get(f'/authors/{author_ids[0]}/tags')
     assert resp.status_code == 200
     assert len(resp.json) == 0
+
+def test_filtering(client):
+    # Create some test tags
+    tag_ids = []
+    for i in range(5):
+        tag = Tag(f'name{i}')
+        resp = client.post('/tags', json=tag.to_dict())
+        assert resp.status_code == 201
+        tag_ids.append(resp.json['id'])
+    
+    # Create some test authors
+    author_ids = []
+    for i in range(5):
+        author = Author(f'name{i}', f'scholar_id{i}')
+        resp = client.post('/authors', json=author.to_dict())
+        assert resp.status_code == 201
+        author_ids.append(resp.json['id'])
+    
+    a_t = lambda x: list(map(lambda y: author_ids[y], x))
+    t_t = lambda x: list(map(lambda y: tag_ids[y], x))
+
+    # Add tags to authors
+    client.put('/authors/tags', json={'tags': t_t([0]), 'authors': a_t([0, 1, 2, 3])})
+    client.put('/authors/tags', json={'tags': t_t([1]), 'authors': a_t([0, 1, 4])})
+    client.put('/authors/tags', json={'tags': t_t([2]), 'authors': a_t([2, 3, 4])})
+    client.put('/authors/tags', json={'tags': t_t([3]), 'authors': a_t([1, 2])})
+    client.put('/authors/tags', json={'tags': t_t([4]), 'authors': a_t([0, 2, 3])})
+
+    # Test some filtering
+    resp = client.get('/authors?name=name0')
+    assert resp.status_code == 200
+    assert len(resp.json) == 1
+    assert resp.json[0]['id'] == author_ids[0]
+
+    resp = client.get('/authors?name=name8')
+    assert resp.status_code == 200
+    assert len(resp.json) == 0
+
+    resp = client.get(f'/authors?tags={tag_ids[1]}')
+    assert resp.status_code == 200
+    assert len(resp.json) == 3
+    assert author_ids[0] in [a['id'] for a in resp.json]
+    assert author_ids[1] in [a['id'] for a in resp.json]
+    assert author_ids[4] in [a['id'] for a in resp.json]
+
+    resp = client.get(f'/authors?tags={tag_ids[0]}')
+    assert resp.status_code == 200
+    assert len(resp.json) == 4
+
+    resp = client.get(f'/authors?tags={tag_ids[0]},{tag_ids[1]}')
+    assert resp.status_code == 200
+    assert len(resp.json) == 2
+    assert author_ids[0] in [a['id'] for a in resp.json]
+    assert author_ids[1] in [a['id'] for a in resp.json]
+
+    resp = client.get(f'/authors?tags={tag_ids[0]},{tag_ids[1]},{tag_ids[2]}')
+    assert resp.status_code == 200
+    assert len(resp.json) == 0
+
+    resp = client.get(f'/authors?tags={tag_ids[0]}&name=name0')
+    assert resp.status_code == 200
+    assert len(resp.json) == 1
+
+    resp = client.get(f'/authors?tags={tag_ids[0]}&name=name4')
+    assert resp.status_code == 200
+    assert len(resp.json) == 0
