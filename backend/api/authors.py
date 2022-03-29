@@ -9,8 +9,22 @@ author_routes = Blueprint('author_routes', __name__, template_folder='templates'
 @author_routes.route('/authors', methods=['GET'])
 def get_authors():
     with db_session(current_app) as session:
+        authors = session.query(Author)
+
+        if 'name' in request.args:
+            words = request.args['name'].split()
+            for word in words:
+                authors = authors.filter(Author.name.ilike(f'%{word}%'))
+        
+        if 'tags' in request.args:
+            tags_ids = request.args['tags'].split(',')
+            for tag_id in tags_ids:
+                authors = authors.filter(Author.tags.any(Tag.id == tag_id))
+        
+        authors = authors.all()
+
         return current_app.response_class(
-            response=json.dumps([author.to_dict() for author in session.query(Author).all()]),
+            response=json.dumps([author.to_dict() for author in authors]),
             status=200,
             mimetype='application/json'
         )
