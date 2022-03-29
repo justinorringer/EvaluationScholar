@@ -12,7 +12,9 @@ def get_authors():
         authors = session.query(Author)
 
         if 'name' in request.args:
-            authors = authors.filter(Author.name == request.args['name'])
+            words = request.args['name'].split()
+            for word in words:
+                authors = authors.filter(Author.name.ilike(f'%{word}%'))
         
         if 'tags' in request.args:
             tags_ids = request.args['tags'].split(',')

@@ -274,8 +274,9 @@ def test_filtering(client):
     
     # Create some test authors
     author_ids = []
+    names = ["arthur ryAn", "molly undore", "sandra DolloP", "clarice OrAnge", "paul goRbovdo"]
     for i in range(5):
-        author = Author(f'name{i}', f'scholar_id{i}')
+        author = Author(names[i], f'scholar_id{i}')
         resp = client.post('/authors', json=author.to_dict())
         assert resp.status_code == 201
         author_ids.append(resp.json['id'])
@@ -291,14 +292,14 @@ def test_filtering(client):
     client.put('/authors/tags', json={'tags': t_t([4]), 'authors': a_t([0, 2, 3])})
 
     # Test some filtering
-    resp = client.get('/authors?name=name0')
+    resp = client.get('/authors?name=pa')
     assert resp.status_code == 200
     assert len(resp.json) == 1
-    assert resp.json[0]['id'] == author_ids[0]
+    assert resp.json[0]['id'] == author_ids[4]
 
-    resp = client.get('/authors?name=name8')
+    resp = client.get('/authors?name=ol')
     assert resp.status_code == 200
-    assert len(resp.json) == 0
+    assert len(resp.json) == 2
 
     resp = client.get(f'/authors?tags={tag_ids[1]}')
     assert resp.status_code == 200
@@ -321,10 +322,14 @@ def test_filtering(client):
     assert resp.status_code == 200
     assert len(resp.json) == 0
 
-    resp = client.get(f'/authors?tags={tag_ids[0]}&name=name0')
+    resp = client.get(f'/authors?tags={tag_ids[0]}&name=do')
     assert resp.status_code == 200
-    assert len(resp.json) == 1
+    assert len(resp.json) == 2
 
-    resp = client.get(f'/authors?tags={tag_ids[0]}&name=name4')
+    resp = client.get(f'/authors?tags={tag_ids[0]}&name=ul')
     assert resp.status_code == 200
     assert len(resp.json) == 0
+
+    resp = client.get(f'/authors?name=ol sa')
+    assert resp.status_code == 200
+    assert len(resp.json) == 1
