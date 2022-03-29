@@ -9,6 +9,7 @@ import {
   Footer,
   Query,
   Input,
+  Graphs,
 } from "./components";
 
 
@@ -18,6 +19,7 @@ ReactDOM.render(
     <Routes>
       <Route path="/" element={<Query />} />
       <Route path="/input" element={<Input />} />
+      <Route path="/graphs" element={<Graphs />} />
     </Routes>
     <Footer />
   </Router>,
