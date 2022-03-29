@@ -333,3 +333,7 @@ def test_filtering(client):
     resp = client.get(f'/authors?name=ol sa')
     assert resp.status_code == 200
     assert len(resp.json) == 1
+
+    resp = client.get('/authors?name=Sandra Dollop')
+    assert resp.status_code == 200
+    assert len(resp.json) == 1
