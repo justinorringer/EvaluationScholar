@@ -90,44 +90,41 @@ function Tasks() {
         try {
             const response = await axios.get('/api/tasks?type=update_citations_task', {mode:'cors'});
             console.log(response.data);
-            if (response.status === 200)
-                papers = response.data;
+            if (response.status === 200) {
+              papers = response.data;
+              const taskTableBody = document.getElementById("taskTableBody");
+              const taskTable = document.getElementById("taskTable");
+
+              papers.forEach(paper => {
+                console.log(paper.paper.name);
+                console.log(paper.date);
+                var row = document.createElement("tr");
+                var paperName = document.createElement("td");
+                var updateTime = document.createElement("td");
+                //var deleteButton = document.createElement("td");
+                //var buttonInner = document.createElement("button");
+                paperName.innerText = paper.paper.name;
+                updateTime.innerText = paper.date;
+
+                //buttonInner.type = "button";
+                //buttonInner.innerText = "Delete";
+                //buttonInner.className = "btn btn-danger btn-sm";
+
+                //deleteButton.appendChild(buttonInner);
+
+                row.appendChild(paperName);
+                row.appendChild(updateTime);
+                //row.appendChild(deleteButton);
+                taskTableBody.appendChild(row);
+              });
+              console.log("getTasks ends");
+            }
+
             console.log({response, papers})
         }
         catch (e) {
             console.log(e);
         }
-
-        
-
-        const taskTableBody = document.getElementById("taskTableBody");
-        const taskTable = document.getElementById("taskTable");
-
-        taskTableBody.innerHTML = "";
-
-        papers.forEach(paper => {
-          console.log(paper.paper.name);
-          console.log(paper.date);
-          var row = document.createElement("tr");
-          var paperName = document.createElement("td");
-          var updateTime = document.createElement("td");
-          //var deleteButton = document.createElement("td");
-          //var buttonInner = document.createElement("button");
-          paperName.innerText = paper.paper.name;
-          updateTime.innerText = paper.date;
-
-          //buttonInner.type = "button";
-          //buttonInner.innerText = "Delete";
-          //buttonInner.className = "btn btn-danger btn-sm";
-
-          //deleteButton.appendChild(buttonInner);
-
-          row.appendChild(paperName);
-          row.appendChild(updateTime);
-          //row.appendChild(deleteButton);
-          taskTableBody.appendChild(row);
-        });
-        console.log("getTasks ends");
       } 
 
       getTasks();
@@ -176,7 +173,7 @@ function Tasks() {
   return (
     <div className="body">
         <div className="container pt-3">
-            <h1>Queued Paper Creations</h1>
+            <h3>Queued Paper Creations</h3>
         </div>
         <div className="container pt-3">
         <table className="table table-borderless table-striped" id="createTable">
@@ -231,7 +228,7 @@ function Tasks() {
         </div>
 
         <div className="container pt-3">
-            <h1>Queued Paper Updates</h1>
+            <h3>Queued Paper Updates</h3>
         </div>
         <div className="container pt-3">
         <table className="table table-borderless table-striped" id="taskTable">
