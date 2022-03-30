@@ -6,7 +6,7 @@ function Issues() {
   return (
     <div className="body">
         <div className="container">
-            <h2>Issues</h2>
+            <h3>Issues</h3>
         </div>
         <div className="container my-3 p-4 border border-5 border-dark">
             {/**<button type="button" className="close btn-small float-right" aria-label="Close">&times;</button>*/}

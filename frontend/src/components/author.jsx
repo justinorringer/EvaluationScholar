@@ -40,9 +40,9 @@ function Author() {
                 var alert = document.createElement("div");
                 alert.className = "alert alert-warning alert-dismissable";
                 alert.role="alert";
-                alert.innerText = "No papers found for this author!";
+                alert.innerText = "No papers found! Upload some on the left!";
                 alert.id = "alertid";
-                document.getElementById("container").appendChild(alert);
+                document.getElementById("articles").appendChild(alert);
                 return;
             }
             papers.forEach(paper => {
@@ -136,6 +136,13 @@ function Author() {
         postPaperTasks();
     }
 
+    function googleScholarRedirect() {
+        window.open(
+            "https://scholar.google.com/citations?hl=en&oi=ao&user=" + authorScholarID,
+            '_blank'
+          );
+    }
+
     function hideSuccessAlert() {
         document.getElementById("success").style = "display: none !important";
     }
@@ -209,7 +216,7 @@ function Author() {
                     <div className="row">
                         <h3 className="px-0" id="authorName"></h3>
                         <div className = "ml-auto">
-                            <a target="_blank" rel="noreferrer noopener" href={`https://scholar.google.com/citations?hl=en&oi=ao&user=${authorScholarID}`}>Google Scholar profile</a>
+                            <a href = "" rel="noreferrer noopener" onClick={googleScholarRedirect}>Google Scholar profile</a>
                         </div>
                     </div>
                     <div className="row pt-2" id="articles">
