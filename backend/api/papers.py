@@ -73,6 +73,14 @@ def create_paper():
                 mimetype='application/json'
             )
 
+        if session.query(Paper).filter(Paper.name == data['name']).first():
+            return current_app.response_class(
+                response=json.dumps({'message': 'duplicate paper name',
+                                    'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+
         paper = Paper(data['name'], data['year'])
         session.add(paper)
         session.flush()
