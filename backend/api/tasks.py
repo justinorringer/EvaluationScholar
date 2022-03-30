@@ -81,6 +81,30 @@ def create_task():
     with db_session(current_app) as session:
         author_id = request.args.get('author_id')
 
+        if author_id is None:
+            return current_app.response_class(
+                response=json.dumps({'message': 'Author ID is required',
+                                     'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+
+        if not author_id.isdigit():
+            return current_app.response_class(
+                response=json.dumps({'message': 'Author ID must be a number',
+                                     'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+
+        if session.query(Author).get(author_id) is None:
+            return current_app.response_class(
+                response=json.dumps({'message': 'Author not found',
+                                     'status': 'error'}),
+                status=404,
+                mimetype='application/json'
+            )
+
         list_of_tasks = []
 
         file = request.files['file']
