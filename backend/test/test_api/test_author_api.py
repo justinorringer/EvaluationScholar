@@ -174,6 +174,13 @@ def test_edge_cases(client):
     resp = client.post('/authors', json={'name': 'name2', 'scholar_id': 'q1236AG15KB8'})
     assert resp.status_code == 400
 
+    # Add author to paper twice
+    resp = client.put(f'/authors/{a1_id}/papers/{p1_id}')
+    assert resp.status_code == 200
+
+    resp = client.put(f'/authors/{a1_id}/papers/{p1_id}')
+    assert resp.status_code == 400
+
 def test_tag_list(client):
     # Create a new author
     author1 = Author('name1', 'q1236AG15KB7')

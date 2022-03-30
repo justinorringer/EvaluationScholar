@@ -151,6 +151,14 @@ def add_author_to_paper(author_id, paper_id):
                 mimetype='application/json'
             )
 
+        if author in paper.authors:
+            return current_app.response_class(
+                response=json.dumps({'message': 'author already in paper',
+                                    'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+
         paper.authors.append(author)
         return current_app.response_class(
             response=json.dumps({'message': 'author added to paper',
