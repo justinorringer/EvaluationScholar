@@ -73,6 +73,14 @@ def create_author():
                 mimetype='application/json'
             )
 
+        if data['scholar_id'] is not None and session.query(Author).filter(Author.scholar_id == data['scholar_id']).first() is not None:
+            return current_app.response_class(
+                response=json.dumps({'message': 'duplicate scholar_id',
+                                     'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+
         author = Author(name=data['name'], scholar_id=data['scholar_id'])
         session.add(author)
         session.flush()
