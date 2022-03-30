@@ -13,6 +13,75 @@ function Tasks() {
 
                         
   */
+      async function deleteTask(id){
+          console.log("attempt to delete " + id);
+
+          const response = await axios({
+            method: "delete",
+            url: '/api/tasks/' + id,
+            headers: {
+              'Access-Control-Allow-Origin': '*',
+              'Content-Type': 'application/json',
+    
+            },
+          
+            mode: 'cors'
+          }, true);
+
+          console.log(response);
+          getCreateTasks();
+      }
+
+      //No way to actually test this in production quite yet...
+      let create_papers = [];
+      //Function to make an API call to gather a list of all current authors.
+      const getCreateTasks = async () => {
+        console.log("getCreateTasks starts");
+        try {
+            const response = await axios.get('/api/tasks?type=create_paper_task', {mode:'cors'});
+            console.log(response.data);
+            if (response.status === 200)
+                create_papers = response.data;
+            console.log({response, create_papers})
+        }
+        catch (e) {
+            console.log(e);
+        }
+
+        
+
+        const createTableBody = document.getElementById("createTableBody");
+        const createTable = document.getElementById("createTable");
+
+        createTableBody.innerHTML = "";
+
+        create_papers.forEach(paper => {
+          //console.log(paper.paper.name);
+          //console.log(paper.date);
+          var row = document.createElement("tr");
+          var paperName = document.createElement("td");
+          var deleteButton = document.createElement("td");
+          var buttonInner = document.createElement("button");
+          paperName.innerText = paper.paper_title;
+          paperName.id = paper.id;
+
+          buttonInner.type = "button";
+          buttonInner.innerText = "Cancel";
+          buttonInner.className = "btn btn-danger btn-sm";
+          buttonInner.value = paper.id;
+
+          buttonInner.onclick = () => { deleteTask(paper.id); };
+
+          deleteButton.appendChild(buttonInner);
+
+          row.appendChild(paperName);
+          row.appendChild(deleteButton);
+          createTableBody.appendChild(row);
+        });
+        console.log("getCreateTasks ends");
+      } 
+
+      getCreateTasks();
 
       let papers = [];
       //Function to make an API call to gather a list of all current authors.
@@ -59,6 +128,48 @@ function Tasks() {
       } 
 
       getTasks();
+
+      async function updateLabel(){
+        try {
+          const response = await axios.get('/api/task_manager/update_period', {mode:'cors'});
+          console.log(response.data);
+          if (response.status === 200)
+            var label = document.getElementById("updateCounter");
+            label.innerHTML = "Current Update Period: " + response.data.value + " days";
+          console.log({response, papers})
+        }
+        catch (e) {
+          console.log(e);
+        }
+      }
+
+      updateLabel();
+
+      async function performUpdate(){
+        var period = document.getElementById("updatePeriod").value;
+
+        const response = await axios({
+          method: "put",
+          url: '/api/task_manager/update_period',
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Content-Type': 'application/json',
+  
+          },
+        
+          //make sure to serialize your JSON body
+          data: JSON.stringify({
+            value: period,
+          }), mode: 'cors'
+        }, true);
+
+        console.log(response);
+
+        updateLabel();
+        //var label = document.getElementById("updateCounter");
+        //label.innerHTML = "Current Update Period: " + period + " days";
+      }
+
   return (
     <div className="body">
         <div className="container pt-3">
@@ -97,7 +208,7 @@ function Tasks() {
           <table>
             <tr>
               <td>
-                <label>Current Update Period: ______</label> 
+                <label id="updateCounter">Current Update Period: ___ days</label> 
               </td>
             </tr>
             <tr>
@@ -105,10 +216,10 @@ function Tasks() {
                 <label>New Update Period (in Days): </label>
               </td>
               <td>
-                <input type="text" placeholder="Insert Number Here"></input>
+                <input type="text" placeholder="Insert Number Here" id="updatePeriod"></input>
               </td>
               <td>
-                <button type="button" className="btn btn-sm btn-danger">
+                <button type="button" onClick={performUpdate} className="btn btn-sm btn-danger">
                   Edit
                 </button>
               </td>
