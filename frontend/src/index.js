@@ -9,6 +9,11 @@ import {
   Footer,
   Query,
   Input,
+  Issues,
+  Tasks,
+  Tags,
+  Author,
+  CreateAuthor
 } from "./components";
 
 
@@ -18,6 +23,11 @@ ReactDOM.render(
     <Routes>
       <Route path="/" element={<Query />} />
       <Route path="/input" element={<Input />} />
+      <Route path="/issues" element={<Issues />} />
+      <Route path="/tasks" element={<Tasks />} />
+      <Route path="/tags" element={<Tags />} />
+      <Route path="/author/:id" element={<Author />} />
+      <Route path="/createauthor" element={<CreateAuthor />} />
     </Routes>
     <Footer />
   </Router>,

@@ -31,13 +31,17 @@ def get_html(url: str) -> str:
     for _ in range(retry_count):
         response = requests.get('https://api.scraperapi.com/', params=params)
 
+        
+        if(response.status_code >= 400):
+            print(response)
+
         # Sometimes, ScraperAPI returns a 500 error. They ask that you retry at least three times.
         if(response.status_code == 500):
             continue
 
         if(response.status_code == 403):
             raise ApiNoCreditsError
-        
+
         return response.text
     
     raise ApiRequestsFailedError
