@@ -7,6 +7,22 @@ components:
           readOnly: true
         name:
           type: string
+        scholar_id:
+          type: string
+          nullable: true
+        papers:
+          type: array
+          readOnly: true
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                readOnly: true
+              latest_citations:
+                type: integer
+                readOnly: true
+                nullable: true
       type: object
     Citation:
       properties:
