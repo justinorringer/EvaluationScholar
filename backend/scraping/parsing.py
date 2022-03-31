@@ -78,6 +78,5 @@ def parse_profile_id(profile: str) -> Optional[str]:
     if a is None:
         return None
     
-    print(a["href"])
     m = re.search("user=(.+)", a['href'])
     return m.group(1)
