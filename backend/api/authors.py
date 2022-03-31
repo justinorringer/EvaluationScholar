@@ -73,6 +73,14 @@ def create_author():
                 mimetype='application/json'
             )
 
+        if data['scholar_id'] is not None and session.query(Author).filter(Author.scholar_id == data['scholar_id']).first() is not None:
+            return current_app.response_class(
+                response=json.dumps({'message': 'duplicate scholar_id',
+                                     'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+
         author = Author(name=data['name'], scholar_id=data['scholar_id'])
         session.add(author)
         session.flush()
@@ -151,6 +159,14 @@ def add_paper_to_author(author_id, paper_id):
                 response=json.dumps({'message': 'paper not found',
                                     'status': 'error'}),
                 status=404,
+                mimetype='application/json'
+            )
+
+        if paper in author.papers:
+            return current_app.response_class(
+                response=json.dumps({'message': 'paper already added',
+                                    'status': 'error'}),
+                status=400,
                 mimetype='application/json'
             )
 

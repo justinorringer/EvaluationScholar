@@ -125,3 +125,23 @@ def test_create(client):
     resp = client.post(f'/tasks/create-papers?author_id={author_id}', data=data, content_type='multipart/form-data')
     assert resp.status_code == 201
     assert len(resp.json) == 16
+
+    # Test invalid author
+    data = dict(
+        file = io.open(f'{os.getcwd()}/test/test_files/Ore.txt', 'rb', buffering=0)
+    )
+    resp = client.post('/tasks/create-papers?author_id=invalid_id', data=data, content_type='multipart/form-data')
+    assert resp.status_code == 400
+
+    data = dict(
+        file = io.open(f'{os.getcwd()}/test/test_files/Ore.txt', 'rb', buffering=0)
+    )
+    resp = client.post('/tasks/create-papers', data=data, content_type='multipart/form-data')
+    assert resp.status_code == 400
+
+    # Test nonexistent author
+    data = dict(
+        file = io.open(f'{os.getcwd()}/test/test_files/Ore.txt', 'rb', buffering=0)
+    )
+    resp = client.post(f'/tasks/create-papers?author_id={author_id + 1}', data=data, content_type='multipart/form-data')
+    assert resp.status_code == 404

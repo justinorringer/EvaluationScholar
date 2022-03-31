@@ -173,6 +173,17 @@ def test_edge_cases(client):
     resp = client.post('/papers', json={'year': 2001})
     assert resp.status_code == 400
 
+    # Add author to paper twice
+    resp = client.put(f'/papers/{p1_id}/authors/{a1_id}')
+    assert resp.status_code == 200
+
+    resp = client.put(f'/papers/{p1_id}/authors/{a1_id}')
+    assert resp.status_code == 400
+
+    # Duplicate paper name
+    resp = client.post('/papers', json={'name': 'name1', 'year': 2001})
+    assert resp.status_code == 400
+
 def test_citations(client):
     # Create a new paper
     paper1 = Paper('name1', 2001)

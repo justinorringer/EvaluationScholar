@@ -73,6 +73,14 @@ def create_paper():
                 mimetype='application/json'
             )
 
+        if session.query(Paper).filter(Paper.name == data['name']).first():
+            return current_app.response_class(
+                response=json.dumps({'message': 'duplicate paper name',
+                                    'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+
         paper = Paper(data['name'], data['year'])
         session.add(paper)
         session.flush()
@@ -148,6 +156,14 @@ def add_author_to_paper(author_id, paper_id):
                 response=json.dumps({'message': 'paper not found',
                                     'status': 'error'}),
                 status=404,
+                mimetype='application/json'
+            )
+
+        if author in paper.authors:
+            return current_app.response_class(
+                response=json.dumps({'message': 'author already in paper',
+                                    'status': 'error'}),
+                status=400,
                 mimetype='application/json'
             )
 
