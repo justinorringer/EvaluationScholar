@@ -31,7 +31,11 @@ class Author(Base):
         return {
             'id': self.id,
             'name': self.name,
-            'scholar_id': self.scholar_id
+            'scholar_id': self.scholar_id,
+            'papers': [{
+                'id': paper.id,
+                'latest_citations': paper.get_latest_citation().num_cited if paper.get_latest_citation() else None,
+            } for paper in self.papers],
         }
 
     def __init__(self, name, scholar_id):
@@ -71,13 +75,16 @@ class Paper(Base):
     authors = relationship('Author', secondary=author_paper, back_populates='papers')
     citations = relationship('Citation', backref='paper', order_by='Citation.date.desc()')
 
+    def get_latest_citation(self):
+        return None if len(self.citations) == 0 else self.citations[0]
+
     def to_dict(self):
         return {
             'id': self.id,
             'name': self.name,
             'year': self.year,
             'scholar_id': self.scholar_id,
-            'latest_citation': None if len(self.citations) == 0 else self.citations[0].to_dict()
+            'latest_citation': self.get_latest_citation().to_dict() if self.get_latest_citation() else None,
         }
 
     def __init__(self, name, year):

@@ -1,8 +1,9 @@
 # Move relative imports up a level to be able to access our client
+from datetime import datetime, timedelta
 import sys
 sys.path.append("..")
 
-from backend.api.models import Author, Paper, Tag
+from backend.api.models import Author, Paper, Tag, Citation
 
 def test_crud(client):
     # Create a new author
@@ -73,7 +74,7 @@ def test_crud(client):
     assert len(resp.json) == 1
     assert resp.json[0]['id'] == a2_id
 
-def test_paper_list(client):
+def test_paper_list(client, session):
     # Create a new author
     author1 = Author('name1', 'q1236AG15KB7')
     resp = client.post('/authors', json=author1.to_dict())
@@ -81,8 +82,9 @@ def test_paper_list(client):
 
     # Create a new paper
     paper1 = Paper('name1', 2001)
-    resp = client.post('/papers', json=paper1.to_dict())
-    p1_id = resp.json['id']
+    session.add(paper1)
+    session.commit()
+    p1_id = paper1.id
 
     # Check empty paper list
     resp = client.get(f'/authors/{a1_id}/papers')
@@ -114,6 +116,24 @@ def test_paper_list(client):
     assert resp.status_code == 200
     assert len(resp.json) == 2
 
+    resp = client.get(f'/authors/{a1_id}')
+    assert resp.status_code == 200
+    assert len(resp.json['papers']) == 2
+    assert resp.json['papers'][0]['id'] == p1_id
+    assert resp.json['papers'][0]['latest_citations'] == None
+
+    paper1.citations.append(Citation(367, datetime.now()))
+    paper1.citations.append(Citation(368, datetime.now() + timedelta(days=1)))
+    session.commit()
+
+    resp = client.get(f'/authors/{a1_id}')
+    assert resp.status_code == 200
+    assert len(resp.json['papers']) == 2
+    assert resp.json['papers'][0]['id'] == p1_id
+    assert resp.json['papers'][0]['latest_citations'] == 368
+    assert resp.json['papers'][1]['id'] == p2_id
+    assert resp.json['papers'][1]['latest_citations'] == None
+
     # Delete paper1
     resp = client.delete(f'/authors/{a1_id}/papers/{p1_id}')
     assert resp.status_code == 200
@@ -123,6 +143,12 @@ def test_paper_list(client):
     assert resp.status_code == 200
     assert len(resp.json) == 1
     assert resp.json[0]['id'] == p2_id
+
+    resp = client.get(f'/authors/{a1_id}')
+    assert resp.status_code == 200
+    assert len(resp.json['papers']) == 1
+    assert resp.json['papers'][0]['id'] == p2_id
+    assert resp.json['papers'][0]['latest_citations'] == None
 
 def test_edge_cases(client):
     # Delete non-existing author
