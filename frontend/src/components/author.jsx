@@ -22,10 +22,9 @@ function Author() {
                 const response = await axios.get(`/api/authors/${authorID}/papers`, {mode:'cors'});
                 if (response.status === 200)
                     papers = response.data;
-                console.log({response, papers});
             }
             catch (e) {
-                console.log(e);
+                console.log("Failed to get papers.");
             }
             const paperTableBody = document.getElementById("paperTableBody");
             const paperTable = document.getElementById("paperTable");
@@ -64,10 +63,9 @@ function Author() {
                 const response = await axios.get(`/api/authors/${authorID}/tags`, {mode:'cors'});
                 if (response.status === 200)
                     tags = response.data;
-                console.log({response, tags});
             }
             catch (e) {
-                console.log(e);
+                console.log("Failed to get tags.");
             }
             let tagList = document.getElementById("Tags");
             tags.forEach(tag => {
@@ -82,22 +80,26 @@ function Author() {
                 const response = await axios.get(`/api/authors/${authorID}`, {mode:'cors'});
                 if (response.status === 200) {
                     authorName = response.data.name;
-                    authorScholarID = response.data.scholar_id; 
+                    if (response.data.scholar_id) {
+                        authorScholarID = response.data.scholar_id; 
+                    } else {
+                        document.getElementById("gslink").remove();
+                    }
+                    
                     
                     //create HTML link element for this, do same thing as author name.
 
                     var authorHeader = document.getElementById("authorName");
                     authorHeader.innerText = authorName;
                 }
-                console.log({response});
             }
             catch (e) {
-                console.log(e);
+                console.log("Failed to get author info.");
             }
         }
+        getAuthorInfo();
         getPapers();
         getTags();
-        getAuthorInfo();
     }
 
     getAuthor();
@@ -127,10 +129,9 @@ function Author() {
                 } else {
                     document.getElementById("fail").style = "display: block !important";
                 }
-                console.log({response});
             }
             catch (e) {
-                console.log(e);
+                console.log("Failed to upload file.");
             }
         }
         postPaperTasks();
@@ -215,7 +216,7 @@ function Author() {
                 <div className="col-9" id="mainColumn">
                     <div className="row">
                         <h3 className="px-0" id="authorName"></h3>
-                        <div className = "ml-auto">
+                        <div className = "ml-auto" id="gslink">
                             <a href = "" rel="noreferrer noopener" onClick={googleScholarRedirect}>Google Scholar profile</a>
                         </div>
                     </div>
