@@ -27,25 +27,38 @@ function CreateAuthor() {
                 button.onclick = function() { createAuthor(name, null) };
                 button.innerText = "Create '" + name + "' Anyway";
                 document.getElementById("container").appendChild(button);
+            } else {
+                authors.forEach(author => {
+                    let a = document.createElement("a");
+                    a.className = "list-group-item list-group-item-action flex-column align-items-start";
+                    a.id = author.name + '+' + author.id;
+                    a.onclick = function() { createAuthor(author.name, author.id) };
+                    let div = document.createElement("div");
+                    div.className = "d-flex w-100 justify-content-between";
+                    let h5 = document.createElement("h5");
+                    h5.className = "mb-1 py-2";
+                    h5.innerText = author.name;
+                    let small = document.createElement("small");
+                    small.className = "text-muted";
+                    small.innerText = author.institution;
+                    parentList.appendChild(a);
+                    a.appendChild(div);
+                    div.appendChild(h5);
+                    div.appendChild(small);
+                });
+                let label = document.createElement("label");
+                label.id = "label";
+                label.className = "mr-2 mt-3";
+                label.innerText = "Is the author you're looking for not here? Try searching full name, partial name, or just";
+                let button = document.createElement("button");
+                button.className = "btn btm-sm btn-danger";
+                button.id = "button";
+                button.onclick = function() { createAuthor(name, null) };
+                button.innerText = "Create '" + name + "'";
+                document.getElementById("container").appendChild(label);
+                document.getElementById("container").appendChild(button);
             }
-            authors.forEach(author => {
-                let a = document.createElement("a");
-                a.className = "list-group-item list-group-item-action flex-column align-items-start";
-                a.id = author.name + '+' + author.id;
-                a.onclick = function() { createAuthor(author.name, author.id) };
-                let div = document.createElement("div");
-                div.className = "d-flex w-100 justify-content-between";
-                let h5 = document.createElement("h5");
-                h5.className = "mb-1 py-2";
-                h5.innerText = author.name;
-                let small = document.createElement("small");
-                small.className = "text-muted";
-                small.innerText = author.institution;
-                parentList.appendChild(a);
-                a.appendChild(div);
-                div.appendChild(h5);
-                div.appendChild(small);
-            });
+            
         }
         catch (e) {
             document.getElementById("failed").style = "display: block !important";
@@ -92,8 +105,9 @@ function CreateAuthor() {
     function hideButton() {
         try {
             document.getElementById("button").remove();
+            document.getElementById("label").remove();
         } catch (e) {
-            console.log("Button doesn't exist.");
+            console.log("Button or label doesn't exist.");
         }
     }
 
