@@ -11,87 +11,74 @@ function CreateAuthor() {
         hideFailedAlert();
         hideNoResultsAlert();
         hideButton();
-        document.getElementById("wait").innerText = "Searching...";
         let name = document.getElementById("authName").value;
-        console.log("Awaiting response for search");
+        document.getElementById("wait").innerText = "Searching...";
         try {
+            console.log("Awaiting response for search");
             const response = await axios.get(`/api/scraping/profiles?name=${name}`, {
                 mode:'cors'});
             console.log("received response");
-            if (response.status === 200) {
-                console.log(response);
-                authors = response.data;
-                const parentList = document.getElementById("authorList");
-                parentList.innerHTML = "";
-                console.log(authors);
-                if (authors.length === 0) {
-                    document.getElementById("noresults").style = "display: block !important";
-                    let button = document.createElement("button");
-                    button.className = "btn btm-sm btn-danger";
-                    button.id = "button";
-                    button.name = name + '+';
-                    button.onclick = function() { createAuthor(button.name) };
-                    button.innerText = "Create '" + name + "' Anyway";
-                    document.getElementById("container").appendChild(button);
-                }
-                authors.forEach(author => {
-                    console.log(author);
-                    let a = document.createElement("a");
-                    a.className = "list-group-item list-group-item-action flex-column align-items-start";
-                    a.id = author.name + '+' + author.id;
-                    a.onclick = function() { createAuthor(a.id) };
-                    let div = document.createElement("div");
-                    div.className = "d-flex w-100 justify-content-between";
-                    let h5 = document.createElement("h5");
-                    h5.className = "mb-1 py-2";
-                    h5.innerText = author.name;
-                    let small = document.createElement("small");
-                    small.className = "text-muted";
-                    small.innerText = author.institution;
-                    parentList.appendChild(a);
-                    a.appendChild(div);
-                    div.appendChild(h5);
-                    div.appendChild(small);
-                });
+            authors = response.data;
+            const parentList = document.getElementById("authorList");
+            parentList.innerHTML = "";
+            if (authors.length === 0) {
+                document.getElementById("noresults").style = "display: block !important";
+                let button = document.createElement("button");
+                button.className = "btn btm-sm btn-danger";
+                button.id = "button";
+                button.onclick = function() { createAuthor(name, null) };
+                button.innerText = "Create '" + name + "' Anyway";
+                document.getElementById("container").appendChild(button);
             }
+            authors.forEach(author => {
+                let a = document.createElement("a");
+                a.className = "list-group-item list-group-item-action flex-column align-items-start";
+                a.id = author.name + '+' + author.id;
+                a.onclick = function() { createAuthor(author.name, author.id) };
+                let div = document.createElement("div");
+                div.className = "d-flex w-100 justify-content-between";
+                let h5 = document.createElement("h5");
+                h5.className = "mb-1 py-2";
+                h5.innerText = author.name;
+                let small = document.createElement("small");
+                small.className = "text-muted";
+                small.innerText = author.institution;
+                parentList.appendChild(a);
+                a.appendChild(div);
+                div.appendChild(h5);
+                div.appendChild(small);
+            });
         }
         catch (e) {
-            console.log(e);
             document.getElementById("failed").style = "display: block !important";
         }
         document.getElementById("wait").innerText = "";
     }
     
-    function createAuthor(name_id) {
-        const arr = name_id.split("+");
-        console.log(arr);
-        var id;
-        if (arr.length === 1) {
-            id = null;
-        } else {
-            id = arr[1];
-        }
+    function createAuthor(name, id) {
         //Function to create an author in the database through an axios call.
         const makeAuthor = async () => {
-            const response = await axios({
-            method: "post",
-            url: '/api/authors',
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Content-Type': 'application/json',
-
-            },
-            
-            //make sure to serialize your JSON body
-            data: JSON.stringify({
-                name: arr[0],
-                scholar_id: id
-            }), mode: 'cors'
-            }, true);
-            
-            console.log(response);
-            const authorID = response.data.id;
-            window.location.href = `/author/${authorID}`;
+            try {
+                const response = await axios({
+                    method: "post",
+                    url: '/api/authors',
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',
+                        'Content-Type': 'application/json',
+        
+                    },
+                    
+                    //make sure to serialize your JSON body
+                    data: JSON.stringify({
+                        name: name,
+                        scholar_id: id
+                    }), mode: 'cors'
+                    }, true);
+                const authorID = response.data.id;
+                window.location.href = `/author/${authorID}`;
+            } catch (e) {
+                console.log("Failed to create author.");
+            }
         }
         makeAuthor();
     }

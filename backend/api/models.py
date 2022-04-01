@@ -22,7 +22,7 @@ class Author(Base):
     __tablename__ = 'author'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(80), unique=False, nullable=False)
-    scholar_id = Column(String(12), unique=False, nullable=False)
+    scholar_id = Column(String(12), unique=False, nullable=True)
 
     papers = relationship('Paper', secondary=author_paper, back_populates='authors')
     tags = relationship('Tag', secondary=author_tag, back_populates='authors')
