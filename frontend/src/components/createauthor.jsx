@@ -14,10 +14,8 @@ function CreateAuthor() {
         let name = document.getElementById("authName").value;
         document.getElementById("wait").innerText = "Searching...";
         try {
-            console.log("Awaiting response for search");
             const response = await axios.get(`/api/scraping/profiles?name=${name}`, {
                 mode:'cors'});
-            console.log("received response");
             authors = response.data;
             const parentList = document.getElementById("authorList");
             parentList.innerHTML = "";
