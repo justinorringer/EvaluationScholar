@@ -9,8 +9,14 @@ from api.authors import author_routes
 from api.papers import paper_routes
 from api.tags import tag_routes
 from api.scrape import scraping_routes
+from api.issues import issue_routes
+from api.tasks import task_routes
+from api.task_manager import task_manager_routes
 
 routes.register_blueprint(author_routes)
 routes.register_blueprint(paper_routes)
 routes.register_blueprint(tag_routes)
 routes.register_blueprint(scraping_routes)
+routes.register_blueprint(issue_routes)
+routes.register_blueprint(task_routes)
+routes.register_blueprint(task_manager_routes)

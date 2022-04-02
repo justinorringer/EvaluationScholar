@@ -2,6 +2,7 @@ import sys
 sys.path.append("..")
 
 from backend.api.models import Author, Paper
+import pytest
 
 def test_crud(client):
     # Create a new paper
@@ -76,7 +77,7 @@ def test_crud(client):
 
 def test_authors_paper_list(client):
     # Create a new author
-    author1 = Author('name1')
+    author1 = Author('name1', 'q1236AG15KB7')
     resp = client.post('/authors', json=author1.to_dict())
     a1_id = resp.json['id']
 
@@ -107,7 +108,7 @@ def test_authors_paper_list(client):
     assert resp.json[0]['name'] == 'name1'
 
     # Add another author to paper1
-    author2 = Author('name2')
+    author2 = Author('name2', 'q1286HT54KH5')
     resp = client.post('/authors', json=author2.to_dict())
     a2_id = resp.json['id']
 
@@ -143,7 +144,7 @@ def test_edge_cases(client):
     assert resp.status_code == 404
 
     # Create a new author
-    author1 = Author('name1')
+    author1 = Author('name1', 'q1236AG15KB7')
     resp = client.post('/authors', json=author1.to_dict())
     a1_id = resp.json['id']
 
@@ -168,6 +169,21 @@ def test_edge_cases(client):
     resp = client.put(f'/papers/{p1_id}/authors/{a1_id - 1}')
     assert resp.status_code == 404
 
+    # Create paper with no name
+    resp = client.post('/papers', json={'year': 2001})
+    assert resp.status_code == 400
+
+    # Add author to paper twice
+    resp = client.put(f'/papers/{p1_id}/authors/{a1_id}')
+    assert resp.status_code == 200
+
+    resp = client.put(f'/papers/{p1_id}/authors/{a1_id}')
+    assert resp.status_code == 400
+
+    # Duplicate paper name
+    resp = client.post('/papers', json={'name': 'name1', 'year': 2001})
+    assert resp.status_code == 400
+
 def test_citations(client):
     # Create a new paper
     paper1 = Paper('name1', 2001)
@@ -179,6 +195,7 @@ def test_citations(client):
     assert resp.status_code == 200
     assert len(resp.json) == 0
 
+@pytest.mark.scraping
 def test_scraping(client):
     # Create a new paper
     paper1 = Paper("Autonomous Aerial Water Sampling", 2001)

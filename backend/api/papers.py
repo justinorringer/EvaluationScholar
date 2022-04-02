@@ -48,6 +48,39 @@ def get_paper(id):
 def create_paper():
     with db_session(current_app) as session:
         data = request.get_json()
+
+        if not data:
+            return current_app.response_class(
+                response=json.dumps({'message': 'invalid request body',
+                                    'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+        
+        if 'name' not in data:
+            return current_app.response_class(
+                response=json.dumps({'message': 'missing name',
+                                    'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+        
+        if 'year' not in data:
+            return current_app.response_class(
+                response=json.dumps({'message': 'missing year',
+                                    'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+
+        if session.query(Paper).filter(Paper.name == data['name']).first():
+            return current_app.response_class(
+                response=json.dumps({'message': 'duplicate paper name',
+                                    'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+
         paper = Paper(data['name'], data['year'])
         session.add(paper)
         session.flush()
@@ -123,6 +156,14 @@ def add_author_to_paper(author_id, paper_id):
                 response=json.dumps({'message': 'paper not found',
                                     'status': 'error'}),
                 status=404,
+                mimetype='application/json'
+            )
+
+        if author in paper.authors:
+            return current_app.response_class(
+                response=json.dumps({'message': 'author already in paper',
+                                    'status': 'error'}),
+                status=400,
                 mimetype='application/json'
             )
 

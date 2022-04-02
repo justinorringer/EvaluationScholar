@@ -172,7 +172,7 @@ function Input() {
   //Return the related HTML of the page.
   return (
     <div className="body">
-      <div className="container pt-5">
+      <div className="container">
         <div className="row">
             <div className="alert alert-success alert-dismissible" role="alert" id="success" style={{display: "none"}}>
                 <button className="close" type="button" data-dismiss="alert"><span>&times;</span></button> Articles done scraping

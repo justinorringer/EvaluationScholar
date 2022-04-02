@@ -9,8 +9,22 @@ author_routes = Blueprint('author_routes', __name__, template_folder='templates'
 @author_routes.route('/authors', methods=['GET'])
 def get_authors():
     with db_session(current_app) as session:
+        authors = session.query(Author)
+
+        if 'name' in request.args:
+            words = request.args['name'].split()
+            for word in words:
+                authors = authors.filter(Author.name.ilike(f'%{word}%'))
+        
+        if 'tags' in request.args:
+            tags_ids = request.args['tags'].split(',')
+            for tag_id in tags_ids:
+                authors = authors.filter(Author.tags.any(Tag.id == tag_id))
+        
+        authors = authors.all()
+
         return current_app.response_class(
-            response=json.dumps([author.to_dict() for author in session.query(Author).all()]),
+            response=json.dumps([author.to_dict() for author in authors]),
             status=200,
             mimetype='application/json'
         )
@@ -36,7 +50,38 @@ def get_author(id):
 def create_author():
     with db_session(current_app) as session:
         data = request.get_json()
-        author = Author(name=data['name'])
+
+        if data is None:
+            return current_app.response_class(
+                response=json.dumps({'message': 'invalid request body',
+                                     'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+        if 'name' not in data:
+            return current_app.response_class(
+                response=json.dumps({'message': 'missing name',
+                                     'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+        if 'scholar_id' not in data:
+            return current_app.response_class(
+                response=json.dumps({'message': 'missing scholar_id',
+                                     'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+
+        if data['scholar_id'] is not None and session.query(Author).filter(Author.scholar_id == data['scholar_id']).first() is not None:
+            return current_app.response_class(
+                response=json.dumps({'message': 'duplicate scholar_id',
+                                     'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+
+        author = Author(name=data['name'], scholar_id=data['scholar_id'])
         session.add(author)
         session.flush()
         return current_app.response_class(
@@ -63,6 +108,8 @@ def update_author(id):
             author.name = data['name']
         if 'institution' in data:
             author.institution = data['institution']
+        if 'scholar_id' in data:
+            author.scholar_id = data['scholar_id']    
 
         return current_app.response_class(
             response=json.dumps({'message': 'author updated',
@@ -112,6 +159,14 @@ def add_paper_to_author(author_id, paper_id):
                 response=json.dumps({'message': 'paper not found',
                                     'status': 'error'}),
                 status=404,
+                mimetype='application/json'
+            )
+
+        if paper in author.papers:
+            return current_app.response_class(
+                response=json.dumps({'message': 'paper already added',
+                                    'status': 'error'}),
+                status=400,
                 mimetype='application/json'
             )
 
@@ -249,6 +304,45 @@ def remove_tag_from_author(author_id, tag_id):
         
         return current_app.response_class(
             response=json.dumps({'message': 'tag removed from author',
+                                    'status': 'success'}),
+            status=200,
+            mimetype='application/json'
+        )
+
+
+@author_routes.route('/authors/tags', methods=['PUT'])
+def batch_add_tags():
+    with db_session(current_app) as session:
+        data = request.get_json()
+        authors = session.query(Author).filter(Author.id.in_(data['authors']))
+        tags = session.query(Tag).filter(Tag.id.in_(data['tags']))
+
+        for author in authors:
+            for tag in tags:
+                if tag not in author.tags:
+                    author.tags.append(tag)
+
+        return current_app.response_class(
+            response=json.dumps({'message': 'tags added to authors',
+                                    'status': 'success'}),
+            status=200,
+            mimetype='application/json'
+        )
+
+@author_routes.route('/authors/tags', methods=['DELETE'])
+def batch_remove_tags():
+    with db_session(current_app) as session:
+        data = request.get_json()
+        authors = session.query(Author).filter(Author.id.in_(data['authors']))
+        tags = session.query(Tag).filter(Tag.id.in_(data['tags']))
+
+        for author in authors:
+            for tag in tags:
+                if tag in author.tags:
+                    author.tags.remove(tag)
+
+        return current_app.response_class(
+            response=json.dumps({'message': 'tags removed from authors',
                                     'status': 'success'}),
             status=200,
             mimetype='application/json'

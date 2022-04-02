@@ -13,8 +13,17 @@ def search_paper(paper_title: str) -> str:
 
     url = base_link + encoded_title + base_link_end
 
-    html = get_html(url)
-    return html
+    return get_html(url)
+
+def search_profile(author_name: str) -> str:
+    base_link = "https://scholar.google.com/citations?hl=en&view_op=search_authors&mauthors="
+    base_link_end = "&btnG="
+
+    encoded_name = urllib.parse.quote_plus(author_name)
+
+    url = base_link + encoded_name + base_link_end
+
+    return get_html(url)
 
 def get_html(url: str) -> str:
     params = {'api_key': os.getenv('SCRAPER_API_KEY'), 'url': url}
@@ -22,13 +31,17 @@ def get_html(url: str) -> str:
     for _ in range(retry_count):
         response = requests.get('https://api.scraperapi.com/', params=params)
 
+        
+        if(response.status_code >= 400):
+            print(response)
+
         # Sometimes, ScraperAPI returns a 500 error. They ask that you retry at least three times.
         if(response.status_code == 500):
             continue
 
         if(response.status_code == 403):
             raise ApiNoCreditsError
-        
+
         return response.text
     
     raise ApiRequestsFailedError

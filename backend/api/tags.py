@@ -14,9 +14,17 @@ def create_tag():
     with db_session(current_app) as session:
         data = request.get_json()
 
-        if not data['name']:
+        if data is None:
             return current_app.response_class(
-                response=json.dumps({'message': 'no name provided',
+                response=json.dumps({'message': 'invalid request body',
+                                     'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+
+        if 'name' not in data:
+            return current_app.response_class(
+                response=json.dumps({'message': 'missing name',
                                     'status': 'error'}),
                 status=400,
                 mimetype='application/json'
@@ -190,6 +198,45 @@ def remove_author_from_tag(tag_id, author_id):
         return current_app.response_class(
             response=json.dumps({'message': 'author removed from tag',
                                 'status': 'success'}),
+            status=200,
+            mimetype='application/json'
+        )
+
+@tag_routes.route('/tags/authors', methods=['PUT'])
+def batch_add_tags():
+    with db_session(current_app) as session:
+        data = request.get_json()
+        authors = session.query(Author).filter(Author.id.in_(data['authors']))
+        tags = session.query(Tag).filter(Tag.id.in_(data['tags']))
+
+        
+        for tag in tags:
+            for author in authors:
+                if author not in tag.authors:
+                    tag.authors.append(author)
+
+        return current_app.response_class(
+            response=json.dumps({'message': 'authors added to tags',
+                                    'status': 'success'}),
+            status=200,
+            mimetype='application/json'
+        )
+
+@tag_routes.route('/tags/authors', methods=['DELETE'])
+def batch_remove_tags():
+    with db_session(current_app) as session:
+        data = request.get_json()
+        authors = session.query(Author).filter(Author.id.in_(data['authors']))
+        tags = session.query(Tag).filter(Tag.id.in_(data['tags']))
+
+        for tag in tags:
+            for author in authors:
+                if author in tag.authors:
+                    tag.authors.remove(author)
+
+        return current_app.response_class(
+            response=json.dumps({'message': 'authors removed from tags',
+                                    'status': 'success'}),
             status=200,
             mimetype='application/json'
         )
