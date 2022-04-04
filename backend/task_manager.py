@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from contextlib import contextmanager
 
 from api.models import Task, Paper, Citation, UpdateCitationsTask, Variable
-from scraping import scrape_paper, scrape_citations
+from scraping import scrape_papers
 
 
 # How often a paper's citation count should be updated
@@ -74,12 +74,17 @@ class TaskManager():
             print("[Task Manager] Paper is None")
             return
 
-        citations = scrape_citations(paper.name)
-        if citations is None:
-            print(f"[Task Manager] Failed to scrape citations for paper: '{paper.name}'")
+        papers = scrape_papers(paper.name)
+        if len(papers) == 0:
+            print(f"[Task Manager] Failed to scrape paper for citation update: '{paper.name}'")
+            return
+
+        paper = papers[0]
+        if paper.citations is None:
+            print(f"[Task Manager] Failed to scrape citations for paper in citation update: '{paper.name}'")
             return
         
-        paper.citations.append(Citation(citations, datetime.now()))
+        paper.citations.append(Citation(paper.citations, datetime.now()))
 
         print(f"[Task Manager] Updated citations for paper: '{paper.name}'")
 
@@ -92,13 +97,23 @@ class TaskManager():
             print(f"[Task Manager] Paper already exists: '{paper_title}'")
             return
 
-        citations, year = scrape_paper(paper_title)
-        if citations is None or year is None:
-            print(f"[Task Manager] Failed to scrape paper: '{paper_title}'")
+        papers = scrape_papers(paper_title)
+        if len(papers) == 0:
+            print(f"[Task Manager] Failed to scrape paper during creation: '{paper_title}'")
+            return
+        
+        scraped_paper = papers[0]
+
+        if scraped_paper.citations is None:
+            print(f"[Task Manager] Failed to scrape paper citations during creation: '{paper_title}'")
+            return
+        
+        if scraped_paper.year is None:
+            print(f"[Task Manager] Failed to scrape paper year during creation: '{paper_title}'")
             return
 
-        paper = Paper(paper_title, year)
-        paper.citations.append(Citation(citations, datetime.now()))
+        paper = Paper(paper_title, scraped_paper.year)
+        paper.citations.append(Citation(scraped_paper.year, datetime.now()))
         paper.authors.append(author)
         session.add(paper)
 

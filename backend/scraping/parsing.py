@@ -1,8 +1,8 @@
-from typing import Optional, List
+from typing import Optional, List, Dict
 from bs4 import BeautifulSoup
 import re
 
-def parse_papers(scholar_search_html: str) -> List[str]:
+def parse_paper_blocks(scholar_search_html: str) -> List[str]:
     soup = BeautifulSoup(scholar_search_html, 'html.parser')
 
     return soup.find_all("div", {"class": "gs_ri"})
@@ -41,7 +41,14 @@ def parse_paper_id(paper: str) -> Optional[str]:
     
     return a['id']
 
-def parse_profiles(scholar_search_html: str) -> List[str]:
+def parse_paper(paper_block: str) -> Dict:
+    return {
+        'citations': parse_citations(paper_block),
+        'year': parse_year(paper_block),
+        'id': parse_paper_id(paper_block)
+    }
+
+def parse_profile_blocks(scholar_search_html: str) -> List[str]:
     soup = BeautifulSoup(scholar_search_html, 'html.parser')
 
     return soup.find_all("div", {"class": "gs_ai_chpr"})
@@ -80,3 +87,10 @@ def parse_profile_id(profile: str) -> Optional[str]:
     
     m = re.search("user=(.+)", a['href'])
     return m.group(1)
+
+def parse_profile(profile_block) -> Dict:
+    return {
+        'name': parse_profile_name(profile_block),
+        'institution': parse_profile_institution(profile_block),
+        'id': parse_profile_id(profile_block)
+    }
