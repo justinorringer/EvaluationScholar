@@ -29,6 +29,11 @@ function Header() {
                   Tags
                 </NavLink>
               </li>
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/graphs">
+                  Graphs
+                </NavLink>
+              </li>
             </ul>
           </div>
         </div>
