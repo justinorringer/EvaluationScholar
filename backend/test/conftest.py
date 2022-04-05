@@ -22,12 +22,13 @@ def database_filepath():
 
 @pytest.fixture(scope="session")
 def database_url(database_filepath):
-    dir_path = os.path.dirname(os.path.realpath(__file__))
     return f"sqlite:///{database_filepath}"
 
 @pytest.fixture(scope="session", autouse=True)
 def schema_create(database_filepath, database_url):
-    os.remove(database_filepath)
+    if os.path.exists(database_filepath):
+        os.remove(database_filepath)
+
     engine = create_engine(database_url, echo=False)
     Base.metadata.create_all(engine)
 
