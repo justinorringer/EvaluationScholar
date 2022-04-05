@@ -1,4 +1,5 @@
 from flask import Blueprint, current_app, json, request, Flask
+from sqlalchemy import func
 from api.models import Author, Paper, Tag
 from api.templates import db_session
 author_routes = Blueprint('author_routes', __name__, template_folder='templates')
@@ -18,8 +19,9 @@ def get_authors():
         
         if 'tags' in request.args:
             tags_ids = request.args['tags'].split(',')
-            for tag_id in tags_ids:
-                authors = authors.filter(Author.tags.any(Tag.id == tag_id))
+            # Could use a for loop and filter multiple times, but that does a join for each tag
+            # Instead, do a single join and count the number of tags that match, checking if the count is equal to the number of tags in the request
+            authors = authors.join(Author.tags).filter(Tag.id.in_(tags_ids)).group_by(Author.id).having(func.count(Tag.id) >= len(tags_ids))
         
         authors = authors.all()
 

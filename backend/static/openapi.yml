@@ -139,10 +139,9 @@ paths:
         - in: query
           name: tags
           required: false
+          example: 1,2,3
           schema:
-            type: array
-            items:
-              type: integer
+            type: string
       responses:
         '200':
           description: Successful operation
