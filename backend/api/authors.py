@@ -1,5 +1,6 @@
 from flask import Blueprint, current_app, json, request, Flask
 from sqlalchemy import func
+from sqlalchemy.orm import subqueryload
 from api.models import Author, Paper, Tag
 from api.templates import db_session
 author_routes = Blueprint('author_routes', __name__, template_folder='templates')
@@ -10,7 +11,8 @@ author_routes = Blueprint('author_routes', __name__, template_folder='templates'
 @author_routes.route('/authors', methods=['GET'])
 def get_authors():
     with db_session(current_app) as session:
-        authors = session.query(Author)
+        # Subqueryload reduces join count compared to lazy loading
+        authors = session.query(Author).options(subqueryload(Author.papers).subqueryload(Paper.citations))
 
         if 'name' in request.args:
             words = request.args['name'].split()
