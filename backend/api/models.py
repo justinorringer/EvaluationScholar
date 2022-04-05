@@ -109,6 +109,10 @@ class Tag(Base):
 
 class Task(Base):
     __tablename__ = 'task'
+
+    # Prevent the test SQLite database from reusing deleted IDs
+    __table_args__ = {"sqlite_autoincrement": True}
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     type = Column(String(80), nullable=False)
     priority = Column(Integer, nullable=False)

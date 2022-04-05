@@ -1,11 +1,11 @@
-from sqlalchemy import or_, exists
-from sqlalchemy.orm import scoped_session
+from sqlalchemy import or_, exists, create_engine
+from sqlalchemy.orm import sessionmaker, scoped_session
 import time
 from datetime import datetime, timedelta
 from contextlib import contextmanager
 
 from api.models import Task, Paper, Citation, UpdateCitationsTask, Variable
-from scraping import scrape_paper, scrape_citations
+from scraping import scrape_papers
 
 
 # How often a paper's citation count should be updated
@@ -24,16 +24,35 @@ def db_session(Session):
         session.close()
 
 class TaskManager():
-    def __init__(self, update_check_period: timedelta, task_lookup_period: timedelta, Session):
+    def __init__(self, update_check_period: timedelta, task_lookup_period: timedelta, connection_string):
         self.update_check_period = update_check_period
         self.task_lookup_period = task_lookup_period
-        self.Session = scoped_session(Session)
+
+        engine = create_engine(connection_string, echo=False)
+        self.Session = scoped_session(sessionmaker(bind=engine))
+
+        self.enabled = True
+        self.running = True
+
+    def disable(self):
+        self.enabled = False
+    
+    def enable(self):
+        self.enabled = True
+
+    def stop(self):
+        self.running = False
 
     def scheduler_loop(self):
         last_update_check = datetime.now()
         last_task_check = datetime.now()
 
-        while True:
+        while self.running:
+            time.sleep(min(self.update_check_period.total_seconds(), self.task_lookup_period.total_seconds(), 1))
+
+            if not self.enabled:
+                continue
+
             if datetime.now() > last_update_check + self.update_check_period:
                 last_update_check = datetime.now()
                 self.check_update_tasks()
@@ -45,14 +64,13 @@ class TaskManager():
                     task = session.query(Task).filter(or_(Task.date == None, Task.date <= datetime.now())).order_by(Task.priority).first()
 
                     if task is not None:
+                        
                         if task.type == "create_paper_task":
                             self.create_paper(session, task.paper_title, task.author)
                         elif task.type == "update_citations_task":
                             self.update_citations(session, task.paper)
 
                         session.delete(task)
-
-            time.sleep(1)
 
     def check_update_tasks(self):
         with db_session(self.Session) as session:
@@ -74,12 +92,17 @@ class TaskManager():
             print("[Task Manager] Paper is None")
             return
 
-        citations = scrape_citations(paper.name)
-        if citations is None:
-            print(f"[Task Manager] Failed to scrape citations for paper: '{paper.name}'")
+        scraped_papers = scrape_papers(paper.name)
+        if len(scraped_papers) == 0:
+            print(f"[Task Manager] Failed to scrape paper for citation update: '{paper.name}'")
+            return
+
+        scraped_paper = scraped_papers[0]
+        if scraped_paper['citations'] is None:
+            print(f"[Task Manager] Failed to scrape citations for paper in citation update: '{paper.name}'")
             return
         
-        paper.citations.append(Citation(citations, datetime.now()))
+        paper.citations.append(Citation(scraped_paper['citations'], datetime.now()))
 
         print(f"[Task Manager] Updated citations for paper: '{paper.name}'")
 
@@ -92,13 +115,28 @@ class TaskManager():
             print(f"[Task Manager] Paper already exists: '{paper_title}'")
             return
 
-        citations, year = scrape_paper(paper_title)
-        if citations is None or year is None:
-            print(f"[Task Manager] Failed to scrape paper: '{paper_title}'")
+        papers = scrape_papers(paper_title)
+        if len(papers) == 0:
+            print(f"[Task Manager] Failed to scrape paper during creation: '{paper_title}'")
+            return
+        
+        scraped_paper = papers[0]
+
+        if scraped_paper['citations'] is None:
+            print(f"[Task Manager] Failed to scrape paper citations during creation: '{paper_title}'")
+            return
+        
+        if scraped_paper['year'] is None:
+            print(f"[Task Manager] Failed to scrape paper year during creation: '{paper_title}'")
+            return
+        
+        if scraped_paper['id'] is None:
+            print(f"[Task Manager] Failed to scrape paper scholar id during creation: '{paper_title}'")
             return
 
-        paper = Paper(paper_title, year)
-        paper.citations.append(Citation(citations, datetime.now()))
+        paper = Paper(paper_title, scraped_paper['year'])
+        paper.scholar_id = scraped_paper['id']
+        paper.citations.append(Citation(scraped_paper['citations'], datetime.now()))
         paper.authors.append(author)
         session.add(paper)
 

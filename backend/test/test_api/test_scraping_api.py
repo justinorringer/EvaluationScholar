@@ -5,8 +5,8 @@ def test_paper_scraping(client):
     # Scrape a paper
     response = client.get('/scraping/papers?title=Autonomous%20Aerial%20Water%20Sampling')
     assert response.status_code == 200
-    assert response.json['citation_count'] > 0
-    assert response.json['year'] == 2015
+    assert response.json[0]['citations'] > 0
+    assert response.json[0]['year'] == 2015
 
 @pytest.mark.scraping
 def test_profile_scraping(client):

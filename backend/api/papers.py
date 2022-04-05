@@ -2,7 +2,7 @@ from flask import Blueprint, current_app, json, request
 from sqlalchemy import desc
 
 from api.models import Author, Citation, Paper
-from scraping import scrape_citations
+from scraping import scrape_papers
 from scraping.errors import ApiNoCreditsError, ApiRequestsFailedError
 from api.templates import db_session
 
@@ -273,7 +273,8 @@ def new_citation(paper_id):
             )
         
         try:
-            citation_count = scrape_citations(paper.name)
+            papers = scrape_papers(paper.name)
+            citation_count = papers[0]['citations']
         except ApiNoCreditsError:
             return current_app.response_class(
                 response=json.dumps({'message': 'API credits exceeded',
@@ -366,7 +367,8 @@ def new_citation_multiple_papers():
                 continue
 
             try:
-                citation_count = scrape_citations(paper.name)
+                papers = scrape_papers(paper.name)
+                citation_count = papers[0]['citations']
             except ApiNoCreditsError:
                 return current_app.response_class(
                     response=json.dumps(json.dumps(created_citations)),
