@@ -7,6 +7,7 @@ from scraping.errors import ApiNoCreditsError, ApiRequestsFailedError
 from api.templates import db_session
 
 from datetime import datetime
+import math
 
 # Routes to handle CRUD actions for the Paper model
 # Author(s): Tyler Maxwell, Abhinav Kulhari
@@ -19,9 +20,46 @@ paper_routes = Blueprint('paper_routes', __name__, template_folder='templates')
 @paper_routes.route('/papers', methods=['GET'])
 def get_papers():
     with db_session(current_app) as session:
+        papers = session.query(Paper)
+
+        total_objects = papers.count()
+
+        custom_headers = {}
+
+        if 'limit' in request.args:
+            try:
+                limit = int(request.args['limit'])
+            except ValueError:
+                return json.dumps({'error': 'Invalid limit'}), 400
+            
+            if limit < 1:
+                return json.dumps({'error': 'Invalid limit'}), 400
+            
+            papers = papers.limit(limit)
+            total_pages = 1 if total_objects == 0 else int(math.ceil(total_objects / limit))
+
+            if 'page' in request.args:
+                try:
+                    page = int(request.args['page'])
+                except ValueError:
+                    return json.dumps({'error': 'Invalid page'}), 400
+                
+                if page < 1:
+                    return json.dumps({'error': 'Invalid page'}), 400
+
+                if page > total_pages:
+                    return json.dumps({'error': 'Page too far'}), 404
+
+                papers = papers.offset(limit * (page - 1))
+            
+            custom_headers['Total-Pages'] = total_pages
+
+        papers = papers.all()
+
         return current_app.response_class(
-            response=json.dumps([paper.to_dict() for paper in session.query(Paper).all()]),
+            response=json.dumps([paper.to_dict() for paper in papers]),
             status=200,
+            headers=custom_headers,
             mimetype='application/json'
         )
 
