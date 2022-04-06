@@ -378,15 +378,33 @@ paths:
       tags:
         - Papers
       description: Get all papers
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
       responses:
         '200':
           description: Successful operation
+          headers:
+            Total-Pages:
+              description: Total number of pages. Only present if limit is set.
+              schema:
+                type: integer
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/Paper'
+        '404':
+          description: Paged too far
   /api/papers/{paper_id}:
     get:
       tags:

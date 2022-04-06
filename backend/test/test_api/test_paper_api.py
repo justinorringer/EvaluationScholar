@@ -184,6 +184,19 @@ def test_edge_cases(client):
     resp = client.post('/papers', json={'name': 'name1', 'year': 2001})
     assert resp.status_code == 400
 
+    # Invalid pages/limits
+    resp = client.get('/papers?limit=-1')
+    assert resp.status_code == 400
+
+    resp = client.get('/papers?limit=0')
+    assert resp.status_code == 400
+
+    resp = client.get('/papers?page=1&limit=a')
+    assert resp.status_code == 400
+
+    resp = client.get('/papers?limit=1&page=1000')
+    assert resp.status_code == 404
+
 def test_citations(client):
     # Create a new paper
     paper1 = Paper('name1', 2001)
@@ -194,6 +207,48 @@ def test_citations(client):
     resp = client.get(f'/papers/{p1_id}/citations')
     assert resp.status_code == 200
     assert len(resp.json) == 0
+
+def test_pagination(client):
+    resp = client.get('/papers?limit=10')
+    assert resp.status_code == 200
+    assert len(resp.json) == 0
+    assert resp.headers['Total-Pages'] == '1'
+
+    for i in range(100):
+        paper = Paper(f'name{i}', i)
+        resp = client.post('/papers', json=paper.to_dict())
+        assert resp.status_code == 201
+    
+    resp = client.get('/papers')
+    assert resp.status_code == 200
+    assert len(resp.json) == 100
+
+    resp = client.get('/papers?limit=10')
+    assert resp.status_code == 200
+    assert len(resp.json) == 10
+    assert resp.json[0]['name'] == 'name0'
+    assert resp.headers['Total-Pages'] == '10'
+
+    resp = client.get('/papers?limit=10&page=2')
+    assert resp.status_code == 200
+    assert len(resp.json) == 10
+    assert resp.json[0]['name'] == 'name10'
+    assert resp.headers['Total-Pages'] == '10'
+
+    resp = client.get('/papers?limit=10&page=10')
+    assert resp.status_code == 200
+    assert len(resp.json) == 10
+    assert resp.json[0]['name'] == 'name90'
+
+    resp = client.get('/papers?limit=10&page=11')
+    assert resp.status_code == 404
+
+    resp = client.get('/papers?limit=7&page=2')
+    assert resp.status_code == 200
+    assert len(resp.json) == 7
+    assert resp.json[0]['name'] == 'name7'
+    assert resp.headers['Total-Pages'] == '15'
+
 
 @pytest.mark.scraping
 def test_scraping(client):
