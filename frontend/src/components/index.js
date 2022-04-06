@@ -16,6 +16,8 @@ export { default as Author }
 from "./author";
 export { default as CreateAuthor }
 from "./createauthor";
+export { default as Papers }
+from "./papers";
 
 //This file handles the exporting of the different components in such a way that the 'index.js'
 //in the parent directory is able to handle them.

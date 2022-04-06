@@ -13,6 +13,7 @@ import {
   Tasks,
   Tags,
   Author,
+  Papers,
   CreateAuthor
 } from "./components";
 
@@ -27,6 +28,7 @@ ReactDOM.render(
       <Route path="/tasks" element={<Tasks />} />
       <Route path="/tags" element={<Tags />} />
       <Route path="/author/:id" element={<Author />} />
+      <Route path="/papers" element={<Papers />} />
       <Route path="/createauthor" element={<CreateAuthor />} />
     </Routes>
     <Footer />

@@ -15,6 +15,11 @@ function Header() {
           <div>
             <ul className="navbar-nav ml-auto">
               <li className="nav-item">
+                <NavLink className="nav-link" to="/papers">
+                  Papers
+                </NavLink>
+              </li>
+              <li className="nav-item">
                 <NavLink className="nav-link" to="/issues">
                   Issues
                 </NavLink>
