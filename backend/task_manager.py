@@ -149,6 +149,10 @@ class TaskManager():
         # Check for an exact match for the given paper title to avoid a scraping call if possible
         existing_paper = session.query(Paper).filter(func.lower(Paper.name) == paper_title.lower()).first()
         if existing_paper is not None:
+            if existing_paper in author.papers:
+                print(f"[Task Manager] Paper '{paper_title}' already exists for author '{author.name}'")
+                return
+
             existing_paper.authors.append(author)
             print(f"[Task Manager] Added author to existing paper: '{paper_title}'")
             return
@@ -178,6 +182,10 @@ class TaskManager():
         
         existing_paper = session.query(Paper).filter(Paper.name == scraped_paper['title']).first()
         if existing_paper is not None:
+            if existing_paper in author.papers:
+                print(f"[Task Manager] Paper '{paper_title}' already exists for author '{author.name}'")
+                return
+
             existing_paper.authors.append(author)
             print(f"[Task Manager] Added author to existing paper: '{existing_paper.name}'")
             return
