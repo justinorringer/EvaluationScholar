@@ -5,16 +5,18 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import {
-  Header,
-  Footer,
   Query,
-  Input,
   Issues,
   Tasks,
   Tags,
   Author,
   Papers,
-  CreateAuthor
+  CreateAuthor,
+  Visualize
+} from "./pages";
+import {
+  Header,
+  Footer
 } from "./components";
 
 
@@ -23,13 +25,13 @@ ReactDOM.render(
     <Header />
     <Routes>
       <Route path="/" element={<Query />} />
-      <Route path="/input" element={<Input />} />
       <Route path="/issues" element={<Issues />} />
       <Route path="/tasks" element={<Tasks />} />
       <Route path="/tags" element={<Tags />} />
       <Route path="/author/:id" element={<Author />} />
       <Route path="/papers" element={<Papers />} />
       <Route path="/createauthor" element={<CreateAuthor />} />
+      <Route path="/visualize" element={<Visualize />} />
     </Routes>
     <Footer />
   </Router>,

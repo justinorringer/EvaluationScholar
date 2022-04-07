@@ -35,8 +35,8 @@ function Header() {
                 </NavLink>
               </li>
               <li className="nav-item">
-                <NavLink className="nav-link" to="/graphs">
-                  Graphs
+                <NavLink className="nav-link" to="/visualize">
+                  Visualize
                 </NavLink>
               </li>
             </ul>

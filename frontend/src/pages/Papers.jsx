@@ -1,6 +1,6 @@
 import React, {Component, Fragment} from "react";
 import axios from 'axios';
-import Pagination from "./pagination";
+import Pagination from "../components/pagination";
 
 class Papers extends Component {
     state = {currentPapers: [], currentPage: 1, totalPages: 2, perPage: 10};
