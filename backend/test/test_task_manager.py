@@ -43,6 +43,20 @@ def test_create_paper(session, task_manager):
     assert paper.scholar_id == "bhfHsCHhomoJ"
     assert paper.authors[0].name == "Test Author"
 
+    # Check for the scraped authors
+
+    scraped_author = session.query(Author).filter(Author.scholar_id == "q7jnx5IAAAAJ").first()
+    assert len(scraped_author.papers) == 1
+    assert scraped_author.name == "JP Ore"
+
+    scraped_author = session.query(Author).filter(Author.scholar_id == "swPW5FYAAAAJ").first()
+    assert len(scraped_author.papers) == 1
+    assert scraped_author.name == "S Elbaum"
+
+    scraped_author = session.query(Author).filter(Author.scholar_id == "mesiHAsAAAAJ").first()
+    assert len(scraped_author.papers) == 1
+    assert scraped_author.name == "A Burgin"
+
     # Make sure there's enough time for a citation update task to be created
     time.sleep(0.2)
 
@@ -84,7 +98,7 @@ def test_create_paper(session, task_manager):
     assert len(session.query(UpdateCitationsTask).all()) == 1
 
     # Make sure the author was added to the paper
-    assert len(session.query(Paper).first().authors) == 2
+    assert len(session.query(Paper).first().authors) == 5
     assert len(author2.papers) == 1
 
     # Try with inexact paper name, will require scraping to match the title with existing paper
@@ -102,7 +116,7 @@ def test_create_paper(session, task_manager):
     assert len(session.query(Paper).all()) == 1
 
     # Make sure the author was added to the paper
-    assert len(session.query(Paper).first().authors) == 3
+    assert len(session.query(Paper).first().authors) == 6
 
 @pytest.mark.scraping
 def test_update_citations(session, task_manager):

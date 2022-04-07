@@ -4,7 +4,7 @@ import time
 from datetime import datetime, timedelta
 from contextlib import contextmanager
 
-from api.models import Task, Paper, Citation, UpdateCitationsTask, Variable
+from api.models import Task, Paper, Citation, UpdateCitationsTask, Variable, Author
 from scraping import scrape_papers
 
 
@@ -106,6 +106,20 @@ class TaskManager():
 
         print(f"[Task Manager] Updated citations for paper: '{paper.name}'")
 
+    def create_and_link_authors(self, session, paper, scraped_authors):
+        for scraped_author in scraped_authors:
+            existing_author = session.query(Author).filter(Author.scholar_id == scraped_author['id']).first()
+            if existing_author is None:
+                author = Author(scraped_author['name'], scraped_author['id'])
+                session.add(author)
+                author.papers.append(paper)
+                print(f"[Task Manager] Created new scraped author: '{author.name}' and linked to paper: '{paper.name}'")
+            else:
+                existing_author.papers.append(paper)
+                print(f"[Task Manager] Linked scraped author: '{existing_author.name}' to paper: '{paper.name}'")
+        
+        session.commit()
+
     def create_paper(self, session, paper_title, author):
         if paper_title == None:
             print("[Task Manager] Paper title is None")
@@ -154,3 +168,5 @@ class TaskManager():
         session.add(paper)
 
         print(f"[Task Manager] Created paper: '{paper_title}'")
+
+        self.create_and_link_authors(session, paper, scraped_paper['authors'])
