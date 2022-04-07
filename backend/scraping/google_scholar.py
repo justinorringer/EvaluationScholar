@@ -113,6 +113,21 @@ def parse_paper_id(paper: str) -> Optional[str]:
     
     return a['id']
 
+def parse_paper_authors(paper: str) -> Optional[Dict]:
+    div = paper.find("div", {"class": "gs_a"})
+
+    if div is None:
+        return None
+    
+    links = div.find_all("a")
+
+    # TODO: Account for authors without a link
+
+    return [{
+        'name': re.sub(r'<[^>]*?>', '', link.text),
+        'id': re.search("user=(.+)&hl=", link['href']).group(1)
+    } for link in links]
+
 def parse_paper(paper_block: str) -> Dict:
     citation_entry = is_citation_entry(paper_block)
 
@@ -120,7 +135,8 @@ def parse_paper(paper_block: str) -> Dict:
         'title': parse_title(paper_block),
         'year': parse_year(paper_block),
         'id': parse_paper_id(paper_block),
-        'citations': parse_citations(paper_block)
+        'citations': parse_citations(paper_block),
+        'authors': parse_paper_authors(paper_block)
     }
 
     if citation_entry:
