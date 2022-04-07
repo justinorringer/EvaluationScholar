@@ -422,3 +422,7 @@ def test_filtering(client, session):
     resp = client.get('/authors?max-h=5&min-i10=1')
     assert resp.status_code == 200
     assert len(resp.json) == 2
+
+    resp = client.get('/authors?max-h=5&min-i10=1&name=und')
+    assert resp.status_code == 200
+    assert len(resp.json) == 1
