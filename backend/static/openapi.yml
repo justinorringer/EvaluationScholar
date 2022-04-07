@@ -142,6 +142,26 @@ paths:
           example: 1,2,3
           schema:
             type: string
+        - in: query
+          name: min-i10
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: max-i10
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: min-h
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: max-h
+          required: false
+          schema:
+            type: integer
       responses:
         '200':
           description: Successful operation
