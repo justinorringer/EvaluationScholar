@@ -48,6 +48,14 @@ def get_profile_search_html(author_name: str) -> str:
 
     return get_html(url)
 
+def get_profile_page_html(profile_id: str) -> str:
+    base_link = "https://scholar.google.com/citations?user="
+    base_link_end = "&hl=en&oi=sra"
+
+    url = base_link + profile_id + base_link_end
+
+    return get_html(url)
+
 def parse_paper_blocks(scholar_search_html: str) -> List[str]:
     soup = BeautifulSoup(scholar_search_html, 'html.parser')
 
@@ -190,3 +198,13 @@ def parse_profile(profile_block) -> Dict:
         'institution': parse_profile_institution(profile_block),
         'id': parse_profile_id(profile_block)
     }
+
+def parse_profile_page_name(profile_page_html: str) -> Optional[str]:
+    soup = BeautifulSoup(profile_page_html, 'html.parser')
+
+    div = soup.find("div", {"id": "gsc_prf_in"})
+
+    if div is None:
+        return None
+
+    return div.text

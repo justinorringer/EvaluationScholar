@@ -179,6 +179,30 @@ class UpdateCitationsTask(Task):
         'polymorphic_identity': 'update_citations_task'
     }
 
+class ScrapeAuthorTask(Task):
+    __tablename__ = 'scrape_author_task'
+    id = Column(Integer, ForeignKey('task.id'), primary_key=True)
+    author_id = Column(Integer, ForeignKey('author.id'), nullable=False)
+
+    author = relationship('Author')
+
+    def __init__(self, author_id, priority=0, date=None):
+        self.author_id = author_id
+        self.priority = priority
+        self.date = date
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'type': self.type,
+            'priority': self.priority,
+            'date': self.date,
+            'author': self.author.to_dict(),
+        }
+    
+    __mapper_args__ = {
+        'polymorphic_identity': 'scrape_author_task'
+    }
 
 class Issue(Base):
     __tablename__ = "issue"

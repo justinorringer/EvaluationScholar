@@ -4,8 +4,9 @@ import time
 from datetime import datetime, timedelta
 from contextlib import contextmanager
 
-from api.models import Task, Paper, Citation, UpdateCitationsTask, Variable, Author
+from api.models import Task, Paper, Citation, UpdateCitationsTask, Variable, Author, ScrapeAuthorTask
 from scraping import scrape_papers
+from scraping.google_scholar import get_profile_page_html, parse_profile_page_name
 
 
 # How often a paper's citation count should be updated
@@ -69,6 +70,8 @@ class TaskManager():
                             self.create_paper(session, task.paper_title, task.author)
                         elif task.type == "update_citations_task":
                             self.update_citations(session, task.paper)
+                        elif task.type == "scrape_author_task":
+                            self.scrape_author(session, task.author)
 
                         session.delete(task)
 
@@ -86,6 +89,20 @@ class TaskManager():
             papers = session.query(Paper).filter(~exists().where(Paper.id == UpdateCitationsTask.paper_id))
             for paper in papers:
                 session.add(UpdateCitationsTask(paper.id, 0, datetime.now() + update_delta))
+
+    def scrape_author(self, session, author):
+        html = get_profile_page_html(author.scholar_id)
+        if html is None:
+            print(f"[Task Manager] Failed to scrape author: '{author.name}'")
+            return
+        
+        name = parse_profile_page_name(html)
+        if name is None:
+            print(f"[Task Manager] Failed to parse name for author: '{author.name}'")
+            return
+        
+        author.name = name
+        print(f"[Task Manager] Scraped author details: '{author.name}'")
 
     def update_citations(self, session, paper):
         if paper is None:
@@ -113,6 +130,10 @@ class TaskManager():
                 author = Author(scraped_author['name'], scraped_author['id'])
                 session.add(author)
                 author.papers.append(paper)
+                session.flush()
+
+                scrape_author_task = ScrapeAuthorTask(author.id)
+                session.add(scrape_author_task)
                 print(f"[Task Manager] Created new scraped author: '{author.name}' and linked to paper: '{paper.name}'")
             else:
                 existing_author.papers.append(paper)
@@ -158,7 +179,7 @@ class TaskManager():
         existing_paper = session.query(Paper).filter(Paper.name == scraped_paper['title']).first()
         if existing_paper is not None:
             existing_paper.authors.append(author)
-            print(f"[Task Manager] Added author to existing paper: '{paper_title}'")
+            print(f"[Task Manager] Added author to existing paper: '{existing_paper.name}'")
             return
 
         paper = Paper(scraped_paper['title'], scraped_paper['year'])

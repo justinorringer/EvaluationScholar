@@ -7,6 +7,8 @@ import pytest
 
 from backend.api.models import Task, CreatePaperTask, Author, Paper, UpdateCitationsTask
 
+timeout = 20
+
 def wait_for_task(session, id):
     start_time = datetime.now()
     while True:
@@ -16,8 +18,27 @@ def wait_for_task(session, id):
             
         time.sleep(1)
 
-        if datetime.now() > start_time + timedelta(seconds = 30):
-            pytest.fail("CreatePaperTask not resolved")
+        if datetime.now() > start_time + timedelta(seconds = timeout):
+            pytest.fail("Task not resolved")
+        
+        session.commit()
+
+def wait_for_task_count(session, target_task_count):
+    start_time = datetime.now()
+    task_count = session.query(Task).count()
+    while True:
+        new_task_count = session.query(Task).count()
+        if new_task_count == target_task_count:
+            return
+        
+        if new_task_count != task_count:
+            task_count = new_task_count
+            start_time = datetime.now()
+            
+        time.sleep(1)
+
+        if datetime.now() > start_time + timedelta(seconds = timeout):
+            pytest.fail("Task count not resolved")
         
         session.commit()
 
@@ -42,26 +63,27 @@ def test_create_paper(session, task_manager):
     assert paper.citations[0].num_cited > 0
     assert paper.scholar_id == "bhfHsCHhomoJ"
     assert paper.authors[0].name == "Test Author"
+    session.commit()
+
+    # Wait for the scrape_author tasks to finish. Only one task should be left: the update citations task
+    wait_for_task_count(session, 1)
 
     # Check for the scraped authors
-
     scraped_author = session.query(Author).filter(Author.scholar_id == "q7jnx5IAAAAJ").first()
     assert len(scraped_author.papers) == 1
-    assert scraped_author.name == "JP Ore"
+    assert scraped_author.name == "John-Paul Ore"
 
     scraped_author = session.query(Author).filter(Author.scholar_id == "swPW5FYAAAAJ").first()
     assert len(scraped_author.papers) == 1
-    assert scraped_author.name == "S Elbaum"
+    assert scraped_author.name == "Sebastian Elbaum"
 
     scraped_author = session.query(Author).filter(Author.scholar_id == "mesiHAsAAAAJ").first()
     assert len(scraped_author.papers) == 1
-    assert scraped_author.name == "A Burgin"
+    assert scraped_author.name == "Amy J. Burgin"
+    session.commit()
 
     # Make sure there's enough time for a citation update task to be created
     time.sleep(0.2)
-
-    # Make sure this session's data is updated
-    session.expunge_all()
 
     # Make sure a citation update task was created
     update_task = session.query(UpdateCitationsTask).first()
@@ -77,7 +99,7 @@ def test_create_paper(session, task_manager):
 
     # Make sure no new papers were added
 
-    assert len(session.query(Paper).all()) == 1
+    assert session.query(Paper).count() == 1
     assert len(session.query(UpdateCitationsTask).all()) == 1
 
     # Test creating a paper with the same name, different author
@@ -94,8 +116,8 @@ def test_create_paper(session, task_manager):
 
     # Make sure the paper wasn't recreated
 
-    assert len(session.query(Paper).all()) == 1
-    assert len(session.query(UpdateCitationsTask).all()) == 1
+    assert session.query(Paper).count() == 1
+    assert session.query(UpdateCitationsTask).count() == 1
 
     # Make sure the author was added to the paper
     assert len(session.query(Paper).first().authors) == 5
@@ -113,10 +135,34 @@ def test_create_paper(session, task_manager):
     wait_for_task(session, task.id)
 
     # Make sure the paper wasn't recreated
-    assert len(session.query(Paper).all()) == 1
+    assert session.query(Paper).count() == 1
 
     # Make sure the author was added to the paper
     assert len(session.query(Paper).first().authors) == 6
+
+    # Test a new paper with some same authors
+    task = CreatePaperTask("An empirical study on type annotations: Accuracy, speed, and suggestion effectiveness", author.id)
+    session.add(task)
+    session.commit()
+
+    wait_for_task(session, task.id)
+
+    assert session.query(Paper).count() == 2
+
+    wait_for_task_count(session, 2)
+
+    assert session.query(UpdateCitationsTask).count() == 2
+    assert session.query(Author).filter(Author.name == "Carrick Detweiler").first() is not None
+
+    authors = {author.name: author for author in session.query(Author).all()}
+    assert len(authors) == 7
+    assert "Carrick Detweiler" in authors.keys()
+    assert len(authors["John-Paul Ore"].papers) == 2
+    assert len(authors["Sebastian Elbaum"].papers) == 2
+    assert len(authors["Carrick Detweiler"].papers) == 1
+    assert len(authors["Amy J. Burgin"].papers) == 1
+    assert len(authors["Test Author"].papers) == 2
+    assert len(authors["Test Author 2"].papers) == 1
 
 @pytest.mark.scraping
 def test_update_citations(session, task_manager):
