@@ -27,6 +27,30 @@ def get_authors():
         
         authors = authors.all()
 
+        if 'min-i10' in request.args:
+            try:
+                authors = [author for author in authors if author.get_i10_index() >= int(request.args['min-i10'])]
+            except ValueError:
+                return json.dumps({'error': 'min-i10 must be an integer'}), 400
+        
+        if 'max-i10' in request.args:
+            try:
+                authors = [author for author in authors if author.get_i10_index() <= int(request.args['max-i10'])]
+            except ValueError:
+                return json.dumps({'error': 'max-i10 must be an integer'}), 400
+        
+        if 'min-h' in request.args:
+            try:
+                authors = [author for author in authors if author.get_h_index() >= int(request.args['min-h'])]
+            except ValueError:
+                return json.dumps({'error': 'min-h must be an integer'}), 400
+        
+        if 'max-h' in request.args:
+            try:
+                authors = [author for author in authors if author.get_h_index() <= int(request.args['max-h'])]
+            except ValueError:
+                return json.dumps({'error': 'max-h must be an integer'}), 400
+
         return current_app.response_class(
             response=json.dumps([author.to_dict() for author in authors]),
             status=200,

@@ -307,7 +307,7 @@ def test_batch(client):
     assert resp.status_code == 200
     assert len(resp.json) == 0
 
-def test_filtering(client):
+def test_filtering(client, session):
     # Create some test tags
     tag_ids = []
     for i in range(5):
@@ -318,12 +318,25 @@ def test_filtering(client):
     
     # Create some test authors
     author_ids = []
+    authors = []
     names = ["arthur ryAn", "molly undore", "sandra DolloP", "clarice OrAnge", "paul goRbovdo"]
     for i in range(5):
         author = Author(names[i], f'scholar_id{i}')
-        resp = client.post('/authors', json=author.to_dict())
-        assert resp.status_code == 201
-        author_ids.append(resp.json['id'])
+        session.add(author)
+        session.flush()
+        author_ids.append(author.id)
+        authors.append(author)
+    
+    session.commit()
+
+    citation_counts = [[5, 6, 0, 2], [12, 0, 99, 3, 5, 6], [8, 9, 34, 6, 7, 112], [1, 2, 1, 0], [0, 10]]
+    for i in range(5):
+        for j, citation_count in enumerate(citation_counts[i]):
+            paper = Paper(f'paper{i} {j}', 2000)
+            paper.citations.append(Citation(citation_count, datetime.now()))
+            authors[i].papers.append(paper)
+    
+    session.commit()
     
     a_t = lambda x: list(map(lambda y: author_ids[y], x))
     t_t = lambda x: list(map(lambda y: tag_ids[y], x))
@@ -381,3 +394,31 @@ def test_filtering(client):
     resp = client.get('/authors?name=Sandra Dollop')
     assert resp.status_code == 200
     assert len(resp.json) == 1
+
+    # Values for the test authors:
+    # h-index   i10-index
+    # 2         0
+    # 4         2
+    # 6         2
+    # 1         0
+    # 1         1
+
+    resp = client.get('/authors?min-h=2&max-i10=1')
+    assert resp.status_code == 200
+    assert len(resp.json) == 1
+
+    resp = client.get('/authors?max-h=3&min-i10=1')
+    assert resp.status_code == 200
+    assert len(resp.json) == 1
+
+    resp = client.get('/authors?min-h=2')
+    assert resp.status_code == 200
+    assert len(resp.json) == 3
+
+    resp = client.get('/authors?min-i10=1&max-i10=1&min-h=1')
+    assert resp.status_code == 200
+    assert len(resp.json) == 1
+
+    resp = client.get('/authors?max-h=5&min-i10=1')
+    assert resp.status_code == 200
+    assert len(resp.json) == 2
