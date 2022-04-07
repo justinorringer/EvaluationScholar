@@ -27,6 +27,36 @@ def test_citation(session):
     assert ret_citation.num_cited == 1
     assert ret_citation.paper.id == ret_paper.id
 
+def test_author_measures(session):
+    author = Author("test", "test")
+    citation_counts = [2, 3, 1, 0, 6, 12, 33, 6, 7]
+
+    for i, citation_count in enumerate(citation_counts):
+        paper = Paper(f"paper {i}", 2000)
+        paper.citations.append(Citation(citation_count, datetime.now()))
+        author.papers.append(paper)
+    
+    session.commit()
+
+    assert author.get_h_index() == 5
+    assert author.get_i10_index() == 2
+
+    paper = Paper("paper fda", 2000)
+    paper.citations.append(Citation(12, datetime.now()))
+    author.papers.append(paper)
+    session.commit()
+
+    assert author.get_h_index() == 6
+    assert author.get_i10_index() == 3
+
+    paper = Paper("paper rew3", 2000)
+    paper.citations.append(Citation(8, datetime.now()))
+    author.papers.append(paper)
+    session.commit()
+
+    assert author.get_h_index() == 6
+    assert author.get_i10_index() == 3
+
 def test_paper(session):
     paper = Paper('name', 2000)
     author = Author('name', 'q1236AG15KB7')
