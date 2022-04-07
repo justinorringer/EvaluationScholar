@@ -36,7 +36,7 @@ def test_create_paper(session, task_manager):
     wait_for_task(session, task.id)
 
     paper = session.query(Paper).first()
-    assert paper.name == "Autonomous Aerial Water Sampling"
+    assert paper.name == "Autonomous aerial water sampling"
     assert paper.year == 2015
     assert len(paper.citations) > 0
     assert paper.citations[0].num_cited > 0
@@ -65,6 +65,44 @@ def test_create_paper(session, task_manager):
 
     assert len(session.query(Paper).all()) == 1
     assert len(session.query(UpdateCitationsTask).all()) == 1
+
+    # Test creating a paper with the same name, different author
+
+    author2 = Author(name="Test Author 2", scholar_id="_QnLm3kAAbAJ")
+    session.add(author2)
+    session.flush()
+
+    task = CreatePaperTask("Autonomous Aerial Water Sampling", author2.id)
+    session.add(task)
+    session.commit()
+
+    wait_for_task(session, task.id)
+
+    # Make sure the paper wasn't recreated
+
+    assert len(session.query(Paper).all()) == 1
+    assert len(session.query(UpdateCitationsTask).all()) == 1
+
+    # Make sure the author was added to the paper
+    assert len(session.query(Paper).first().authors) == 2
+    assert len(author2.papers) == 1
+
+    # Try with inexact paper name, will require scraping to match the title with existing paper
+    author3 = Author(name="Test Author 3", scholar_id="_QnLm3kAAbAJ")
+    session.add(author3)
+    session.flush()
+
+    task = CreatePaperTask("Autonomous Aerial Water", author3.id)
+    session.add(task)
+    session.commit()
+
+    wait_for_task(session, task.id)
+
+    # Make sure the paper wasn't recreated
+    assert len(session.query(Paper).all()) == 1
+
+    # Make sure the author was added to the paper
+    assert len(session.query(Paper).first().authors) == 3
 
 @pytest.mark.scraping
 def test_update_citations(session, task_manager):

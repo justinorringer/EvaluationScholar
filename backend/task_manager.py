@@ -1,4 +1,4 @@
-from sqlalchemy import or_, exists, create_engine
+from sqlalchemy import or_, exists, create_engine, func
 from sqlalchemy.orm import sessionmaker, scoped_session
 import time
 from datetime import datetime, timedelta
@@ -111,8 +111,11 @@ class TaskManager():
             print("[Task Manager] Paper title is None")
             return
 
-        if session.query(Paper).filter(Paper.name == paper_title).first() is not None:
-            print(f"[Task Manager] Paper already exists: '{paper_title}'")
+        # Check for an exact match for the given paper title to avoid a scraping call if possible
+        existing_paper = session.query(Paper).filter(func.lower(Paper.name) == paper_title.lower()).first()
+        if existing_paper is not None:
+            existing_paper.authors.append(author)
+            print(f"[Task Manager] Added author to existing paper: '{paper_title}'")
             return
 
         papers = scrape_papers(paper_title)
@@ -133,8 +136,18 @@ class TaskManager():
         if scraped_paper['id'] is None:
             print(f"[Task Manager] Failed to scrape paper scholar id during creation: '{paper_title}'")
             return
+        
+        if scraped_paper['title'] is None:
+            print(f"[Task Manager] Failed to scrape paper title during creation: '{paper_title}'")
+            return
+        
+        existing_paper = session.query(Paper).filter(Paper.name == scraped_paper['title']).first()
+        if existing_paper is not None:
+            existing_paper.authors.append(author)
+            print(f"[Task Manager] Added author to existing paper: '{paper_title}'")
+            return
 
-        paper = Paper(paper_title, scraped_paper['year'])
+        paper = Paper(scraped_paper['title'], scraped_paper['year'])
         paper.scholar_id = scraped_paper['id']
         paper.citations.append(Citation(scraped_paper['citations'], datetime.now()))
         paper.authors.append(author)
