@@ -54,6 +54,7 @@ def test_papers():
     assert normal_paper["year"] == 2015
     assert normal_paper["id"] == "bhfHsCHhomoJ"
     assert normal_paper["title"].lower() == "Autonomous Aerial Water Sampling".lower()
+    assert len(normal_paper["authors"]) == 3
     assert 'citation_entry' not in normal_paper
 
     # There should be some citation entries
@@ -68,6 +69,12 @@ def test_papers():
     assert google_scholar.parse_year(normal_paper_block) == 2015
     assert google_scholar.parse_paper_id(normal_paper_block) == "bhfHsCHhomoJ"
     assert google_scholar.parse_title(normal_paper_block).lower() == "Autonomous Aerial Water Sampling".lower()
+
+    # Check the scraped authors
+    authors = google_scholar.parse_paper_authors(normal_paper_block)
+    assert {'name': 'JP Ore', 'id': 'q7jnx5IAAAAJ'} in authors
+    assert {'name': 'S Elbaum', 'id': 'swPW5FYAAAAJ'} in authors
+    assert {'name': 'A Burgin', 'id': 'mesiHAsAAAAJ'} in authors
 
     # Test all-in-one call
     searched_papers = google_scholar.search_papers("Autonomous Aerial Water Sampling")

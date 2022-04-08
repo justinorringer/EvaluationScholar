@@ -27,6 +27,29 @@ class Author(Base):
     papers = relationship('Paper', secondary=author_paper, back_populates='authors')
     tags = relationship('Tag', secondary=author_tag, back_populates='authors')
 
+    def get_h_index(self):
+        citations = [paper.get_latest_citation().num_cited for paper in self.papers]
+        # 
+        paper_counts = [0 for _ in range(len(citations))]
+        for citation_count in citations:
+            if citation_count > len(citations):
+                paper_counts[len(citations) - 1] += 1
+            elif citation_count == 0:
+                continue
+            else:
+                paper_counts[citation_count - 1] += 1
+        
+        cumulative = 0
+        for i in reversed(range(len(paper_counts))):
+            cumulative += paper_counts[i]
+            if cumulative >= i + 1:
+                return i + 1
+        
+        return 0
+
+    def get_i10_index(self):
+        return sum(1 for paper in self.papers if paper.get_latest_citation().num_cited >= 10)
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -179,6 +202,30 @@ class UpdateCitationsTask(Task):
         'polymorphic_identity': 'update_citations_task'
     }
 
+class ScrapeAuthorTask(Task):
+    __tablename__ = 'scrape_author_task'
+    id = Column(Integer, ForeignKey('task.id'), primary_key=True)
+    author_id = Column(Integer, ForeignKey('author.id'), nullable=False)
+
+    author = relationship('Author')
+
+    def __init__(self, author_id, priority=0, date=None):
+        self.author_id = author_id
+        self.priority = priority
+        self.date = date
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'type': self.type,
+            'priority': self.priority,
+            'date': self.date,
+            'author': self.author.to_dict(),
+        }
+    
+    __mapper_args__ = {
+        'polymorphic_identity': 'scrape_author_task'
+    }
 
 class Issue(Base):
     __tablename__ = "issue"

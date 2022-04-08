@@ -48,6 +48,14 @@ def get_profile_search_html(author_name: str) -> str:
 
     return get_html(url)
 
+def get_profile_page_html(profile_id: str) -> str:
+    base_link = "https://scholar.google.com/citations?user="
+    base_link_end = "&hl=en&oi=sra"
+
+    url = base_link + profile_id + base_link_end
+
+    return get_html(url)
+
 def parse_paper_blocks(scholar_search_html: str) -> List[str]:
     soup = BeautifulSoup(scholar_search_html, 'html.parser')
 
@@ -113,6 +121,21 @@ def parse_paper_id(paper: str) -> Optional[str]:
     
     return a['id']
 
+def parse_paper_authors(paper: str) -> Optional[Dict]:
+    div = paper.find("div", {"class": "gs_a"})
+
+    if div is None:
+        return None
+    
+    links = div.find_all("a")
+
+    # TODO: Account for authors without a link
+
+    return [{
+        'name': re.sub(r'<[^>]*?>', '', link.text),
+        'id': re.search("user=(.+)&hl=", link['href']).group(1)
+    } for link in links]
+
 def parse_paper(paper_block: str) -> Dict:
     citation_entry = is_citation_entry(paper_block)
 
@@ -120,7 +143,8 @@ def parse_paper(paper_block: str) -> Dict:
         'title': parse_title(paper_block),
         'year': parse_year(paper_block),
         'id': parse_paper_id(paper_block),
-        'citations': parse_citations(paper_block)
+        'citations': parse_citations(paper_block),
+        'authors': parse_paper_authors(paper_block)
     }
 
     if citation_entry:
@@ -174,3 +198,13 @@ def parse_profile(profile_block) -> Dict:
         'institution': parse_profile_institution(profile_block),
         'id': parse_profile_id(profile_block)
     }
+
+def parse_profile_page_name(profile_page_html: str) -> Optional[str]:
+    soup = BeautifulSoup(profile_page_html, 'html.parser')
+
+    div = soup.find("div", {"id": "gsc_prf_in"})
+
+    if div is None:
+        return None
+
+    return div.text
