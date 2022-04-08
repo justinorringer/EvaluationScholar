@@ -61,19 +61,25 @@ class TaskManager():
             if datetime.now() > last_task_check + self.task_lookup_period:
                 last_task_check = datetime.now()
 
-                with db_session(self.Session) as session:
-                    task = session.query(Task).filter(or_(Task.date == None, Task.date <= datetime.now())).order_by(Task.priority).first()
-
-                    if task is not None:
-                        
+                session = self.Session()
+                task = session.query(Task).filter(or_(Task.date == None, Task.date <= datetime.now())).order_by(Task.priority).first()
+                if task is not None:
+                    try: 
                         if task.type == "create_paper_task":
                             self.create_paper(session, task.paper_title, task.author)
                         elif task.type == "update_citations_task":
                             self.update_citations(session, task.paper)
                         elif task.type == "scrape_author_task":
                             self.scrape_author(session, task.author)
-
+                        session.commit()
+                    except Exception as e:
+                        print(f"[Task Manager] Error: {e}")
+                        session.rollback()
+                    finally:
                         session.delete(task)
+                        session.commit()
+                
+                session.close()
 
     def check_update_tasks(self):
         with db_session(self.Session) as session:

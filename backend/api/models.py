@@ -88,7 +88,7 @@ class Paper(Base):
     __tablename__ = 'paper'
     id = Column(Integer, primary_key=True, autoincrement=True)
     #Should we have the title be unique to handle duplicates?
-    name = Column(String(100), unique=True, nullable=False)
+    name = Column(String(400), unique=True, nullable=False)
     #Leave enough characters for 'dd/mm/yyyy', but can just do a year
     year = Column(Integer, unique=False, nullable=False)
     #I believe we were just linking these to the Citation table
