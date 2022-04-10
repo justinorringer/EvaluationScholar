@@ -36,6 +36,22 @@ def test_profiles():
     assert profiles[0]["id"] == "_QnLm3kAAAAJ"
 
 @pytest.mark.scraping
+def test_zero_citations():
+    html = google_scholar.get_paper_search_html("ITALIAN OCCUPATION OF ETHIOPIA.-FRONTIER QUESTIONS: OCCUPATION OF POST NORTH OF KOKOI.")
+
+    paper_blocks = google_scholar.parse_paper_blocks(html)
+    assert len(paper_blocks) > 0
+
+    paper_block = paper_blocks[0]
+    paper = google_scholar.parse_paper(paper_block)
+
+    assert paper['citations'] == 0
+    assert paper['year'] == 1938
+    assert paper['title'] == "ITALIAN OCCUPATION OF ETHIOPIA.-FRONTIER QUESTIONS: OCCUPATION OF POST NORTH OF KOKOI."
+    assert paper['id'] == "Mu4Snx7skzcJ"
+    assert len(paper['authors']) == 0
+
+@pytest.mark.scraping
 def test_papers():
     # Test Google Scholar searching and parsing
 
