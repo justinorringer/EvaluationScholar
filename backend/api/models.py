@@ -96,7 +96,7 @@ class Paper(Base):
     scholar_id = Column(String(100), unique=False, nullable=True)
 
     authors = relationship('Author', secondary=author_paper, back_populates='papers')
-    citations = relationship('Citation', backref='paper', order_by='Citation.date.desc()')
+    citations = relationship('Citation', backref='paper', order_by='Citation.date.desc()', cascade='all, delete-orphan')
 
     def get_latest_citation(self):
         return None if len(self.citations) == 0 else self.citations[0]

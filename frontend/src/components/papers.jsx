@@ -35,6 +35,19 @@ class Papers extends Component {
         this.setPapers(newPage);
     }
 
+    deletePaper(id) {
+        axios.delete(`/api/papers/${id}`)
+            .then(res => {
+                this.setPapers(this.state.currentPage);
+            }).
+            catch(err => {
+                if (err.response.status === 404) {
+                    this.setPapers(this.state.currentPage);
+                }
+            }
+        );
+    }
+
     render() {
         return (
             <div className="container mb-5">
@@ -57,6 +70,7 @@ class Papers extends Component {
                                 <th scope="col-6">Article</th>
                                 <th scope="col-2">Year</th>
                                 <th scope="col-2">Citations</th>
+                                <th scope="col-2"></th>
                             </tr>
                         </thead>
                         <tbody id = "paperTableBody">
@@ -65,6 +79,9 @@ class Papers extends Component {
                                     <td>{paper.name}</td>
                                     <td>{paper.year}</td>
                                     <td>{paper.latest_citation?.num_cited}</td>
+                                    <td>
+                                        <button className="btn btn-danger" onClick={() => this.deletePaper(paper.id)}>Delete</button>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

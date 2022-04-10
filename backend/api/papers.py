@@ -1,7 +1,7 @@
 from flask import Blueprint, current_app, json, request
 from sqlalchemy import desc
 
-from api.models import Author, Citation, Paper
+from api.models import Author, Citation, Paper, UpdateCitationsTask
 from scraping import scrape_papers
 from scraping.errors import ApiNoCreditsError, ApiRequestsFailedError
 from api.templates import db_session
@@ -167,7 +167,12 @@ def delete_paper(id):
                 mimetype='application/json'
             )
 
+        update_citation_tasks = session.query(UpdateCitationsTask).filter(UpdateCitationsTask.paper_id == id).all()
+
+        for task in update_citation_tasks:
+            session.delete(task)
         session.delete(paper)
+
         return current_app.response_class(
             response=json.dumps({'message': 'paper deleted',
                                     'status': 'success'}),
