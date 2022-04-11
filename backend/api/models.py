@@ -94,12 +94,8 @@ class Citation(Base):
 class Paper(Base):
     __tablename__ = 'paper'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    #Should we have the title be unique to handle duplicates?
     name = Column(String(400), unique=True, nullable=False)
-    #Leave enough characters for 'dd/mm/yyyy', but can just do a year
     year = Column(Integer, unique=False, nullable=False)
-    #I believe we were just linking these to the Citation table
-    #num_cited=Column(Integer, nullable=False)
     scholar_id = Column(String(100), unique=False, nullable=True)
 
     authors = relationship('Author', secondary=author_paper, back_populates='papers')
@@ -117,9 +113,10 @@ class Paper(Base):
             'latest_citation': self.get_latest_citation().to_dict() if self.get_latest_citation() else None,
         }
 
-    def __init__(self, name, year):
+    def __init__(self, name, year, scholar_id = None):
         self.name = name
         self.year = year
+        self.scholar_id = scholar_id
 
 class Tag(Base):
     __tablename__ = 'tag'
