@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@toast-ui/chart": "^4.4.1"
+  }
+}
