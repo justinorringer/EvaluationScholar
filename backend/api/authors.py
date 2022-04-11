@@ -51,8 +51,10 @@ def get_authors():
             except ValueError:
                 return json.dumps({'error': 'max-h must be an integer'}), 400
 
+        includes = request.args['include'].split(',') if 'include' in request.args else []
+
         return current_app.response_class(
-            response=json.dumps([author.to_dict() for author in authors]),
+            response=json.dumps([author.to_dict(includes) for author in authors]),
             status=200,
             mimetype='application/json'
         )
@@ -68,8 +70,11 @@ def get_author(id):
                 status=404,
                 mimetype='application/json'
             )
+
+        includes = request.args['include'].split(',') if 'include' in request.args else []
+    
         return current_app.response_class(
-            response=json.dumps(author.to_dict()),
+            response=json.dumps(author.to_dict(includes)),
             status=200,
             mimetype='application/json'
         )

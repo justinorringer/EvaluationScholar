@@ -132,6 +132,12 @@ paths:
       description: Get all authors
       parameters:
         - in: query
+          name: include
+          required: false
+          example: papers,tags
+          schema:
+            type: string
+        - in: query
           name: name
           required: false
           schema:

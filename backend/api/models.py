@@ -28,8 +28,9 @@ class Author(Base):
     tags = relationship('Tag', secondary=author_tag, back_populates='authors')
 
     def get_h_index(self):
-        citations = [paper.get_latest_citation().num_cited for paper in self.papers]
-        # 
+        citations = [paper.get_latest_citation().num_cited for paper in 
+            filter(lambda p: len(p.citations) > 0, self.papers)]
+
         paper_counts = [0 for _ in range(len(citations))]
         for citation_count in citations:
             if citation_count > len(citations):
@@ -48,18 +49,24 @@ class Author(Base):
         return 0
 
     def get_i10_index(self):
-        return sum(1 for paper in self.papers if paper.get_latest_citation().num_cited >= 10)
+        return sum(1 for paper in 
+            filter(lambda p: len(p.citations) > 0, self.papers)
+            if paper.get_latest_citation().num_cited >= 10)
 
-    def to_dict(self):
-        return {
+    def to_dict(self, includes = []):
+        dict = {
             'id': self.id,
             'name': self.name,
             'scholar_id': self.scholar_id,
-            'papers': [{
-                'id': paper.id,
-                'latest_citations': paper.get_latest_citation().num_cited if paper.get_latest_citation() else None,
-            } for paper in self.papers],
         }
+
+        if 'papers' in includes:
+            dict['papers'] = [paper.to_dict() for paper in self.papers]
+        
+        if 'tags' in includes:
+            dict['tags'] = [tag.to_dict() for tag in self.tags]
+
+        return dict
 
     def __init__(self, name, scholar_id):
         self.name = name
