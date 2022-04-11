@@ -4,7 +4,7 @@ from sqlalchemy import desc
 from api.models import Author, Citation, Paper, UpdateCitationsTask
 from scraping import scrape_papers
 from scraping.errors import ApiNoCreditsError, ApiRequestsFailedError
-from api.templates import db_session
+from api.templates import db_session, paginate, ApiTemplateError
 
 from datetime import datetime
 import math
@@ -22,37 +22,17 @@ def get_papers():
     with db_session(current_app) as session:
         papers = session.query(Paper)
 
-        total_objects = papers.count()
-
         custom_headers = {}
 
-        if 'limit' in request.args:
-            try:
-                limit = int(request.args['limit'])
-            except ValueError:
-                return json.dumps({'error': 'Invalid limit'}), 400
-            
-            if limit < 1:
-                return json.dumps({'error': 'Invalid limit'}), 400
-            
-            papers = papers.limit(limit)
-            total_pages = 1 if total_objects == 0 else int(math.ceil(total_objects / limit))
-
-            if 'page' in request.args:
-                try:
-                    page = int(request.args['page'])
-                except ValueError:
-                    return json.dumps({'error': 'Invalid page'}), 400
-                
-                if page < 1:
-                    return json.dumps({'error': 'Invalid page'}), 400
-
-                if page > total_pages:
-                    return json.dumps({'error': 'Page too far'}), 404
-
-                papers = papers.offset(limit * (page - 1))
-            
-            custom_headers['Total-Pages'] = total_pages
+        try:
+            papers, total_pages = paginate(papers, request.args)
+            if total_pages is not None:
+                custom_headers['Total-Pages'] = str(total_pages)
+        except ApiTemplateError as e:
+            return json.dumps({
+                "status": "error",
+                "message": e.message
+            }), e.code
 
         papers = papers.all()
 
