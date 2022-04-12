@@ -2,42 +2,47 @@
 import sys
 sys.path.append("..")
 
-from backend.api.models import Issue, AmbiguousPaperIssue, Paper
+import pytest
+from backend.api.models import CreatePaperTask, Issue, AmbiguousPaperIssue, Paper, AmbiguousPaperChoice, Author, UpdateCitationsTask
+from backend.test import wait_for_task, wait_for_task_count
 
 def test_crud(client, session):
-    paper_1 = Paper("paper1", 2001)
-    paper_2 = Paper("paper2", 2002)
-    paper_3 = Paper("paper3", 2003)
+    author = Author(name="author", scholar_id="_QnLm3kAAAAJ")
+    session.add(author)
+    session.flush()
 
-    resp = client.post('/papers', json=paper_1.to_dict())
-    assert resp.status_code == 201
-    paper_1_id = resp.json['id']
-
-    resp = client.post('/papers', json=paper_2.to_dict())
-    assert resp.status_code == 201
-    paper_2_id = resp.json['id']
-
-    resp = client.post('/papers', json=paper_3.to_dict())
-    assert resp.status_code == 201
-    paper_3_id = resp.json['id']
-
-    issue = AmbiguousPaperIssue(author_name="author", paper_id_1=paper_1_id, paper_id_2=paper_2_id, paper_id_3=paper_3_id)
+    issue = AmbiguousPaperIssue(author.id, "lava")
     session.add(issue)
+    session.flush()
+
+    choice_1 = AmbiguousPaperChoice("The dynamics of lava flows", 2000, "N-GznIQELfYJ", 10, issue.id)
+    choice_2 = AmbiguousPaperChoice("Lava effusion rate definition and measurement: a review", 2001, "MVNZ5BM8UegJ", 20, issue.id)
+    choice_3 = AmbiguousPaperChoice("Differentiation behavior of Kilauea Iki lava lake, Kilauea Volcano, Hawaii: an overview of past and current work", 2002, "cy0qh3krAjgJ", 30, issue.id)
+
+    session.add(choice_1)
+    session.add(choice_2)
+    session.add(choice_3)
     session.commit()
 
     resp = client.get('/issues')
     assert resp.status_code == 200
     assert len(resp.json) == 1
     assert resp.json[0]['type'] == 'ambiguous_paper_issue'
-    assert resp.json[0]['author_name'] == 'author'
-    assert resp.json[0]['paper_1']['id'] == paper_1_id
-    assert resp.json[0]['paper_1']['year'] == 2001
-    assert resp.json[0]['paper_2']['name'] == 'paper2'
+    assert resp.json[0]['id'] == issue.id
+
+    assert len(resp.json[0]['paper_choices']) == 3
+    assert resp.json[0]['paper_choices'][0]['name'] == 'The dynamics of lava flows'
+    assert resp.json[0]['paper_choices'][0]['year'] == 2000
+    assert resp.json[0]['paper_choices'][0]['scholar_id'] == 'N-GznIQELfYJ'
+    assert resp.json[0]['paper_choices'][0]['citations'] == 10
+
+    assert resp.json[0]['author']['name'] == 'author'
+    assert resp.json[0]['author']['id'] == author.id
 
     resp = client.get(f'/issues/{issue.id}')
     assert resp.status_code == 200
     assert resp.json['type'] == 'ambiguous_paper_issue'
-    assert resp.json['author_name'] == 'author'
+    assert resp.json['id'] == issue.id
 
     resp = client.delete(f'/issues/{issue.id}')
     assert resp.status_code == 200
@@ -49,7 +54,7 @@ def test_crud(client, session):
     assert resp.status_code == 200
     assert len(resp.json) == 0
 
-    issue2 = AmbiguousPaperIssue('author', paper_1_id, paper_2_id)
+    issue2 = AmbiguousPaperIssue(author.id, "title_query")
     session.add(issue2)
     session.commit()
 
@@ -57,7 +62,44 @@ def test_crud(client, session):
     assert resp.status_code == 200
     assert len(resp.json) == 1
     assert resp.json[0]['type'] == 'ambiguous_paper_issue'
-    assert resp.json[0]['author_name'] == 'author'
-    assert resp.json[0]['paper_1']['name'] == 'paper1'
-    assert resp.json[0]['paper_1']['year'] == 2001
-    assert resp.json[0]['paper_2']['name'] == 'paper2'
+    assert resp.json[0]['id'] == issue2.id
+
+@pytest.mark.scraping
+def test_ambiguous_resolve(client, session, task_manager):
+    author = Author("author", "fhnifdsa")
+    session.add(author)
+    session.flush()
+
+    issue = AmbiguousPaperIssue(author.id, "lava")
+    session.add(issue)
+    session.flush()
+
+    choice_1 = AmbiguousPaperChoice("The dynamics of lava flows", 2000, "N-GznIQELfYJ", 10, issue.id)
+    choice_2 = AmbiguousPaperChoice("Lava effusion rate definition and measurement: a review", 2001, "MVNZ5BM8UegJ", 20, issue.id)
+    choice_3 = AmbiguousPaperChoice("Differentiation behavior of Kilauea Iki lava lake, Kilauea Volcano, Hawaii: an overview of past and current work", 2002, "cy0qh3krAjgJ", 30, issue.id)
+
+    session.add(choice_1)
+    session.add(choice_2)
+    session.add(choice_3)
+    session.commit()
+
+    task_manager.disable()
+
+    resp = client.post(f'/issues/{issue.id}/resolve', json={'correct_scholar_id': 'MVNZ5BM8UegJ'})
+    assert resp.status_code == 200
+    assert resp.json['status'] == 'success'
+
+    assert session.query(CreatePaperTask).count() == 1
+    task = session.query(CreatePaperTask).first()
+
+    task_manager.enable()
+
+    wait_for_task(session, task.id)
+
+    assert session.query(Paper).count() == 1
+    paper = session.query(Paper).first()
+    assert paper.name == 'Lava effusion rate definition and measurement: a review'
+    assert paper.year == 2007
+    assert paper.scholar_id == 'MVNZ5BM8UegJ'
+
+    assert session.query(UpdateCitationsTask).count() == 1
