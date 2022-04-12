@@ -66,3 +66,11 @@ input.checkbox {
 #profile {
     width: 80%;
 }
+
+#chart-area div.toastui-chart-tooltip-container {
+    position: absolute;
+}
+
+#chart-area > div.toastui-chart-wrapper {
+    position: relative;
+}

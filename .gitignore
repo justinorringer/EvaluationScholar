@@ -6,3 +6,4 @@ mysql-data/
 .idea/*
 **/.vscode/*
 **/test_database.db
+node_modules/

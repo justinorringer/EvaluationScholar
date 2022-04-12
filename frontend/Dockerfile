@@ -6,7 +6,9 @@ COPY package*.json ./
 
 RUN npm install
 
-RUN npm install --save @toast-ui/chart
+RUN npm install --save @toast-ui/chart @toast-ui/react-chart
+
+RUN npm install @mui/material @emotion/react @emotion/styled
 
 COPY . .
 
