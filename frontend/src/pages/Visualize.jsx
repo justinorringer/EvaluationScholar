@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Chart from "react-apexcharts";
-//import {BoxPlotChart} from '@toast-ui/chart';
-//import BoxPlotChart from '@toast-ui/chart/boxPlot';
 import { BoxPlotChart } from '@toast-ui/react-chart';
 import { styled } from '@mui/material/styles';
 import FormGroup from '@mui/material/FormGroup';
