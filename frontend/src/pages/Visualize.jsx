@@ -123,7 +123,7 @@ function Visualize() {
 
 
     useEffect(() => {        
-        var tempData = {
+        let temptempData = {
             categories: [],
             series: [
                 {
@@ -132,6 +132,10 @@ function Visualize() {
                 }
             ],
         };
+        console.log("temptempData");
+        console.log(temptempData);
+        let tempData = {};
+        Object.assign(tempData, temptempData);
         console.log("tempData");
         console.log(tempData);
         let i = 0;
