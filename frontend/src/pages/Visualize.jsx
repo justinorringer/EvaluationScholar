@@ -92,6 +92,19 @@ function Visualize() {
         }
     }
 
+    function median(papers) {
+        console.log(papers);
+
+        if (papers.length === 0) throw new Error("No inputs");
+
+        var half = Math.floor(papers.length / 2);
+
+        if (papers.length % 2)
+            return papers[half];
+
+        return (papers[half - 1] + papers[half]) / 2.0;
+    }
+
     useEffect(() => {
         setAuthorsData([]);
         selectedAuthors.forEach(author => {
@@ -108,8 +121,9 @@ function Visualize() {
         });        
     }, [selectedAuthors]);
 
+
     useEffect(() => {        
-        const tempData = {
+        var tempData = {
             categories: [],
             series: [
                 {
@@ -118,6 +132,7 @@ function Visualize() {
                 }
             ],
         };
+        console.log("tempData");
         console.log(tempData);
         let i = 0;
         authorsData.forEach(author => {
@@ -134,15 +149,7 @@ function Visualize() {
             //check the sort
             console.log(papers);
 
-            var med = 0; //get median
-            if (papers.length === 0) throw new Error("No inputs");
-            var half2 = Math.floor(papers.length / 2);
-            if (papers.length % 2) {
-                med = papers[half2];
-            } else {
-                med = (papers[half2 - 1] + papers[half2]) / 2.0;
-            }
-            console.log(med);
+            var med = median(papers); //get median
 
             var half = Math.ceil(papers.length / 2);
             var firstHalf = papers.splice(0, half);
@@ -153,25 +160,9 @@ function Visualize() {
             console.log(firstHalf);
             console.log(secondHalf);
 
-            var q1 = 0; //get Q1
-            if (firstHalf.length === 0) throw new Error("No inputs");
-            half2 = Math.floor(firstHalf.length / 2);
-            if (firstHalf.length % 2) {
-                q1 = firstHalf[half2];
-            } else {
-                q1 = (firstHalf[half2 - 1] + firstHalf[half2]) / 2.0;
-            }
-            console.log(q1);
+            var q1 = median(firstHalf);
 
-            var q3 = 0; //get Q3
-            if (secondHalf.length === 0) throw new Error("No inputs");
-            half2 = Math.floor(secondHalf.length / 2);
-            if (secondHalf.length % 2) {
-                q3 = secondHalf[half2];
-            } else {
-                q3 = (secondHalf[half2 - 1] + secondHalf[half2]) / 2.0;
-            }
-            console.log(q3);
+            var q3 = median(secondHalf);
 
             var iqr = q3 - q1; //get IQR
             console.log(iqr);
@@ -210,18 +201,7 @@ function Visualize() {
             tempData.series[0].data.push([min, q1, med, q3, max]);
             i++;
 
-            // function median(...papers) {
-            //     console.log(papers);
-        
-            //     if (papers.length === 0) throw new Error("No inputs");
-        
-            //     var half = Math.floor(papers.length / 2);
-        
-            //     if (papers.length % 2)
-            //         return papers[half];
-        
-            //     return (papers[half - 1] + papers[half]) / 2.0;
-            // }
+            
         });
         
         if (selectedAuthors.length > 0 && authorsData.length > 0) {
