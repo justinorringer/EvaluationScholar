@@ -58,10 +58,20 @@ function CreateAuthor() {
                 document.getElementById("container").appendChild(label);
                 document.getElementById("container").appendChild(button);
             }
-            
         }
         catch (e) {
             document.getElementById("failed").style = "display: block !important";
+            let label = document.createElement("label");
+            label.id = "label";
+            label.className = "mr-2 mt-3";
+            label.innerText = "Is the author you're looking for not here? Try searching full name, partial name, or just";
+            let button = document.createElement("button");
+            button.className = "btn btm-sm btn-danger";
+            button.id = "button";
+            button.onclick = function () { createAuthor(name, null) };
+            button.innerText = "Create '" + name + "'";
+            document.getElementById("container").appendChild(label);
+            document.getElementById("container").appendChild(button);
         }
         document.getElementById("wait").innerText = "";
     }

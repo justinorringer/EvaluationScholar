@@ -323,9 +323,9 @@ function Author() {
                         <table className="table table-borderless table-striped" id="paperTable" style={{display: "none"}}>
                             <thead className="thead-dark">
                                 <tr>
-                                    <th scope="col-6">Article</th>
-                                    <th scope="col-2">Year</th>
-                                    <th scope="col-2">Citations</th>
+                                    <th className="col-6" scope="col">Article</th>
+                                    <th className="col-2" scope="col">Year</th>
+                                    <th className="col-2" scope="col">Citations</th>
                                 </tr>
                             </thead>
                             <tbody id = "paperTableBody">
