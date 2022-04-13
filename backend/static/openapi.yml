@@ -132,6 +132,12 @@ paths:
       description: Get all authors
       parameters:
         - in: query
+          name: include
+          required: false
+          example: papers,tags
+          schema:
+            type: string
+        - in: query
           name: name
           required: false
           schema:
@@ -139,10 +145,29 @@ paths:
         - in: query
           name: tags
           required: false
+          example: 1,2,3
           schema:
-            type: array
-            items:
-              type: integer
+            type: string
+        - in: query
+          name: min-i10
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: max-i10
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: min-h
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: max-h
+          required: false
+          schema:
+            type: integer
       responses:
         '200':
           description: Successful operation
@@ -379,15 +404,33 @@ paths:
       tags:
         - Papers
       description: Get all papers
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
       responses:
         '200':
           description: Successful operation
+          headers:
+            Total-Pages:
+              description: Total number of pages. Only present if limit is set.
+              schema:
+                type: integer
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/Paper'
+        '404':
+          description: Paged too far
   /api/papers/{paper_id}:
     get:
       tags:

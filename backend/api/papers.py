@@ -1,12 +1,13 @@
 from flask import Blueprint, current_app, json, request
 from sqlalchemy import desc
 
-from api.models import Author, Citation, Paper
-from scraping import scrape_citations
+from api.models import Author, Citation, Paper, UpdateCitationsTask
+from scraping import scrape_papers
 from scraping.errors import ApiNoCreditsError, ApiRequestsFailedError
-from api.templates import db_session
+from api.templates import db_session, paginate, ApiTemplateError
 
 from datetime import datetime
+import math
 
 # Routes to handle CRUD actions for the Paper model
 # Author(s): Tyler Maxwell, Abhinav Kulhari
@@ -19,9 +20,26 @@ paper_routes = Blueprint('paper_routes', __name__, template_folder='templates')
 @paper_routes.route('/papers', methods=['GET'])
 def get_papers():
     with db_session(current_app) as session:
+        papers = session.query(Paper)
+
+        custom_headers = {}
+
+        try:
+            papers, total_pages = paginate(papers, request.args)
+            if total_pages is not None:
+                custom_headers['Total-Pages'] = str(total_pages)
+        except ApiTemplateError as e:
+            return json.dumps({
+                "status": "error",
+                "message": e.message
+            }), e.code
+
+        papers = papers.all()
+
         return current_app.response_class(
-            response=json.dumps([paper.to_dict() for paper in session.query(Paper).all()]),
+            response=json.dumps([paper.to_dict() for paper in papers]),
             status=200,
+            headers=custom_headers,
             mimetype='application/json'
         )
 
@@ -129,7 +147,12 @@ def delete_paper(id):
                 mimetype='application/json'
             )
 
+        update_citation_tasks = session.query(UpdateCitationsTask).filter(UpdateCitationsTask.paper_id == id).all()
+
+        for task in update_citation_tasks:
+            session.delete(task)
         session.delete(paper)
+
         return current_app.response_class(
             response=json.dumps({'message': 'paper deleted',
                                     'status': 'success'}),
@@ -273,7 +296,8 @@ def new_citation(paper_id):
             )
         
         try:
-            citation_count = scrape_citations(paper.name)
+            papers = scrape_papers(paper.name)
+            citation_count = papers[0]['citations']
         except ApiNoCreditsError:
             return current_app.response_class(
                 response=json.dumps({'message': 'API credits exceeded',
@@ -366,7 +390,8 @@ def new_citation_multiple_papers():
                 continue
 
             try:
-                citation_count = scrape_citations(paper.name)
+                papers = scrape_papers(paper.name)
+                citation_count = papers[0]['citations']
             except ApiNoCreditsError:
                 return current_app.response_class(
                     response=json.dumps(json.dumps(created_citations)),

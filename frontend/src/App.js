@@ -2,37 +2,59 @@ import logo from './logo.svg';
 import './App.css';
 import React, { useEffect, useState } from 'react';
 
+import { red } from '@mui/material/colors'
+import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
+
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import {
+  Query,
+  Issues,
+  Tasks,
+  Tags,
+  Author,
+  Papers,
+  CreateAuthor,
+  Visualize
+} from "./pages";
+import {
+  Header,
+  Footer
+} from "./components";
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#CC0000',
+    }
+  },
+  typography: {
+    fontFamily: [
+      "Josefin Sans",
+      "sans-serif"
+    ].join(",")
+  }
+});
+
 
 function App() {
-  const [getMessage, setGetMessage] = useState({})
-
-  const makeAPICall = async () => {
-    try {
-      const response = await fetch('http://localhost/');
-      const data = await response.json();
-      //console.log({response, data})
-      setGetMessage({response, data})
-      console.log(getMessage.response.status)
-    }
-    catch (e) {
-      console.log(e)
-    }
-  }
-  useEffect(() => {
-    makeAPICall();
-  }, [])
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>React + Flask Tutorial</p>
-        <div>{getMessage.status === 200 ? 
-          <h3>{getMessage.data}</h3>
-          :
-          <h3>LOADING</h3>}</div>
-      </header>
-    </div>
-  );
+    <ThemeProvider theme={theme}>
+      <Router>
+        <Header />
+        <Routes>
+          <Route path="/" element={<Query />} />
+          <Route path="/issues" element={<Issues />} />
+          <Route path="/tasks" element={<Tasks />} />
+          <Route path="/tags" element={<Tags />} />
+          <Route path="/author/:id" element={<Author />} />
+          <Route path="/papers" element={<Papers />} />
+          <Route path="/createauthor" element={<CreateAuthor />} />
+          <Route path="/visualize" element={<Visualize />} />
+        </Routes>
+        <Footer />
+      </Router>
+    </ThemeProvider>
+  )
 }
 
 export default App;

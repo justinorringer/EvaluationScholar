@@ -3,34 +3,10 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import {
-  Header,
-  Footer,
-  Query,
-  Input,
-  Issues,
-  Tasks,
-  Tags,
-  Author,
-  CreateAuthor
-} from "./components";
 
 
 ReactDOM.render(
-  <Router>
-    <Header />
-    <Routes>
-      <Route path="/" element={<Query />} />
-      <Route path="/input" element={<Input />} />
-      <Route path="/issues" element={<Issues />} />
-      <Route path="/tasks" element={<Tasks />} />
-      <Route path="/tags" element={<Tags />} />
-      <Route path="/author/:id" element={<Author />} />
-      <Route path="/createauthor" element={<CreateAuthor />} />
-    </Routes>
-    <Footer />
-  </Router>,
+    <App />,
 
   document.getElementById("root")
 );

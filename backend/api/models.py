@@ -27,16 +27,46 @@ class Author(Base):
     papers = relationship('Paper', secondary=author_paper, back_populates='authors')
     tags = relationship('Tag', secondary=author_tag, back_populates='authors')
 
-    def to_dict(self):
-        return {
+    def get_h_index(self):
+        citations = [paper.get_latest_citation().num_cited for paper in 
+            filter(lambda p: len(p.citations) > 0, self.papers)]
+
+        paper_counts = [0 for _ in range(len(citations))]
+        for citation_count in citations:
+            if citation_count > len(citations):
+                paper_counts[len(citations) - 1] += 1
+            elif citation_count == 0:
+                continue
+            else:
+                paper_counts[citation_count - 1] += 1
+        
+        cumulative = 0
+        for i in reversed(range(len(paper_counts))):
+            cumulative += paper_counts[i]
+            if cumulative >= i + 1:
+                return i + 1
+        
+        return 0
+
+    def get_i10_index(self):
+        return sum(1 for paper in 
+            filter(lambda p: len(p.citations) > 0, self.papers)
+            if paper.get_latest_citation().num_cited >= 10)
+
+    def to_dict(self, includes = []):
+        dict = {
             'id': self.id,
             'name': self.name,
             'scholar_id': self.scholar_id,
-            'papers': [{
-                'id': paper.id,
-                'latest_citations': paper.get_latest_citation().num_cited if paper.get_latest_citation() else None,
-            } for paper in self.papers],
         }
+
+        if 'papers' in includes:
+            dict['papers'] = [paper.to_dict() for paper in self.papers]
+        
+        if 'tags' in includes:
+            dict['tags'] = [tag.to_dict() for tag in self.tags]
+
+        return dict
 
     def __init__(self, name, scholar_id):
         self.name = name
@@ -65,7 +95,7 @@ class Paper(Base):
     __tablename__ = 'paper'
     id = Column(Integer, primary_key=True, autoincrement=True)
     #Should we have the title be unique to handle duplicates?
-    name = Column(String(100), unique=True, nullable=False)
+    name = Column(String(400), unique=True, nullable=False)
     #Leave enough characters for 'dd/mm/yyyy', but can just do a year
     year = Column(Integer, unique=False, nullable=False)
     #I believe we were just linking these to the Citation table
@@ -73,7 +103,7 @@ class Paper(Base):
     scholar_id = Column(String(100), unique=False, nullable=True)
 
     authors = relationship('Author', secondary=author_paper, back_populates='papers')
-    citations = relationship('Citation', backref='paper', order_by='Citation.date.desc()')
+    citations = relationship('Citation', backref='paper', order_by='Citation.date.desc()', cascade='all, delete-orphan')
 
     def get_latest_citation(self):
         return None if len(self.citations) == 0 else self.citations[0]
@@ -109,6 +139,10 @@ class Tag(Base):
 
 class Task(Base):
     __tablename__ = 'task'
+
+    # Prevent the test SQLite database from reusing deleted IDs
+    __table_args__ = {"sqlite_autoincrement": True}
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     type = Column(String(80), nullable=False)
     priority = Column(Integer, nullable=False)
@@ -175,6 +209,30 @@ class UpdateCitationsTask(Task):
         'polymorphic_identity': 'update_citations_task'
     }
 
+class ScrapeAuthorTask(Task):
+    __tablename__ = 'scrape_author_task'
+    id = Column(Integer, ForeignKey('task.id'), primary_key=True)
+    author_id = Column(Integer, ForeignKey('author.id'), nullable=False)
+
+    author = relationship('Author')
+
+    def __init__(self, author_id, priority=0, date=None):
+        self.author_id = author_id
+        self.priority = priority
+        self.date = date
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'type': self.type,
+            'priority': self.priority,
+            'date': self.date,
+            'author': self.author.to_dict(),
+        }
+    
+    __mapper_args__ = {
+        'polymorphic_identity': 'scrape_author_task'
+    }
 
 class Issue(Base):
     __tablename__ = "issue"

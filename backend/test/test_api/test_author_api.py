@@ -116,23 +116,23 @@ def test_paper_list(client, session):
     assert resp.status_code == 200
     assert len(resp.json) == 2
 
-    resp = client.get(f'/authors/{a1_id}')
+    resp = client.get(f'/authors/{a1_id}?include=papers')
     assert resp.status_code == 200
     assert len(resp.json['papers']) == 2
     assert resp.json['papers'][0]['id'] == p1_id
-    assert resp.json['papers'][0]['latest_citations'] == None
+    assert resp.json['papers'][0]['latest_citation'] == None
 
     paper1.citations.append(Citation(367, datetime.now()))
     paper1.citations.append(Citation(368, datetime.now() + timedelta(days=1)))
     session.commit()
 
-    resp = client.get(f'/authors/{a1_id}')
+    resp = client.get(f'/authors/{a1_id}?include=papers')
     assert resp.status_code == 200
     assert len(resp.json['papers']) == 2
     assert resp.json['papers'][0]['id'] == p1_id
-    assert resp.json['papers'][0]['latest_citations'] == 368
+    assert resp.json['papers'][0]['latest_citation']['num_cited'] == 368
     assert resp.json['papers'][1]['id'] == p2_id
-    assert resp.json['papers'][1]['latest_citations'] == None
+    assert resp.json['papers'][1]['latest_citation'] == None
 
     # Delete paper1
     resp = client.delete(f'/authors/{a1_id}/papers/{p1_id}')
@@ -144,11 +144,11 @@ def test_paper_list(client, session):
     assert len(resp.json) == 1
     assert resp.json[0]['id'] == p2_id
 
-    resp = client.get(f'/authors/{a1_id}')
+    resp = client.get(f'/authors/{a1_id}?include=papers')
     assert resp.status_code == 200
     assert len(resp.json['papers']) == 1
     assert resp.json['papers'][0]['id'] == p2_id
-    assert resp.json['papers'][0]['latest_citations'] == None
+    assert resp.json['papers'][0]['latest_citation'] == None
 
 def test_edge_cases(client):
     # Delete non-existing author
@@ -307,7 +307,7 @@ def test_batch(client):
     assert resp.status_code == 200
     assert len(resp.json) == 0
 
-def test_filtering(client):
+def test_filtering(client, session):
     # Create some test tags
     tag_ids = []
     for i in range(5):
@@ -318,12 +318,25 @@ def test_filtering(client):
     
     # Create some test authors
     author_ids = []
+    authors = []
     names = ["arthur ryAn", "molly undore", "sandra DolloP", "clarice OrAnge", "paul goRbovdo"]
     for i in range(5):
         author = Author(names[i], f'scholar_id{i}')
-        resp = client.post('/authors', json=author.to_dict())
-        assert resp.status_code == 201
-        author_ids.append(resp.json['id'])
+        session.add(author)
+        session.flush()
+        author_ids.append(author.id)
+        authors.append(author)
+    
+    session.commit()
+
+    citation_counts = [[5, 6, 0, 2], [12, 0, 99, 3, 5, 6], [8, 9, 34, 6, 7, 112], [1, 2, 1, 0], [0, 10]]
+    for i in range(5):
+        for j, citation_count in enumerate(citation_counts[i]):
+            paper = Paper(f'paper{i} {j}', 2000)
+            paper.citations.append(Citation(citation_count, datetime.now()))
+            authors[i].papers.append(paper)
+    
+    session.commit()
     
     a_t = lambda x: list(map(lambda y: author_ids[y], x))
     t_t = lambda x: list(map(lambda y: tag_ids[y], x))
@@ -381,3 +394,92 @@ def test_filtering(client):
     resp = client.get('/authors?name=Sandra Dollop')
     assert resp.status_code == 200
     assert len(resp.json) == 1
+
+    # Values for the test authors:
+    # h-index   i10-index
+    # 2         0
+    # 4         2
+    # 6         2
+    # 1         0
+    # 1         1
+
+    resp = client.get('/authors?min-h=2&max-i10=1')
+    assert resp.status_code == 200
+    assert len(resp.json) == 1
+
+    resp = client.get('/authors?max-h=3&min-i10=1')
+    assert resp.status_code == 200
+    assert len(resp.json) == 1
+
+    resp = client.get('/authors?min-h=2')
+    assert resp.status_code == 200
+    assert len(resp.json) == 3
+
+    resp = client.get('/authors?min-i10=1&max-i10=1&min-h=1')
+    assert resp.status_code == 200
+    assert len(resp.json) == 1
+
+    resp = client.get('/authors?max-h=5&min-i10=1')
+    assert resp.status_code == 200
+    assert len(resp.json) == 2
+
+    resp = client.get('/authors?max-h=5&min-i10=1&name=und')
+    assert resp.status_code == 200
+    assert len(resp.json) == 1
+
+    authors[0].papers.append(Paper('paper_no_citations', 2000))
+    session.commit()
+
+    resp = client.get('/authors?min-h=2&max-i10=1')
+    assert resp.status_code == 200
+    assert len(resp.json) == 1
+
+def test_include(client, session):
+    author = Author('arthur ryAn', 'scholar_id')
+    session.add(author)
+
+    paper = Paper('paper', 2000)
+    paper.scholar_id = 'scholar_id'
+    paper.citations.append(Citation(5, datetime.now()))
+    author.papers.append(paper)
+
+    tag = Tag('name')
+    author.tags.append(tag)
+    
+    session.commit()
+
+    resp = client.get('/authors')
+    assert resp.status_code == 200
+    assert len(resp.json) == 1
+    assert resp.json[0]['id'] == author.id
+    assert 'tags' not in resp.json[0]
+    assert 'papers' not in resp.json[0]
+
+    resp = client.get('/authors?include=tags')
+    assert resp.status_code == 200
+    assert len(resp.json) == 1
+    assert resp.json[0]['id'] == author.id
+    assert 'tags' in resp.json[0]
+    assert resp.json[0]['tags'][0]['name'] == tag.name
+    assert resp.json[0]['tags'][0]['id'] == tag.id
+    assert 'papers' not in resp.json[0]
+
+    resp = client.get('/authors?include=papers')
+    assert resp.status_code == 200
+    assert len(resp.json) == 1
+    assert resp.json[0]['id'] == author.id
+    assert 'tags' not in resp.json[0]
+    assert 'papers' in resp.json[0]
+    assert resp.json[0]['papers'][0]['id'] == paper.id
+    assert resp.json[0]['papers'][0]['latest_citation']['num_cited'] == paper.citations[0].num_cited
+    assert resp.json[0]['papers'][0]['year'] == paper.year
+    assert resp.json[0]['papers'][0]['name'] == paper.name
+    assert resp.json[0]['papers'][0]['scholar_id'] == paper.scholar_id
+
+    resp = client.get('/authors?include=tags,papers')
+    assert resp.status_code == 200
+    assert len(resp.json) == 1
+    assert 'tags' in resp.json[0]
+    assert 'papers' in resp.json[0]
+    assert len(resp.json[0]['tags']) == 1
+    assert len(resp.json[0]['papers']) == 1

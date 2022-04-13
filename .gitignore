@@ -5,3 +5,5 @@ mysql-data/
 .env
 .idea/*
 **/.vscode/*
+**/test_database.db
+node_modules/
