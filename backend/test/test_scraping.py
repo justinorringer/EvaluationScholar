@@ -63,23 +63,20 @@ def test_papers():
     papers = [google_scholar.parse_paper(paper_block) for paper_block in paper_blocks]
 
     # There should be a normal paper entry in the list
-    assert len([paper for paper in papers if "citation_entry" not in paper]) >=1 
-    normal_paper = [paper for paper in papers if 'citation_entry' not in paper][0]
+    assert len(papers) >= 1 
+    parsed_paper = papers[0]
 
-    assert normal_paper["citations"] > 0
-    assert normal_paper["year"] == 2015
-    assert normal_paper["id"] == "bhfHsCHhomoJ"
-    assert normal_paper["title"].lower() == "Autonomous Aerial Water Sampling".lower()
-    assert len(normal_paper["authors"]) == 3
-    assert 'citation_entry' not in normal_paper
+    assert parsed_paper["citations"] > 0
+    assert parsed_paper["year"] == 2015
+    assert parsed_paper["id"] == "bhfHsCHhomoJ"
+    assert parsed_paper["title"].lower() == "Autonomous Aerial Water Sampling".lower()
+    assert len(parsed_paper["authors"]) == 3
 
-    # There should be some citation entries
-    assert len([paper for paper in papers if 'citation_entry' in paper]) >= 2
     # Make sure the title is being gathered correctly
-    assert len([paper for paper in papers if 'citation_entry' in paper and paper['title'] == "Autonomous aerial water sampling. J Field Robot 32 (8): 1095–1113"]) == 1
+    assert len([paper for paper in papers if paper['title'] == "Autonomous aerial water sampling. J Field Robot 32 (8): 1095–1113"]) == 1
 
     # Find the paper block for the normal paper
-    normal_paper_block = paper_blocks[papers.index(normal_paper)]
+    normal_paper_block = paper_blocks[papers.index(parsed_paper)]
     # Test parsing on its own
     assert google_scholar.parse_citations(normal_paper_block) > 0
     assert google_scholar.parse_year(normal_paper_block) == 2015
@@ -97,13 +94,7 @@ def test_papers():
     assert len(searched_papers) > 0
     s_paper = searched_papers[0]
 
-    # There shouldn't be citation entries from this call
-    assert len([s_paper for s_paper in searched_papers if 'citation_entry' in s_paper]) == 0
-
     # Test the values
     assert s_paper["citations"] > 0
     assert s_paper["year"] == 2015
     assert s_paper["id"] == "bhfHsCHhomoJ"
-
-    # Make sure merging works. The citation entries should be merged into the normal paper entry, so the count will be higher
-    assert s_paper['citations'] > normal_paper['citations']
