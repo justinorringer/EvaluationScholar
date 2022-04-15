@@ -228,12 +228,12 @@ function Author() {
                     </div>
 
                     <div className="row pt-2">
-                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#uploadPapersModal">
+                        <button id="UploadPapers" type="button" class="btn btn-danger" data-toggle="modal" data-target="#uploadPapersModal">
                             Upload Papers
                         </button>
                     </div>
                     <div className="row pt-2">
-                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#updatePapersModal">
+                        <button id="UpdatePapers" type="button" class="btn btn-danger" data-toggle="modal" data-target="#updatePapersModal">
                             Update Papers
                         </button>
                     </div>
@@ -260,7 +260,7 @@ function Author() {
                             </div>
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                <button type="button" className="btn btn-success" data-dismiss="modal" onClick={upload}>Upload</button>
+                                <button id="uploadPapers" type="button" className="btn btn-success" data-dismiss="modal" onClick={upload}>Upload</button>
                             </div>
                             </div>
                         </div>
