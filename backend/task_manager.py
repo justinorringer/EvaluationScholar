@@ -233,8 +233,6 @@ class TaskManager():
                 self.check_update_tasks()
 
             if len(self.running_tasks) < self.max_concurrent_tasks and datetime.now() > last_task_check + self.task_lookup_period:
-                last_task_check = datetime.now()
-
                 session = self.Session()
                 task = session.query(Task).filter(or_(Task.date == None, Task.date <= datetime.now())).order_by(Task.priority).first()
             
@@ -256,6 +254,8 @@ class TaskManager():
                         'task_id': task_id
                     })
                 else:
+                    # Only wait if there aren't any tasks to run
+                    last_task_check = datetime.now()
                     session.close()
 
     def check_update_tasks(self):
