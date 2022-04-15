@@ -24,3 +24,19 @@ def test_profile_scraping(client):
     response = client.get('/scraping/profiles?name=d')
     assert response.status_code == 200
     assert len(response.json) > 5
+
+@pytest.mark.scraping
+def test_profile_page_scraping(client):
+    response = client.get('/scraping/profiles/7XjL07wAAAAJ')
+    assert response.status_code == 200
+    assert response.json['name'] == 'Gregg Rothermel'
+    assert len(response.json['papers']) == 100
+    assert response.json['papers'][0]['title'] == "Prioritizing test cases for regression testing"
+    assert response.json['papers'][0]['year'] == 2001
+    assert response.json['papers'][0]['citations'] > 1500
+
+    response = client.get('/scraping/profiles/7XjL07wAAAAJ?all_papers=true')
+    assert response.status_code == 200
+    assert response.json['name'] == 'Gregg Rothermel'
+    assert len(response.json['papers']) > 200
+    assert response.json['papers'][0]['title'] == "Prioritizing test cases for regression testing"

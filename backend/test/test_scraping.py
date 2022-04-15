@@ -52,6 +52,26 @@ def test_zero_citations():
     assert len(paper['authors']) == 0
 
 @pytest.mark.scraping
+def test_profile_page():
+    html = google_scholar.get_profile_page_html("7XjL07wAAAAJ", page = 1)
+    html_2 = google_scholar.get_profile_page_html("7XjL07wAAAAJ", page = 2)
+
+    profile_name = google_scholar.parse_profile_page_name(html)
+    assert profile_name == "Gregg Rothermel"
+
+    profile_papers = google_scholar.parse_profile_page_papers(html)
+    assert len(profile_papers) == 100
+
+    profile_papers_2 = google_scholar.parse_profile_page_papers(html_2)
+    assert len(profile_papers_2) == 100
+
+    assert profile_papers[0]['title'] != profile_papers_2[0]['title']
+
+    assert profile_papers[0]['title'] == "Prioritizing test cases for regression testing"
+    assert profile_papers[0]['year'] == 2001
+    assert profile_papers[0]['citations'] > 1500
+
+@pytest.mark.scraping
 def test_papers():
     # Test Google Scholar searching and parsing
 
