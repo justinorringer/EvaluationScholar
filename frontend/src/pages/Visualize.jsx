@@ -15,6 +15,9 @@ import Slider from '@mui/material/Slider';
 import Checkbox from '@mui/material/Checkbox';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
+import PropTypes from 'prop-types';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 
@@ -25,6 +28,12 @@ const Separator = styled('div')(
     height: ${theme.spacing(3)};
   `,
   );
+function a11yProps(index) {
+    return {
+        id: `simple-tab-${index}`,
+        'aria-controls': `simple-tabpanel-${index}`,
+    };
+}
 
 function Visualize() {
 
@@ -34,7 +43,7 @@ function Visualize() {
 
     const [range, setRange] = useState([1960, new Date().getFullYear()]);
 
-    const [bounds, setBounds] = useState([1960, 2022]);
+    const [bounds, setBounds] = useState([1960, new Date().getFullYear()]);
 
     const [authors, setAuthors] = useState([]);
 
@@ -48,13 +57,13 @@ function Visualize() {
 
     const [indexType, setIndexType] = useState("");
 
-    const [index, setIndex] = useState(1);
+    const [index, setIndex] = useState(0);
 
-    const [tab, setTab] = useState("boxplot");
+    const [tab, setTab] = useState(0);
 
     const [toggleOutliers, setToggleOutliers] = useState(true);
 
-    const [data, setData] = useState({
+    const [boxData, setBoxData] = useState({
         categories: [],
         series: [
             {
@@ -76,7 +85,7 @@ function Visualize() {
      * @author https://ourcodeworld.com/articles/read/764/how-to-sort-alphabetically-an-array-of-objects-by-key-in-javascript
      */
     function alphabeticSort(property) {
-        var sortOrder = 1;
+        let sortOrder = 1;
 
         if (property[0] === "-") {
             sortOrder = -1;
@@ -93,11 +102,9 @@ function Visualize() {
     }
 
     function median(papers) {
-        console.log(papers);
-
         if (papers.length === 0) throw new Error("No inputs");
 
-        var half = Math.floor(papers.length / 2);
+        let half = Math.floor(papers.length / 2);
 
         if (papers.length % 2)
             return papers[half];
@@ -105,85 +112,141 @@ function Visualize() {
         return (papers[half - 1] + papers[half]) / 2.0;
     }
 
+    //get authors and their papers if selected
     useEffect(() => {
-        setAuthorsData([]);
-        selectedAuthors.forEach(author => {
-            console.log("hello author");
-            axios.get(`api/authors/${author.id}?include=papers`)
+        let tempMin = new Date().getFullYear(); //current year starting min
+        let tempMax = 0; //0 starting max
+        const tempAuthorData = [];
+        var bar = new Promise((resolve, reject) => {
+            selectedAuthors.forEach(author => {
+                axios.get(`api/authors/${author.id}?include=papers`)
+                    .then(response => {
+                        response.data.papers.forEach(paper => {
+                            if (paper.year > tempMax) {
+                                tempMax = paper.year;
+                            }
+                            if (paper.year < tempMin) {
+                                tempMin = paper.year;
+                            }
+                        })
+                        tempAuthorData.push(response.data);
+                    }).
+                    catch(err => {
+                        console.log(err);
+                    }
+                    );
+            });
+            resolve();
+        })
+        bar.then(() => {
+            console.log("resolved");
+            console.log(tempAuthorData);
+            if (tempMax > 0) {
+                setBounds([tempMin, tempMax]);
+            }
+            setAuthorsData(tempAuthorData);
+        })
+    }, [selectedAuthors]);
+
+    //get authors and their papers given tag(s). group authors if aggAuthors === true
+    useEffect(() => {
+        let tempMin = new Date().getFullYear(); //current year starting min
+        let tempMax = 0; //0 starting max
+        let tag_ids = [];
+        selectedTags.forEach(tag => {
+            tag_ids.push(tag.id);
+        })
+        if (aggAuthors) {
+        } else {
+            axios.get(`api/authors?include=papers&tags=${tag_ids}`)
                 .then(response => {
-                    setAuthorsData([...authorsData, response.data]);
-                    console.log(response.data);
+                    setAuthorsData(response.data);
+                    // 
+                    // response.data.papers.forEach(paper => {
+                    //     if (paper.year > tempMax) {
+                    //         tempMax = paper.year;
+                    //         if (paper.year < tempMin) {
+                    //             tempMin = paper.year;
+                    //             setBounds([tempMin, tempMax]);
+                    //         } else {
+                    //             setBounds([bounds[0], tempMax]);
+                    //         }
+                    //     } else if (paper.year < tempMin) {
+                    //         tempMin = paper.year;
+                    //         setBounds([tempMin, bounds[1]]);
+                    //     }
+                    // })
+                    // 
+
                 }).
                 catch(err => {
                     console.log(err);
                 }
-                );
-        });        
-    }, [selectedAuthors]);
+            );
+        }
+    }, [selectedTags, aggAuthors]);
 
+    //reset graph
+    useEffect(() => {
+        const categories = [];
+        const data = [];
+        const outliers = [];
 
-    useEffect(() => {        
-        let temptempData = {
-            categories: [],
-            series: [
-                {
-                    data: [],
-                    outliers: [],
-                }
-            ],
-        };
-        console.log("temptempData");
-        console.log(temptempData);
-        let tempData = {};
-        Object.assign(tempData, temptempData);
-        console.log("tempData");
-        console.log(tempData);
         let i = 0;
+        console.log(authorsData); //waits for promise on console so it shows
+        console.log(authorsData.length); //does not wait for promise, so it's accurate to what's actually happening
         authorsData.forEach(author => {
-            console.log(author);
-            tempData.categories.push(author.name);
+            console.log("hello author");
+            categories.push(author.name);
             const papers = [];
             author.papers.forEach(paper => {
-                papers.push(paper.latest_citation.num_cited);
+                if (paper.year >= range[0] && paper.year <= range[1]) {
+                    papers.push(paper.latest_citation.num_cited);
+                }
             })
             //sort the papers for the author
             papers.sort(function (a, b) {
                 return a - b;
             });
             //check the sort
-            console.log(papers);
+            
+            let firstHalf = [];
+            let secondHalf = [];
+            let med = 0;
+            let q1 = 0;
+            let q3 = 0;
+            try {
+                if (papers.length > 0) {
+                    med = median(papers); //get median
+                }
+                q1 = med; //set to median by default
+                q3 = med; //set to median by default
+                if (papers.length > 1) {
+                    let half = Math.ceil(papers.length / 2);
+                    firstHalf = papers.splice(0, half);
+                    secondHalf = papers.splice(-half);
+                    q1 = median(firstHalf); //reset to median of the first half
+                    if (secondHalf.length > 0) {
+                        q3 = median(secondHalf); //reset to median of the second half as long as the second half exists
+                    }
+                }
+            } catch (e) { //something was length 0
+                console.log(e);
+            }
 
-            var med = median(papers); //get median
-
-            var half = Math.ceil(papers.length / 2);
-            var firstHalf = papers.splice(0, half);
-            var secondHalf = papers.splice(-half);
-
-            console.log(papers);
-            console.log(half);
-            console.log(firstHalf);
-            console.log(secondHalf);
-
-            var q1 = median(firstHalf);
-
-            var q3 = median(secondHalf);
-
-            var iqr = q3 - q1; //get IQR
-            console.log(iqr);
-            var min = 0;
-            var max = 0;
+            let iqr = q3 - q1; //get IQR
+            
+            let min = q1;
+            let max = q3;
 
             const minThreshold = q1 - (1.5 * iqr); //get outlier threshold for lower bound
             const maxThreshold = q3 + (1.5 * iqr); //get outlier threshold for higher bound
-
-            console.log(minThreshold);
-            console.log(maxThreshold);
 
             for (let j = 0; j < firstHalf.length; j++) {
                 let value = firstHalf[j];
                 if (value < minThreshold) {
                     if (toggleOutliers) {
-                        tempData.series[0].outliers.push([i, value]);
+                        outliers.push([i, value]);
                     }
                 } else {
                     min = value; //set min
@@ -194,7 +257,7 @@ function Visualize() {
                 let value = secondHalf[j];
                 if (value > maxThreshold) {
                     if (toggleOutliers) {
-                        tempData.series[0].outliers.push([i, value]);
+                        outliers.push([i, value]);
                     }
                 } else {
                     max = value; //set max
@@ -202,24 +265,31 @@ function Visualize() {
                 }
             }
 
-            tempData.series[0].data.push([min, q1, med, q3, max]);
+            data.push([min, q1, med, q3, max]);
             i++;
-
-            
         });
         
-        if (selectedAuthors.length > 0 && authorsData.length > 0) {
-            console.log(tempData);
-            setData(tempData);
-            console.log(data);
-        }
-    }, [authorsData, toggleOutliers]);
+        console.log("setting boxplot data!");
+        console.log(categories);
+        console.log(data);
+        console.log(outliers);
+        setBoxData({
+            categories: categories,
+            series: [
+                {
+                    name: "Author",
+                    data: data,
+                    outliers: outliers,
+                }
+            ],
+        });
+    }, [authorsData, toggleOutliers, range]);
 
     useEffect(() => {
-        axios.get("api/authors?include=papers")
+        axios.get("api/authors")
             .then(response => {
                 setAuthors(response.data.sort(alphabeticSort("name")));
-                console.log(response.data);
+                
             }).
             catch(err => {
                 console.log(err);
@@ -238,7 +308,10 @@ function Visualize() {
     return (
         <div className="body">
             <div className="container">
-                <div className="row d-flex">
+                <div className="container">
+                    <h3>Visualize</h3>
+                </div>
+                <div className="row d-flex p-4">
                     <div className="col-4">
                         <Box sx={{ width: 300 }}>
                             <FormControl fullWidth>
@@ -313,7 +386,6 @@ function Visualize() {
                             <FormGroup>
                                 <FormControlLabel control={
                                     <Switch
-                                        defaultChecked
                                         checked={aggAuthors}
                                         onChange={(event) => { setAggAuthors(event.target.checked); }}
                                         inputProps={{ 'aria-label': 'controlled' }}>
@@ -324,7 +396,7 @@ function Visualize() {
                             </FormGroup>
                         }
                         {
-                            (tab === "boxplot" || tab === "trend") &&
+                            (tab === 0 || tab === 1) &&
                             <Box sx={{ width: 300 }}>
                                 <Typography id="year-range-id" gutterBottom>
                                     Year Range
@@ -376,19 +448,28 @@ function Visualize() {
                         }
                     </div>
                     <div className="col-8">
-                        <div id="chart-area" className="container pt-5">
+                        <div id="chart-area" className="container">
+                            <Box sx={{ width: '100%' }}>
+                                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                                    <Tabs value={tab} onChange={(event, value) => { setTab(value); }} aria-label="basic tabs example">
+                                        <Tab label="Boxplot" {...a11yProps(0)} />
+                                        <Tab label="Trend" {...a11yProps(1)} />
+                                        <Tab label="h-index" {...a11yProps(2)} />
+                                        <Tab label="i10-index" {...a11yProps(3)} />
+                                    </Tabs>
+                                </Box>
+                            </Box>
                             {
-                                data && options &&
-                                <BoxPlotChart data={data} options={options}></BoxPlotChart>
+                                boxData && options &&
+                                <BoxPlotChart data={boxData} options={options}></BoxPlotChart>
                             }
                         </div>
                         {
-                            tab === "boxplot" &&
+                            tab === 0 &&
                             <FormGroup>
                                 <Separator />
                                 <FormControlLabel control={
                                     <Switch
-                                        defaultChecked
                                         checked={toggleOutliers}
                                         onChange={(event) => { setToggleOutliers(event.target.checked); }}
                                         inputProps={{ 'aria-label': 'controlled' }}>
