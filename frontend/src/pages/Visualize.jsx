@@ -128,8 +128,6 @@ function Visualize() {
                 );
         });
         Promise.all(mapAuthors).then(() => {
-            console.log("resolved");
-            console.log(tempAuthorData);
             tempAuthorData.forEach(author => {
                 author.papers.forEach(paper => {
                     if (paper.year > tempMax) {
@@ -151,7 +149,7 @@ function Visualize() {
     useEffect(() => {
         let tempMin = new Date().getFullYear(); //current year starting min
         let tempMax = 0; //0 starting max
-        let tag_ids = [];
+        const tag_ids = [];
         selectedTags.forEach(tag => {
             tag_ids.push(tag.id);
         })
@@ -223,7 +221,7 @@ function Visualize() {
                 console.log(e);
             }
 
-            let iqr = q3 - q1; //get IQR
+            const iqr = q3 - q1; //get IQR
             
             let min = q1;
             let max = q3;
@@ -258,10 +256,6 @@ function Visualize() {
             i++;
         });
         
-        console.log("setting boxplot data!");
-        console.log(categories);
-        console.log(data);
-        console.log(outliers);
         setBoxData({
             categories: categories,
             series: [
