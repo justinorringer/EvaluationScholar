@@ -117,30 +117,29 @@ function Visualize() {
         let tempMin = new Date().getFullYear(); //current year starting min
         let tempMax = 0; //0 starting max
         const tempAuthorData = [];
-        var bar = new Promise((resolve, reject) => {
-            selectedAuthors.forEach(author => {
-                axios.get(`api/authors/${author.id}?include=papers`)
-                    .then(response => {
-                        response.data.papers.forEach(paper => {
-                            if (paper.year > tempMax) {
-                                tempMax = paper.year;
-                            }
-                            if (paper.year < tempMin) {
-                                tempMin = paper.year;
-                            }
-                        })
-                        tempAuthorData.push(response.data);
-                    }).
-                    catch(err => {
-                        console.log(err);
-                    }
-                    );
-            });
-            resolve();
-        })
-        bar.then(() => {
+        const mapAuthors = selectedAuthors.map(author => {
+            return axios.get(`api/authors/${author.id}?include=papers`)
+                .then(response => {
+                    tempAuthorData.push(response.data);
+                }).
+                catch(err => {
+                    console.log(err);
+                }
+                );
+        });
+        Promise.all(mapAuthors).then(() => {
             console.log("resolved");
             console.log(tempAuthorData);
+            tempAuthorData.forEach(author => {
+                author.papers.forEach(paper => {
+                    if (paper.year > tempMax) {
+                        tempMax = paper.year;
+                    }
+                    if (paper.year < tempMin) {
+                        tempMin = paper.year;
+                    }
+                })
+            })
             if (tempMax > 0) {
                 setBounds([tempMin, tempMax]);
             }
@@ -160,24 +159,17 @@ function Visualize() {
         } else {
             axios.get(`api/authors?include=papers&tags=${tag_ids}`)
                 .then(response => {
+                    response.data.forEach(author => {
+                        author.papers.forEach(paper => {
+                            if (paper.year > tempMax) {
+                                tempMax = paper.year;
+                            }
+                            if (paper.year < tempMin) {
+                                tempMin = paper.year;
+                            }
+                        })
+                    })
                     setAuthorsData(response.data);
-                    // 
-                    // response.data.papers.forEach(paper => {
-                    //     if (paper.year > tempMax) {
-                    //         tempMax = paper.year;
-                    //         if (paper.year < tempMin) {
-                    //             tempMin = paper.year;
-                    //             setBounds([tempMin, tempMax]);
-                    //         } else {
-                    //             setBounds([bounds[0], tempMax]);
-                    //         }
-                    //     } else if (paper.year < tempMin) {
-                    //         tempMin = paper.year;
-                    //         setBounds([tempMin, bounds[1]]);
-                    //     }
-                    // })
-                    // 
-
                 }).
                 catch(err => {
                     console.log(err);
@@ -193,10 +185,7 @@ function Visualize() {
         const outliers = [];
 
         let i = 0;
-        console.log(authorsData); //waits for promise on console so it shows
-        console.log(authorsData.length); //does not wait for promise, so it's accurate to what's actually happening
         authorsData.forEach(author => {
-            console.log("hello author");
             categories.push(author.name);
             const papers = [];
             author.papers.forEach(paper => {
@@ -308,11 +297,12 @@ function Visualize() {
     return (
         <div className="body">
             <div className="container">
-                <div className="container">
-                    <h3>Visualize</h3>
-                </div>
-                <div className="row d-flex p-4">
+                <div className="row d-flex">
                     <div className="col-4">
+                        <div className="container">
+                            <h3>Visualize</h3>
+                        </div>
+                        <Separator/>
                         <Box sx={{ width: 300 }}>
                             <FormControl fullWidth>
                                 <InputLabel id="filter-select-label">Filter</InputLabel>
@@ -446,8 +436,23 @@ function Visualize() {
                                 }
                             </div>
                         }
+                        {
+                            tab === 0 &&
+                            <FormGroup>
+                                <Separator />
+                                <FormControlLabel control={
+                                    <Switch
+                                        checked={toggleOutliers}
+                                        onChange={(event) => { setToggleOutliers(event.target.checked); }}
+                                        inputProps={{ 'aria-label': 'controlled' }}>
+                                    </Switch>
+                                } label="Display Outliers">
+                                </FormControlLabel>
+                                <Separator />
+                            </FormGroup>
+                        }
                     </div>
-                    <div className="col-8">
+                    <div className="col-8 p-4">
                         <div id="chart-area" className="container">
                             <Box sx={{ width: '100%' }}>
                                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -464,21 +469,6 @@ function Visualize() {
                                 <BoxPlotChart data={boxData} options={options}></BoxPlotChart>
                             }
                         </div>
-                        {
-                            tab === 0 &&
-                            <FormGroup>
-                                <Separator />
-                                <FormControlLabel control={
-                                    <Switch
-                                        checked={toggleOutliers}
-                                        onChange={(event) => { setToggleOutliers(event.target.checked); }}
-                                        inputProps={{ 'aria-label': 'controlled' }}>
-                                    </Switch>
-                                } label="Display Outliers">
-                                </FormControlLabel>
-                                <Separator />
-                            </FormGroup>
-                        }
                     </div>
                 </div>
             </div>
