@@ -20,7 +20,7 @@ def test_create_paper(session, task_manager):
     session.add(task)
     session.commit()
 
-    wait_for_task(session, task.id)
+    wait_for_task(task_manager, task.id)
 
     paper = session.query(Paper).first()
     assert paper.name == "Autonomous aerial water sampling"
@@ -32,7 +32,7 @@ def test_create_paper(session, task_manager):
     session.commit()
 
     # Wait for the scrape_author tasks to finish. Only one task should be left: the update citations task
-    wait_for_task_count(session, 1)
+    wait_for_task_count(task_manager, 1)
 
     # Check for the scraped authors
     scraped_author = session.query(Author).filter(Author.scholar_id == "q7jnx5IAAAAJ").first()
@@ -61,7 +61,7 @@ def test_create_paper(session, task_manager):
     task = CreatePaperTask("this paper does not exist like seriously nisuadfhna", author.id)
     session.add(task)
 
-    wait_for_task(session, task.id)
+    wait_for_task(task_manager, task.id)
 
     # Make sure no new papers were added
 
@@ -78,7 +78,7 @@ def test_create_paper(session, task_manager):
     session.add(task)
     session.commit()
 
-    wait_for_task(session, task.id)
+    wait_for_task(task_manager, task.id)
 
     # Make sure the paper wasn't recreated
 
@@ -98,7 +98,7 @@ def test_create_paper(session, task_manager):
     session.add(task)
     session.commit()
 
-    wait_for_task(session, task.id)
+    wait_for_task(task_manager, task.id)
 
     # Make sure the paper wasn't recreated
     assert session.query(Paper).count() == 1
@@ -111,11 +111,11 @@ def test_create_paper(session, task_manager):
     session.add(task)
     session.commit()
 
-    wait_for_task(session, task.id)
+    wait_for_task(task_manager, task.id)
 
     assert session.query(Paper).count() == 2
 
-    wait_for_task_count(session, 2)
+    wait_for_task_count(task_manager, 2)
 
     assert session.query(UpdateCitationsTask).count() == 2
     assert session.query(Author).filter(Author.name == "Carrick Detweiler").first() is not None
@@ -140,7 +140,7 @@ def test_create_with_scholar_id(session, task_manager):
     session.add(task)
     session.commit()
 
-    wait_for_task(session, task.id)
+    wait_for_task(task_manager, task.id)
 
     paper = session.query(Paper).first()
     assert paper.name == "Compound and simple lava flows and flood basalts"
@@ -174,7 +174,7 @@ def test_update_citations(session, task_manager):
     session.add(task)
     session.commit()
 
-    wait_for_task(session, task.id)
+    wait_for_task(task_manager, task.id)
 
     # Make sure the paper's citations were updated
     paper = session.query(Paper).first()

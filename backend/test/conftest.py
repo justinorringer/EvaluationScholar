@@ -22,7 +22,7 @@ def database_filepath():
 
 @pytest.fixture(scope="session")
 def database_url(database_filepath):
-    return f"sqlite:///{database_filepath}"
+    return f"sqlite:///{database_filepath}?check_same_thread=False"
 
 @pytest.fixture(scope="session", autouse=True)
 def schema_create(database_filepath, database_url):
@@ -50,7 +50,10 @@ def session(app):
 
 @pytest.fixture(scope="function")
 def task_manager(database_url):
-    task_manager = TaskManager(timedelta(milliseconds = 100), timedelta(milliseconds = 100), database_url)
+    task_manager = TaskManager(
+        connection_string = database_url,
+        update_check_period = timedelta(milliseconds = 100),
+        task_lookup_period = timedelta(milliseconds = 100))
     thread = threading.Thread(target=task_manager.scheduler_loop)
 
     thread.start()
