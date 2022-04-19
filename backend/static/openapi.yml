@@ -103,6 +103,21 @@ components:
           type: string
         id:
           type: string
+    ProfilePage:
+      properties:
+        name:
+          type: string
+        papers:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              year:
+                type: integer
+              citations:
+                type: integer
 info:
   description: API Docs
   title: API Docs
@@ -700,6 +715,34 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Profile'
+        '500':
+          description: Error retrieving data
+        '403':
+          description: Not enough API credits
+  /api/scraping/profiles/{scholar_id}:
+    get:
+      tags:
+        - Scraping
+      description: Returns details of a given profile
+      parameters:
+        - in: path
+          name: scholar_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: all_papers
+          description: Whether to return all papers or just the first 100
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfilePage'
         '500':
           description: Error retrieving data
         '403':

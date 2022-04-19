@@ -39,11 +39,19 @@ def get_profile_search_html(author_name: str) -> str:
 
     return get_html(url)
 
-def get_profile_page_html(profile_id: str) -> str:
+def get_profile_page_html(profile_id: str, page: int = None, pagesize: int = 100) -> str:
     base_link = "https://scholar.google.com/citations?user="
     base_link_end = "&hl=en&oi=sra"
 
     url = base_link + profile_id + base_link_end
+
+    if pagesize is not None:
+        url += "&pagesize=" + str(pagesize)
+    
+    if page is not None:
+        url += "&cstart=" + str((page - 1) * pagesize)
+
+    #TODO: Check if profile exists and return None if it doesn't
 
     return get_html(url)
 
@@ -199,3 +207,50 @@ def parse_profile_page_name(profile_page_html: str) -> Optional[str]:
         return None
 
     return div.text
+
+def parse_profile_page_papers(profile_page_html: str) -> List[Dict]:
+    soup = BeautifulSoup(profile_page_html, 'html.parser')
+
+    table = soup.find("table", {"id": "gsc_a_t"})
+
+    if table is None:
+        return []
+    
+    papers = []
+
+    tbody = table.find("tbody")
+
+    if tbody is None:
+        return []
+
+    for row in tbody.find_all("tr"):
+        title_data = row.find("td", {"class": "gsc_a_t"})
+        citations_data = row.find("td", {"class": "gsc_a_c"})
+        year_data = row.find("td", {"class": "gsc_a_y"})
+
+        if title_data is None or citations_data is None or year_data is None:
+            continue
+            
+        title = title_data.find("a").text
+        citations = citations_data.find("a").text
+        year = year_data.find("span").text
+
+        # Some papers are garbage or aren't actually papers
+        # These almost always don't have years, and correct papers always have years
+        # So we can just skip a paper if it doesn't have a year
+        if not year.isdigit():
+            continue
+
+        papers.append({
+            'title': title,
+            'citations': int(citations) if citations.isdigit() else 0,
+            'year': int(year)
+        })
+    
+    return papers
+
+def parse_profile_page(profile_page_html: str) -> Dict:
+    return {
+        'name': parse_profile_page_name(profile_page_html),
+        'papers': parse_profile_page_papers(profile_page_html)
+    }
