@@ -66,7 +66,7 @@ class TaskManager():
                 if task is not None:
                     try: 
                         if task.type == "create_paper_task":
-                            self.create_paper(session, task.paper_title, task.author)
+                            self.create_paper(session, task.paper_title, task.author, task.paper_scholar_id)
                         elif task.type == "update_citations_task":
                             self.update_citations(session, task.paper)
                         elif task.type == "scrape_author_task":
@@ -147,7 +147,7 @@ class TaskManager():
         
         session.commit()
 
-    def create_paper(self, session, paper_title, author):
+    def create_paper(self, session, paper_title, author, paper_scholar_id):
         if paper_title == None:
             print("[Task Manager] Paper title is None")
             return
@@ -163,12 +163,22 @@ class TaskManager():
             print(f"[Task Manager] Added author to existing paper: '{paper_title}'")
             return
 
-        papers = scrape_papers(paper_title)
-        if len(papers) == 0:
-            print(f"[Task Manager] Failed to scrape paper during creation: '{paper_title}'")
+        scraped_papers = scrape_papers(paper_title)
+        if len(scraped_papers) == 0:
+            print(f"[Task Manager] Failed to find papers for title: '{paper_title}'")
             return
         
-        scraped_paper = papers[0]
+        # Select the correct scraped paper to use
+        # If a scholar id is given, use that paper
+        # Otherwise, use the first paper
+        # TODO: Raise an ambiguous paper issue depending on the results
+        if paper_scholar_id is not None:
+            scraped_paper = next(filter(lambda p: p['id'] == paper_scholar_id, scraped_papers), None)
+            if scraped_paper is None:
+                print(f"[Task Manager] Failed to find scraped paper with id: '{paper_scholar_id}' and title: '{paper_title}'")
+                return
+        else:
+            scraped_paper = scraped_papers[0]
 
         if scraped_paper['citations'] is None:
             print(f"[Task Manager] Failed to scrape paper citations during creation: '{paper_title}'")
@@ -196,12 +206,13 @@ class TaskManager():
             print(f"[Task Manager] Added author to existing paper: '{existing_paper.name}'")
             return
 
-        paper = Paper(scraped_paper['title'], scraped_paper['year'])
-        paper.scholar_id = scraped_paper['id']
+        paper = Paper(scraped_paper['title'], scraped_paper['year'], scraped_paper['id'])
+
         paper.citations.append(Citation(scraped_paper['citations'], datetime.now()))
         paper.authors.append(author)
+        
         session.add(paper)
 
-        print(f"[Task Manager] Created paper: '{paper_title}'")
+        print(f"[Task Manager] Created paper: '{paper.name}' from query: '{paper_title}'")
 
         self.create_and_link_authors(session, paper, scraped_paper['authors'])

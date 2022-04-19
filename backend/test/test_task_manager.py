@@ -6,41 +6,7 @@ import threading
 import pytest
 
 from backend.api.models import Task, CreatePaperTask, Author, Paper, UpdateCitationsTask
-
-timeout = 20
-
-def wait_for_task(session, id):
-    start_time = datetime.now()
-    while True:
-        print(session.query(Task).filter(Task.id == id).first())
-        if session.query(Task).filter(Task.id == id).first() is None:
-            return
-            
-        time.sleep(1)
-
-        if datetime.now() > start_time + timedelta(seconds = timeout):
-            pytest.fail("Task not resolved")
-        
-        session.commit()
-
-def wait_for_task_count(session, target_task_count):
-    start_time = datetime.now()
-    task_count = session.query(Task).count()
-    while True:
-        new_task_count = session.query(Task).count()
-        if new_task_count == target_task_count:
-            return
-        
-        if new_task_count != task_count:
-            task_count = new_task_count
-            start_time = datetime.now()
-            
-        time.sleep(1)
-
-        if datetime.now() > start_time + timedelta(seconds = timeout):
-            pytest.fail("Task count not resolved")
-        
-        session.commit()
+from backend.test import wait_for_task, wait_for_task_count
 
 @pytest.mark.scraping
 def test_create_paper(session, task_manager):
@@ -163,6 +129,26 @@ def test_create_paper(session, task_manager):
     assert len(authors["Amy J. Burgin"].papers) == 1
     assert len(authors["Test Author"].papers) == 2
     assert len(authors["Test Author 2"].papers) == 1
+
+@pytest.mark.scraping
+def test_create_with_scholar_id(session, task_manager):
+    author = Author(name="Test Author", scholar_id="_QnLm3kAAAAJ")
+    session.add(author)
+    session.flush()
+
+    task = CreatePaperTask("lava", author.id, "UK460fxHiUAJ")
+    session.add(task)
+    session.commit()
+
+    wait_for_task(session, task.id)
+
+    paper = session.query(Paper).first()
+    assert paper.name == "Compound and simple lava flows and flood basalts"
+    assert paper.scholar_id == "UK460fxHiUAJ"
+    assert paper.year == 1971
+    assert len(paper.citations) > 0
+    assert paper.citations[0].num_cited > 0
+    assert len(paper.authors) >= 1
 
 @pytest.mark.scraping
 def test_update_citations(session, task_manager):

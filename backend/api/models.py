@@ -94,12 +94,8 @@ class Citation(Base):
 class Paper(Base):
     __tablename__ = 'paper'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    #Should we have the title be unique to handle duplicates?
     name = Column(String(400), unique=True, nullable=False)
-    #Leave enough characters for 'dd/mm/yyyy', but can just do a year
     year = Column(Integer, unique=False, nullable=False)
-    #I believe we were just linking these to the Citation table
-    #num_cited=Column(Integer, nullable=False)
     scholar_id = Column(String(100), unique=False, nullable=True)
 
     authors = relationship('Author', secondary=author_paper, back_populates='papers')
@@ -117,9 +113,10 @@ class Paper(Base):
             'latest_citation': self.get_latest_citation().to_dict() if self.get_latest_citation() else None,
         }
 
-    def __init__(self, name, year):
+    def __init__(self, name, year, scholar_id = None):
         self.name = name
         self.year = year
+        self.scholar_id = scholar_id
 
 class Tag(Base):
     __tablename__ = 'tag'
@@ -244,37 +241,60 @@ class Issue(Base):
         'polymorphic_on':type
     }
 
+class AmbiguousPaperChoice(Base):
+    __tablename__ = "ambiguous_paper_choice"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    name = Column(String(200), nullable=False)
+    year = Column(Integer, nullable=False)
+    scholar_id = Column(String(40), nullable=True)
+    citations = Column(Integer, nullable=False)
+
+    issue_id = Column(Integer, ForeignKey('issue.id'), nullable=False)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'year': self.year,
+            'scholar_id': self.scholar_id,
+            'citations': self.citations,
+        }
+    
+    def __init__(self, name, year, scholar_id, citations, issue_id):
+        self.name = name
+        self.year = year
+        self.scholar_id = scholar_id
+        self.citations = citations
+        self.issue_id = issue_id
+
 class AmbiguousPaperIssue(Issue):
     __tablename__ = "ambiguous_paper_issue"
     id = Column(Integer, ForeignKey('issue.id'), primary_key=True)
-    __mapper_args__ = {
-        'polymorphic_identity': 'ambiguous_paper_issue',
-    }
 
-    author_name = Column(String(80), nullable=False)
-    paper_id_1 = Column(Integer, ForeignKey('paper.id'), nullable=False)
-    paper_id_2 = Column(Integer, ForeignKey('paper.id'), nullable=False)
-    paper_id_3 = Column(Integer, ForeignKey('paper.id'), nullable=True)
+    title_query = Column(String(200), nullable=False)
 
-    paper_1 = relationship('Paper', foreign_keys=[paper_id_1])
-    paper_2 = relationship('Paper', foreign_keys=[paper_id_2])
-    paper_3 = relationship('Paper', foreign_keys=[paper_id_3])
+    author_id = Column(Integer, ForeignKey('author.id'), nullable=False)
+
+    author = relationship('Author')
+    paper_choices = relationship('AmbiguousPaperChoice', backref='issue', cascade='all, delete-orphan')
 
     def to_dict(self):
         return {
             'id': self.id,
             'type': self.type,
-            'author_name': self.author_name,
-            'paper_1': self.paper_1.to_dict(),
-            'paper_2': self.paper_2.to_dict(),
-            'paper_3': None if self.paper_3 is None else self.paper_3.to_dict(),
+            'title_query': self.title_query,
+            'author': self.author.to_dict(),
+            "paper_choices": [choice.to_dict() for choice in self.paper_choices]
         }
     
-    def __init__(self, author_name, paper_id_1, paper_id_2, paper_id_3 = None):
-        self.author_name = author_name
-        self.paper_id_1 = paper_id_1
-        self.paper_id_2 = paper_id_2
-        self.paper_id_3 = paper_id_3
+    def __init__(self, author_id, title_query):
+        self.author_id = author_id
+        self.title_query = title_query
+    
+    __mapper_args__ = {
+        'polymorphic_identity': 'ambiguous_paper_issue',
+    }
 
 class Variable(Base):
     __tablename__ = "variable"
