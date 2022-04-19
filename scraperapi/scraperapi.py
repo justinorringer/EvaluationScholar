@@ -8,6 +8,8 @@ worker_thread_count = 5
 
 tasks = queue.Queue()
 
+import sys
+
 class RequestTask():
     def __init__(self, url: str):
         self.url = url
@@ -23,9 +25,16 @@ def get_scraperapi_response(url: str):
     task = RequestTask(url)
     tasks.put(task)
 
+    print("Started task for {}".format(url))
+    print("Queue size: {}".format(tasks.qsize()))
+    sys.stdout.flush()
+
     while not task.finished:
         time.sleep(0.1)
     
+    print("Finished task for {}".format(url))
+    sys.stdout.flush()
+
     return task.response
 
 def worker_thread():
