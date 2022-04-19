@@ -10,16 +10,7 @@ def search_papers(paper_title: str) -> List[Dict]:
     paper_blocks = parse_paper_blocks(html)
     papers = [parse_paper(paper_block) for paper_block in paper_blocks]
 
-    citation_entries = [paper for paper in papers if 'citation_entry' in paper]
-    papers = [paper for paper in papers if 'citation_entry' not in paper]
-
-    for citation_entry in citation_entries:
-        for paper in papers:
-            if paper['title'].lower() in citation_entry['title'].lower():
-                paper['citations'] += citation_entry['citations']
-                break
-
-    return papers
+    return [paper for paper in papers if 'citation_entry' not in paper]
 
 def search_profiles(author_name: str) -> List[Dict]:
     html = get_profile_search_html(author_name)
