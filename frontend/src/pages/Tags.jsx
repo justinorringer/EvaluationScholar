@@ -242,6 +242,26 @@ function Tags() {
         unassign();
     }
 
+    function deleteTags(){
+        const deleteTag = async () => {
+            const mapPromises = checkedTags.map(tag => {
+                return axios.delete(`/api/tags/${tag}`, { mode: 'cors' }).then(res => {
+                    if (res.status == 200) {
+                        console.log("Deleted tag");
+                    }
+                    else {
+                        console.log("Error deleting tag");
+                    }
+                });
+            });
+            Promise.all(mapPromises).then(() => {
+                checkedTags = [];
+                getTags();
+            })
+        }
+        deleteTag();
+    }
+
     function hideSuccessAlert() {
         document.getElementById("success").style = "display: none !important";
     }
@@ -253,58 +273,61 @@ function Tags() {
     getAuthors();
     getTags();
 
-  //Return the related HTML of the page.
-  return (
-    <div className="container">
-        <div className="container">
-            <h3>Assign Tags to Authors</h3>
-        </div>
-        <div className="row">
-            <div className="alert alert-success alert-dismissible" role="alert" id="success" style={{display: "none"}}>
-                <button className="close" type="button" onClick={hideSuccessAlert}><span>&times;</span></button> Tags Assigned Successfully.
-            </div>
-        </div>
-        <div className="row">
-            <div className="alert alert-danger alert-dismissible" role="alert" id="fail" style={{display: "none"}}>
-                <button className="close" type="button" onClick={hideFailAlert}><span>&times;</span></button> Error: No Tags Assigned.
-            </div>
-        </div>
-        <div className="container border border-dark my-3 p-4 rounded">
-            <h3>
-                Authors
-            </h3>
-            <div className="row">
-                <div className="col-12">
-                    <ul className="col-count-3" id="authorList">
-                    </ul>
+    //Return the related HTML of the page.
+    return (
+        <div className="body">
+            <div className="container">
+                <div className="container">
+                    <h3>Assign Tags to Authors</h3>
                 </div>
-            </div>
-        </div>
-        <div className="container border border-dark my-3 p-4 rounded">
-            <div className="row px-2 pb-2 d-flex">
-                <h3>
-                    Tags
-                </h3>
-                <div className="d-flex px-3 align-items-right ml-auto">
-                    <input type="type" className="form-control mr-2" id="tagBox" placeholder="New Tag" />
-                    <button type="button" className="btn btn-danger btn-sm" onClick={createTag}>Create</button>
+                <div className="row">
+                    <div className="alert alert-success alert-dismissible" role="alert" id="success" style={{ display: "none" }}>
+                        <button className="close" type="button" onClick={hideSuccessAlert}><span>&times;</span></button> Tags Assigned Successfully.
+                    </div>
                 </div>
-            </div>
+                <div className="row">
+                    <div className="alert alert-danger alert-dismissible" role="alert" id="fail" style={{ display: "none" }}>
+                        <button className="close" type="button" onClick={hideFailAlert}><span>&times;</span></button> Error: No Tags Assigned.
+                    </div>
+                </div>
+                <div className="container border border-dark my-3 p-4 rounded">
+                    <h3>
+                        Authors
+                    </h3>
+                    <div className="row">
+                        <div className="col-12">
+                            <ul className="col-count-3" id="authorList">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div className="container border border-dark my-3 p-4 rounded">
+                    <div className="row px-2 pb-2 d-flex">
+                        <h3>
+                            Tags
+                        </h3>
+                        <div className="d-flex px-3 align-items-right ml-auto">
+                            <input type="type" className="form-control mr-2" id="tagBox" placeholder="New Tag" />
+                            <button type="button" className="btn btn-danger btn-sm" onClick={createTag}>Create</button>
+                        </div>
+                    </div>
 
-            <div className="row">
-                <div className="col-12">
-                    <ul className="col-count-3" id="tagList">
-                    </ul>
+                    <div className="row">
+                        <div className="col-12">
+                            <ul className="col-count-3" id="tagList">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="container d-flex justify-content-end">
+                    <button type="button" className="btn btn-danger btn-sm mr-2" onClick={deleteTags}>Delete</button>
+                    <button type="button" className="btn btn-danger btn-sm mr-2" onClick={assignTags}>Assign</button>
+                    <button type="button" className="btn btn-danger btn-sm" onClick={unassignTags}>Unassign</button>
                 </div>
             </div>
         </div>
-        
-        <div className="container d-flex justify-content-end">
-            <button type="button" className="btn btn-danger btn-sm mr-2" onClick={assignTags}>Assign</button>
-            <button type="button" className="btn btn-danger btn-sm" onClick={unassignTags}>Unassign</button>
-        </div>
-    </div>
-  );
+    );
 }
 
 export default Tags;

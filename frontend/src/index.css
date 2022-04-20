@@ -12,9 +12,12 @@ body,
 
 body {
     background-color: #e7e3e4e8;
+}
+
+.body {
     width: 100%;
-    height: 86%;
-    margin-top: 10vh;
+    margin-top: 10vh !important;
+    margin-bottom: 5vh !important;
     padding-top: 4vh !important;
 
     
