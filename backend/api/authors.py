@@ -11,9 +11,9 @@ author_routes = Blueprint('author_routes', __name__, template_folder='templates'
 @author_routes.route('/authors', methods=['GET'])
 def get_authors():
     with db_session(current_app) as session:
-        # Subqueryload reduces join count compared to lazy loading
+        includes = request.args['include'].split(',') if 'include' in request.args else []
         authors = session.query(Author).options(subqueryload(Author.papers).subqueryload(Paper.citations))
-
+        
         if 'name' in request.args:
             words = request.args['name'].split()
             for word in words:
@@ -51,8 +51,6 @@ def get_authors():
             except ValueError:
                 return json.dumps({'error': 'max-h must be an integer'}), 400
 
-        includes = request.args['include'].split(',') if 'include' in request.args else []
-
         return current_app.response_class(
             response=json.dumps([author.to_dict(includes) for author in authors]),
             status=200,
@@ -62,6 +60,7 @@ def get_authors():
 @author_routes.route('/authors/<int:id>', methods=['GET'])
 def get_author(id):
     with db_session(current_app) as session:
+        includes = request.args['include'].split(',') if 'include' in request.args else []
         author = session.query(Author).get(id)
         if author is None:
             return current_app.response_class(
@@ -70,8 +69,6 @@ def get_author(id):
                 status=404,
                 mimetype='application/json'
             )
-
-        includes = request.args['include'].split(',') if 'include' in request.args else []
     
         return current_app.response_class(
             response=json.dumps(author.to_dict(includes)),
@@ -243,7 +240,10 @@ def remove_paper_from_author(author_id, paper_id):
 @author_routes.route('/authors/<int:author_id>/papers', methods=['GET'])
 def get_papers_by_author(author_id):
     with db_session(current_app) as session:
-        author = session.query(Author).get(author_id)
+        includes = request.args['include'].split(',') if 'include' in request.args else []
+        author = session.query(Author).options(subqueryload(Author.papers).subqueryload(Paper.citations))
+        author = author.get(author_id)
+
         if not author:
             return current_app.response_class(
                 response=json.dumps({'message': 'author not found',
@@ -251,8 +251,9 @@ def get_papers_by_author(author_id):
                 status=404,
                 mimetype='application/json'
             )
+
         return current_app.response_class(
-            response=json.dumps([paper.to_dict() for paper in author.papers]),
+            response=json.dumps([paper.to_dict(includes ) for paper in author.papers]),
             status=200,
             mimetype='application/json'
         )

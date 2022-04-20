@@ -29,12 +29,27 @@ def test_crud(client):
     resp = client.get('/papers')
     assert resp.status_code == 200
     assert len(resp.json) == 2
+    assert 'citations' not in resp.json[0]
+
+    resp = client.get(f'/papers?include=citations')
+    assert resp.status_code == 200
+    assert len(resp.json) == 2
+    assert len(resp.json[0]['citations']) == 0
 
     #Check paper1
     resp = client.get(f'/papers/{p1_id}')
     assert resp.status_code == 200
     assert resp.json['name'] == 'name1'
     assert resp.json['year'] == 2001
+    assert 'citations' not in resp.json
+
+    resp = client.get(f'/papers/{p1_id}?include=citations')
+    assert resp.status_code == 200
+    assert resp.json['name'] == 'name1'
+    assert resp.json['year'] == 2001
+    assert len(resp.json['citations']) == 0
+
+    resp = client.get
 
     #Check paper2
     resp = client.get(f'/papers/{p2_id}')

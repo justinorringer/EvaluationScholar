@@ -51,7 +51,6 @@ def test_crud(client):
     assert resp.json['name'] == 'name1_updated'
     assert resp.json['scholar_id'] == 'q1376BY15UD4'
 
-
     # Partially update author2
     resp = client.put(f'/authors/{a2_id}', json={'name': 'name2_updated'})
     assert resp.status_code == 200
@@ -115,6 +114,12 @@ def test_paper_list(client, session):
     resp = client.get(f'/authors/{a1_id}/papers')
     assert resp.status_code == 200
     assert len(resp.json) == 2
+    assert 'citations' not in resp.json[0]
+
+    resp = client.get(f'/authors/{a1_id}/papers?include=citations')
+    assert resp.status_code == 200
+    assert len(resp.json) == 2
+    assert len(resp.json[0]['citations']) == 0
 
     resp = client.get(f'/authors/{a1_id}?include=papers')
     assert resp.status_code == 200

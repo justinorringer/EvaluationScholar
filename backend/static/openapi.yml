@@ -258,6 +258,12 @@ paths:
           required: true
           schema:
             type: integer
+        - in: query
+          name: include
+          required: false
+          example: citations
+          schema:
+            type: string
       responses:
         '200':
           description: Successful operation
@@ -430,6 +436,12 @@ paths:
           required: false
           schema:
             type: integer
+        - in: query
+          name: include
+          required: false
+          example: citations
+          schema:
+            type: string
       responses:
         '200':
           description: Successful operation
@@ -457,6 +469,12 @@ paths:
           required: true
           schema:
             type: integer
+        - in: query
+          name: include
+          required: false
+          example: citations
+          schema:
+            type: string
       responses:
         '200':
           description: Successful operation
@@ -512,6 +530,12 @@ paths:
           required: true
           schema:
             type: integer
+        - in: query
+          name: include
+          required: false
+          example: papers
+          schema:
+            type: string
       responses:
         '200':
           description: Successful operation

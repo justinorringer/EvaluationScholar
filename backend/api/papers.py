@@ -1,5 +1,6 @@
 from flask import Blueprint, current_app, json, request
 from sqlalchemy import desc
+from sqlalchemy.orm import subqueryload
 
 from api.models import Author, Citation, Paper, UpdateCitationsTask
 from scraping import scrape_papers
@@ -20,7 +21,8 @@ paper_routes = Blueprint('paper_routes', __name__, template_folder='templates')
 @paper_routes.route('/papers', methods=['GET'])
 def get_papers():
     with db_session(current_app) as session:
-        papers = session.query(Paper)
+        includes = request.args['include'].split(',') if 'include' in request.args else []
+        papers = session.query(Paper).options(subqueryload(Paper.citations))
 
         custom_headers = {}
 
@@ -37,7 +39,7 @@ def get_papers():
         papers = papers.all()
 
         return current_app.response_class(
-            response=json.dumps([paper.to_dict() for paper in papers]),
+            response=json.dumps([paper.to_dict(includes) for paper in papers]),
             status=200,
             headers=custom_headers,
             mimetype='application/json'
@@ -46,6 +48,7 @@ def get_papers():
 @paper_routes.route('/papers/<int:id>', methods=['GET'])
 def get_paper(id):
     with db_session(current_app) as session:
+        includes = request.args['include'].split(',') if 'include' in request.args else []
         paper = session.query(Paper).get(id)
 
         if not paper:
@@ -57,7 +60,7 @@ def get_paper(id):
             )
 
         return current_app.response_class(
-            response=json.dumps(paper.to_dict()),
+            response=json.dumps(paper.to_dict(includes)),
             status=200,
             mimetype='application/json'
         )    
@@ -231,6 +234,7 @@ def remove_author_from_paper(author_id, paper_id):
 @paper_routes.route('/papers/<int:paper_id>/authors', methods=['GET'])
 def get_authors_in_paper(paper_id):
     with db_session(current_app) as session:
+        includes = request.args['include'].split(',') if 'include' in request.args else []
         paper = session.query(Paper).get(paper_id)
         if not paper:
             return current_app.response_class(
@@ -240,7 +244,7 @@ def get_authors_in_paper(paper_id):
                 mimetype='application/json'
             )
         return current_app.response_class(
-            response=json.dumps([author.to_dict() for author in paper.authors]),
+            response=json.dumps([author.to_dict(includes) for author in paper.authors]),
             status=200,
             mimetype='application/json'
         )
