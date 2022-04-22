@@ -312,3 +312,11 @@ class Variable(Base):
     def __init__(self, name, value):
         self.name = name
         self.value = value
+
+class User(Base):
+    __tablename__ = "user"
+
+    shib_uid = Column(String(80), primary_key=True)
+
+    def __init__(self, shib_uid):
+        self.shib_uid = shib_uid
