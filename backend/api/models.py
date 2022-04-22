@@ -104,14 +104,22 @@ class Paper(Base):
     def get_latest_citation(self):
         return None if len(self.citations) == 0 else self.citations[0]
 
-    def to_dict(self):
-        return {
+    def to_dict(self, includes = []):
+        dict = {
             'id': self.id,
             'name': self.name,
             'year': self.year,
             'scholar_id': self.scholar_id,
             'latest_citation': self.get_latest_citation().to_dict() if self.get_latest_citation() else None,
         }
+
+        if 'authors' in includes:
+            dict['authors'] = [author.to_dict() for author in self.authors]
+        
+        if 'citations' in includes:
+            dict['citations'] = [citation.to_dict() for citation in self.citations]
+
+        return dict
 
     def __init__(self, name, year, scholar_id = None):
         self.name = name
