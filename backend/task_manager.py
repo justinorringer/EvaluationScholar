@@ -8,6 +8,7 @@ from api.models import Task, Paper, Citation, UpdateCitationsTask, Variable, Aut
 from scraping import scrape_papers
 from scraping.google_scholar import get_profile_page_html, parse_profile_page_name
 from multiprocessing import Process
+from threading import Thread
 
 @contextmanager
 def db_session(Session):
@@ -167,13 +168,11 @@ class TaskManager():
     connection_string: str,
     update_check_period: timedelta = timedelta(seconds=5),
     task_lookup_period: timedelta = timedelta(seconds=5),
-    task_timeout: timedelta = timedelta(minutes=2),
     max_concurrent_tasks: int = 3):
         self.update_check_period = update_check_period
         self.task_lookup_period = task_lookup_period
         self.connection_string = connection_string
         self.max_concurrent_tasks = max_concurrent_tasks
-        self.task_timeout = task_timeout
 
         engine = create_engine(connection_string, echo=False)
         self.Session = scoped_session(sessionmaker(bind=engine))
@@ -218,12 +217,8 @@ class TaskManager():
 
         while self.running:
             time.sleep(min(self.update_check_period.total_seconds(), self.task_lookup_period.total_seconds(), 1))
-
-            # Remove any finished task processes or processes that have timed out
-            for task in self.running_tasks:
-                task['process'].join(timeout=0)
             
-            self.running_tasks = [task for task in self.running_tasks if task['process'].is_alive() and datetime.now() - task['start_time'] < self.task_timeout]
+            self.running_tasks = [task for task in self.running_tasks if task['thread'].is_alive()]
 
             if not self.enabled:
                 continue
@@ -234,29 +229,30 @@ class TaskManager():
 
             if len(self.running_tasks) < self.max_concurrent_tasks and datetime.now() > last_task_check + self.task_lookup_period:
                 session = self.Session()
-                task = session.query(Task).filter(or_(Task.date == None, Task.date <= datetime.now())).order_by(Task.priority).first()
-            
-                if task is not None:
+                space_available = self.max_concurrent_tasks - len(self.running_tasks)
+
+                tasks = session.query(Task)
+                tasks = tasks.filter(or_(Task.date == None, Task.date <= datetime.now()))
+                tasks = tasks.order_by(Task.priority)
+                tasks = tasks.limit(space_available).all()
+
+                for task in tasks:
                     task_id = task.id
 
                     session.delete(task)
                     session.commit()
-                    session.close()
 
-                    task_process = Process(target=handle_task, args=(self.connection_string, task))
-                    task_process.start()
+                    task_thread = Thread(target=handle_task, args=(self.connection_string, task))
+                    task_thread.start()
 
-                    # Need to keep track of start time to timeout
                     # Keep track of task id so tests can check if task is done
                     self.running_tasks.append({
-                        'process': task_process,
-                        'start_time': datetime.now(),
+                        'thread': task_thread,
                         'task_id': task_id
                     })
-                else:
-                    # Only wait if there aren't any tasks to run
-                    last_task_check = datetime.now()
-                    session.close()
+                
+                session.close()
+                last_task_check = datetime.now()
 
     def check_update_tasks(self):
         with db_session(self.Session) as session:

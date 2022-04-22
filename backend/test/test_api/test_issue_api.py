@@ -94,7 +94,7 @@ def test_ambiguous_resolve(client, session, task_manager):
 
     task_manager.enable()
 
-    wait_for_task(session, task.id)
+    wait_for_task(task_manager, task.id)
 
     assert session.query(Paper).count() == 1
     paper = session.query(Paper).first()

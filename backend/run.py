@@ -13,7 +13,7 @@ app = create_app(scoped_session(Session))
 Base.metadata.create_all(engine)
 
 from task_manager import TaskManager
-task_manager = TaskManager(connection_string = create_connection_string())
+task_manager = TaskManager(connection_string = create_connection_string(), max_concurrent_tasks = 5)
 p = Process(target=task_manager.scheduler_loop)
 p.start()
 

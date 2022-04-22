@@ -8,7 +8,10 @@ def get_html(url: str) -> str:
     params = {'api_key': os.getenv('SCRAPER_API_KEY'), 'url': url}
 
     for _ in range(retry_count):
-        response = requests.get('https://api.scraperapi.com/', params=params)
+        if 'PYTEST_CURRENT_TEST' in os.environ: 
+            response = requests.get('https://api.scraperapi.com/', params=params)
+        else:
+            response = requests.get('http://scraperapi:5000/', params=params)
 
         # Sometimes, ScraperAPI returns a 500 error. They ask that you retry at least three times.
         if(response.status_code == 500):

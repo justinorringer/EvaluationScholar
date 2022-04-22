@@ -25,10 +25,22 @@ services:
     #Otherwise, the container will create a new volume on each run and lose data
     volumes:
       - ./mysql-data:/var/lib/mysql
+  scraperapi:
+    container_name: scraperapi
+
+    env_file:
+      - .env
+
+    #Builds the image from the Dockerfile in the current directory
+    build: ./scraperapi
+
+    volumes:
+      - './scraperapi:/app'
   backend:
     container_name: backend
     depends_on:
       - database
+      - scraperapi
 
     env_file:
       - .env

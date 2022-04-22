@@ -63,7 +63,8 @@ def test_profile_page():
     assert len(profile_papers) == 100
 
     profile_papers_2 = google_scholar.parse_profile_page_papers(html_2)
-    assert len(profile_papers_2) == 100
+    # Second page has 100 papers, but two of them don't have years so aren't included
+    assert len(profile_papers_2) == 98
 
     assert profile_papers[0]['title'] != profile_papers_2[0]['title']
 
