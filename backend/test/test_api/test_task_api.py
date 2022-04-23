@@ -151,3 +151,24 @@ def test_create(client):
     )
     resp = client.post(f'/tasks/create-papers?author_id={author_id + 1}', data=data, content_type='multipart/form-data')
     assert resp.status_code == 404
+
+    # Test no data
+    resp = client.post(f'/tasks/create-papers?author_id={author_id}', content_type='multipart/form-data')
+    assert resp.status_code == 400
+
+def test_body_create(client, session):
+    author = Author('JP Ore', 'q1124AA12BD4')
+    session.add(author)
+    session.commit()
+
+    papers = ['title1', 'title2', 'title3']
+
+    resp = client.post(f'/tasks/create-papers-list?author_id={author.id}', json={'paper_titles': papers})
+    assert resp.status_code == 201
+    assert len(resp.json) == 3
+
+    assert author.uploaded_papers == False
+
+    # Test no data
+    resp = client.post(f'/tasks/create-papers-list?author_id={author.id}', json={})
+    assert resp.status_code == 400

@@ -76,6 +76,62 @@ def delete_task(id):
             mimetype='application/json'
         )
 
+@task_routes.route("/tasks/create-papers-list", methods=['POST'])
+def create_papers_list():
+    with db_session(current_app) as session:
+        author_id = request.args.get('author_id')
+
+        if author_id is None:
+            return current_app.response_class(
+                response=json.dumps({'message': 'Author ID is required',
+                                     'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+
+        if not author_id.isdigit():
+            return current_app.response_class(
+                response=json.dumps({'message': 'Author ID must be a number',
+                                     'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+
+        author = session.query(Author).get(author_id)
+
+        if author is None:
+            return current_app.response_class(
+                response=json.dumps({'message': 'Author not found',
+                                     'status': 'error'}),
+                status=404,
+                mimetype='application/json'
+            )
+
+        data = request.get_json()
+
+        if 'paper_titles' not in data:
+            return current_app.response_class(
+                response=json.dumps({'message': 'paper_titles required',
+                                     'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+        
+        tasks = []
+        
+        paper_titles = data['paper_titles']
+        for paper_title in paper_titles:
+            task = CreatePaperTask(paper_title = paper_title, author_id = author_id, date = datetime.now())
+            session.add(task)
+            session.flush()
+            tasks.append(task.to_dict())
+        
+        return current_app.response_class(
+            response=json.dumps(tasks),
+                status=201,
+                mimetype='application/json'
+            )
+
 @task_routes.route("/tasks/create-papers", methods=['POST'])
 def create_task():    
     with db_session(current_app) as session:
@@ -107,20 +163,27 @@ def create_task():
                 mimetype='application/json'
             )
 
-        list_of_tasks = []
+        if 'file' not in request.files:
+            return current_app.response_class(
+                response=json.dumps({'message': 'File is required',
+                                     'status': 'error'}),
+                status=400,
+                mimetype='application/json'
+            )
+
+        tasks = []
 
         file = request.files['file']
-
         for line in file:
             task = CreatePaperTask(paper_title = line[0:-1].decode('utf-8'), author_id = author_id, date = datetime.now())
             session.add(task)
             session.flush()
-            list_of_tasks.append(task.to_dict())
-
+            tasks.append(task.to_dict())
+        
         author.uploaded_papers = True
 
         return current_app.response_class(
-            response=json.dumps(list_of_tasks),
+            response=json.dumps(tasks),
                 status=201,
                 mimetype='application/json'
             )
