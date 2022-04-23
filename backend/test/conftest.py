@@ -35,7 +35,7 @@ def schema_create(database_filepath, database_url):
 @pytest.fixture(scope="session")
 def app(database_url):
     engine = create_engine(database_url, echo=False)
-    app = create_app(sessionmaker(bind=engine))
+    app = create_app(sessionmaker(bind=engine), disable_auth = True)
     return app
 
 @pytest.fixture(scope="session")
