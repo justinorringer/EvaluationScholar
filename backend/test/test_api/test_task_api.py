@@ -119,12 +119,18 @@ def test_create(client):
     author = Author('JP Ore', 'q1124AA12BD4')
     resp = client.post('/authors', json=author.to_dict())
     author_id = resp.json['id']
+    assert resp.json['uploaded_papers'] == False
+
     data = dict(
         file = io.open(f'{os.getcwd()}/test/test_files/Ore.txt', 'rb', buffering=0)
     )
+    
     resp = client.post(f'/tasks/create-papers?author_id={author_id}', data=data, content_type='multipart/form-data')
     assert resp.status_code == 201
     assert len(resp.json) == 16
+
+    resp = client.get(f'/authors/{author_id}')
+    assert resp.json['uploaded_papers'] == True
 
     # Test invalid author
     data = dict(

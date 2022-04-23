@@ -97,7 +97,9 @@ def create_task():
                 mimetype='application/json'
             )
 
-        if session.query(Author).get(author_id) is None:
+        author = session.query(Author).get(author_id)
+
+        if author is None:
             return current_app.response_class(
                 response=json.dumps({'message': 'Author not found',
                                      'status': 'error'}),
@@ -114,6 +116,8 @@ def create_task():
             session.add(task)
             session.flush()
             list_of_tasks.append(task.to_dict())
+
+        author.uploaded_papers = True
 
         return current_app.response_class(
             response=json.dumps(list_of_tasks),
