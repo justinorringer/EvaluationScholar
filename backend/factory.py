@@ -1,7 +1,7 @@
 from flask import Flask
 import os
 
-def create_app(session_maker):
+def create_app(session_maker, disable_auth = False):
     app = Flask(__name__)
 
     from api.routes import routes
@@ -11,6 +11,7 @@ def create_app(session_maker):
     app.register_blueprint(views)
 
     app.session_maker = session_maker
+    app.disable_auth = disable_auth
 
     return app
 
