@@ -14,6 +14,7 @@ function Author() {
     //Variable to hold list of papers related to an author
     let papers = [];
     let tags = [];
+    let checkedPapers = [];
 
     //Function to make the API call to gather the papers of a specific author.
     function getAuthor() {
@@ -49,12 +50,22 @@ function Author() {
                 var article = document.createElement("td");
                 var year = document.createElement("td");
                 var citations = document.createElement("td");
+                var checkBox = document.createElement("td");
+
+                let input = document.createElement("input");
+                input.className = "checkbox";
+                input.type = "checkbox";
+                input.id = "p" + paper.id;
+                input.onclick = function() { checkedPaper(input.id) };
+                checkBox.appendChild(input);
+
                 article.innerText = paper.name;
                 year.innerText = paper.year;
                 citations.innerText = paper.latest_citation.num_cited;
                 row.appendChild(article);
                 row.appendChild(year);
                 row.appendChild(citations);
+                row.appendChild(checkBox);
                 paperTableBody.appendChild(row);
             });
         }
@@ -238,6 +249,56 @@ function Author() {
         postPaperTasks();
     }
 
+    function deleteAuthor(){
+        const deleteAnAuthor = async () => {
+            const response = await axios.delete(`/api/authors/${authorID}`, {mode:'cors'}).then(res =>{
+                if(res.status == 200){
+                    console.log("Deleted author");
+                }
+                else{
+                    console.log("Error deleting author");
+                }
+                window.location.href = `/`;
+            });
+        }
+        deleteAnAuthor();
+    }
+
+    function checkedPaper(id) {
+        var checkBox = document.getElementById(id);
+        if (checkBox.checked == true){
+            checkedPapers.push(id.substring(1));
+            console.log(checkedPapers);
+        } else {
+            const index = checkedPapers.indexOf(id.substring(1));
+            checkedPapers.splice(index, 1);
+            console.log(checkedPapers);
+        }
+    }
+
+    function deletePapers(){
+
+        const deletePaper = async () => {
+            const mapPromises = checkedPapers.map(paper => {
+                return axios.delete(`/api/authors/${authorID}/papers/${paper}`, { mode: 'cors' }).then(res => {
+                    if (res.status == 200) {
+                        console.log("Deleted paper");
+                    }
+                    else {
+                        console.log("Error deleting paper");
+                    }
+                });
+            });
+            Promise.all(mapPromises).then(() => {
+                checkedPapers = [];
+                getAuthor();
+            })
+        }
+
+        deletePaper();
+
+    }
+
     function googleScholarRedirect() {
         window.open(
             "https://scholar.google.com/citations?hl=en&oi=ao&user=" + authorScholarID,
@@ -367,17 +428,26 @@ function Author() {
                         </div>
                     </div>
                     <div className="row pt-2" id="articles">
-                        <table className="table table-borderless table-striped" id="paperTable" style={{display: "none"}}>
+                        <table className="table table-borderless table-striped mb-0" id="paperTable" style={{display: "none"}}>
                             <thead className="thead-dark">
                                 <tr>
                                     <th className="col-6" scope="col">Article</th>
                                     <th className="col-2" scope="col">Year</th>
                                     <th className="col-2" scope="col">Citations</th>
+                                    <th className="col-2" scope="col">Check</th>
                                 </tr>
                             </thead>
                             <tbody id = "paperTableBody">
                             </tbody>
                         </table>
+                    </div>
+                    <div className="row">
+                        <div className="ml-auto" id="deleteAuthor">
+                            <button type="button" class="btn btn-danger" onClick={deleteAuthor}>Delete Author</button>
+                        </div>
+                        <div className="ml-auto" id="deletePapers">
+                            <button type="button" class="btn btn-danger" onClick={deletePapers}>Delete Checked Papers</button>
+                        </div>
                     </div>
                 </div>
             </div>
