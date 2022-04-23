@@ -163,7 +163,7 @@ def test_body_create(client, session):
 
     papers = ['title1', 'title2', 'title3']
 
-    resp = client.post(f'/tasks/create-papers-list?author_id={author.id}', json={'paper_titles': papers})
+    resp = client.post(f'/tasks/create-papers-list?author_id={author.id}', json=papers)
     assert resp.status_code == 201
     assert len(resp.json) == 3
 

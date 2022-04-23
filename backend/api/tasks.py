@@ -109,18 +109,17 @@ def create_papers_list():
 
         data = request.get_json()
 
-        if 'paper_titles' not in data:
+        if not isinstance(data, list):
             return current_app.response_class(
-                response=json.dumps({'message': 'paper_titles required',
+                response=json.dumps({'message': 'Data must be an array',
                                      'status': 'error'}),
                 status=400,
                 mimetype='application/json'
             )
         
         tasks = []
-        
-        paper_titles = data['paper_titles']
-        for paper_title in paper_titles:
+
+        for paper_title in data:
             task = CreatePaperTask(paper_title = paper_title, author_id = author_id, date = datetime.now())
             session.add(task)
             session.flush()
