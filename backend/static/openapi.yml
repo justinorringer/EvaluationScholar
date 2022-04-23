@@ -1073,11 +1073,42 @@ paths:
               type: string
               format: binary
       responses:
-        '200':
+        '201':
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Task'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '404':
+          description: Author not found
+  /api/tasks/create-papers-list:
+    post:
+      tags:
+        - Tasks
+      description: Schedule CreatePaperTasks using the given list of paper titles for an author
+      parameters:
+        - in: query
+          name: author_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
         '404':
           description: Author not found

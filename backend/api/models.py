@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Table, Column, Integer, ForeignKey, String, DateTime, desc, Enum
+from sqlalchemy import Table, Column, Integer, ForeignKey, String, DateTime, desc, Enum, Boolean
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -23,6 +23,7 @@ class Author(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(80), unique=False, nullable=False)
     scholar_id = Column(String(12), unique=False, nullable=True)
+    uploaded_papers = Column(Boolean, default=False)
 
     papers = relationship('Paper', secondary=author_paper, back_populates='authors')
     tags = relationship('Tag', secondary=author_tag, back_populates='authors')
@@ -58,6 +59,7 @@ class Author(Base):
             'id': self.id,
             'name': self.name,
             'scholar_id': self.scholar_id,
+            'uploaded_papers': self.uploaded_papers,
         }
 
         if 'papers' in includes:
