@@ -1,0 +1,14 @@
+An  Empirical  Study  on  Type  Annotations:  Accuracy, Speed, and Suggestion Effectiveness
+Automated Object Manipulation Using Vision-Based Mobile Robotic System for Construction Applications
+Sensing Water Properties at Precise Depths from the Air
+Obtaining the Thermal Structure of Lakes from the Air
+Bringing Unmanned Aerial Systems Closer to the Environment
+Autonomous Aerial Water Sampling
+Phys: Probabilistic Physical Unit Assignment and Inconsistency Detection
+Assessing the Type Annotation Burden
+Dimensional Inconsistencies in Code and ROS Messages:  A Study of 5.9M Lines of Code
+Phriky-Units:  a  Lightweight,  Annotation-Free Physical Unit Inconsistency Detection Tool 
+Lightweight Detection of Physical Unit Inconsistencies without Program Annotations
+Surface Classification for Sensor Deployment from UAV Landings
+On Air-to-Water Radio Communication between UAVs and Water Sensor Networks
+Controlled Sensor Network Installation with Unmanned Aerial Vehicles

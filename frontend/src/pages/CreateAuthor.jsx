@@ -132,7 +132,7 @@ function CreateAuthor() {
             <div className="row pl-3">
                 <label>Enter Author Name: &nbsp;</label>
                 <input className="mx-3" type="text" id="authName"></input>
-                <button type="button" className="btn btm-sm btn-danger" onClick={getScrapedAuthors}>Search Google Scholar</button>
+                <button id="searchButton" type="button" className="btn btm-sm btn-danger" onClick={getScrapedAuthors}>Search Google Scholar</button>
                 <span className="ml-3" id="wait"></span>
             </div>
         </div>
