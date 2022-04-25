@@ -115,6 +115,51 @@ function Author() {
 
     getAuthor();
 
+    function populateUpdateModal(){
+        let curr_papers = [];
+        const getPapers = async () => {
+            try {
+                const response = await axios.get(`/api/authors/${authorID}/papers`, {mode:'cors'});
+                if (response.status === 200)
+                    curr_papers = response.data;
+            }
+            catch (e) {
+                console.log("Failed to get papers.");
+            }
+            const modalTableBody = document.getElementById("modalTableBody");
+            const modalTable = document.getElementById("modalTable");
+
+            console.log(curr_papers)
+
+            curr_papers.forEach(paper => {
+                var row = document.createElement("tr");
+                var article = document.createElement("td");
+                var add_butt = document.createElement("td");
+                article.innerText = paper.name;
+
+                var buttonInner = document.createElement("button");
+
+                buttonInner.type = "button";
+                buttonInner.innerText = "+";
+                buttonInner.className = "btn btn-dark btn-sm";
+                buttonInner.value = paper.id;
+
+                add_butt.style = "vertical-align: middle";
+                buttonInner.style = "display: block; margin: auto";
+
+                //buttonInner.onclick = () => { deleteTask(paper.id); };
+
+                add_butt.appendChild(buttonInner);
+
+                row.appendChild(article);
+                row.appendChild(add_butt);
+                modalTableBody.appendChild(row);
+            });
+        }
+        getPapers();
+    }
+
+    populateUpdateModal();
     //Function to get called by the download button so that a CSV is generated for the user, now tied to checkboxes
     function htmlToCSV(){
 
@@ -289,12 +334,12 @@ function Author() {
                     </div>
 
                     <div className="row pt-2">
-                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#uploadPapersModal">
+                        <button id="UploadPapers" type="button" class="btn btn-danger" data-toggle="modal" data-target="#uploadPapersModal">
                             Upload Papers
                         </button>
                     </div>
                     <div className="row pt-2">
-                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#updatePapersModal">
+                        <button id="UpdatePapers" type="button" class="btn btn-danger" data-toggle="modal" data-target="#updatePapersModal">
                             Update Papers
                         </button>
                     </div>
@@ -321,7 +366,7 @@ function Author() {
                             </div>
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                <button type="button" className="btn btn-success" data-dismiss="modal" onClick={upload}>Upload</button>
+                                <button id="uploadPapers" type="button" className="btn btn-success" data-dismiss="modal" onClick={upload}>Upload</button>
                             </div>
                             </div>
                         </div>
@@ -341,14 +386,16 @@ function Author() {
                                     <label for="myfile">Select Papers to Update/Add:&nbsp;</label>
                                 </div>
                                 <div className="row pl-3">
-                                    <ul>
-                                        <li>
-                                            First Filler Paper
-                                        </li>
-                                        <li>
-                                            Second Filler Paper
-                                        </li>
-                                    </ul>
+                                    <table className="table table-borderless table-striped" id="modalPaperTable">
+                                        <thead className="thead-dark">
+                                            <tr>
+                                                <th className="col-8" scope="col">Article</th>
+                                                <th className="col-2" scope="col">Update/Add</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id = "modalTableBody">
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                             <div className="modal-footer">
