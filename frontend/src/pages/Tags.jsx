@@ -184,7 +184,7 @@ function Tags() {
         <div className="body">
             <div className="container">
                 <div className="container">
-                    <h3>Assign Tags to Authors</h3>
+                    <h3 id="tagTitle">Assign Tags to Authors</h3>
                 </div>
                 <div className="row">
                     <div className="alert alert-success alert-dismissible" role="alert" id="success" style={{ display: "none" }}>
@@ -231,7 +231,7 @@ function Tags() {
                         </h4>
                         <div className="d-flex px-3 align-items-right ml-auto">
                             <input type="type" className="form-control mr-2" id="tagBox" placeholder="New Tag" />
-                            <button type="button" className="btn btn-danger btn-sm" onClick={createTag}>Create</button>
+                            <button id="createButton" type="button" className="btn btn-danger btn-sm" onClick={createTag}>Create</button>
                         </div>
                     </div>
                     <div className="row px-2 pb-2 d-flex">
@@ -258,14 +258,14 @@ function Tags() {
                                 <TextField {...params} label="Select Tags" placeholder="Select Tags" />
                             )}
                         />
-                        <button type="button" className="btn btn-danger btn-sm ml-2" onClick={deleteTags}>Delete</button>
+                        <button id="deleteButton" type="button" className="btn btn-danger btn-sm ml-2" onClick={deleteTags}>Delete</button>
                     </div>
 
                 </div>
 
                 <div className="container d-flex justify-content-end">
-                    <button type="button" className="btn btn-danger btn-sm mr-2" onClick={assignTags}>Assign</button>
-                    <button type="button" className="btn btn-danger btn-sm" onClick={unassignTags}>Unassign</button>
+                    <button id="assignButton" type="button" className="btn btn-danger btn-sm mr-2" onClick={assignTags}>Assign</button>
+                    <button id="unassignButton" type="button" className="btn btn-danger btn-sm" onClick={unassignTags}>Unassign</button>
                 </div>
             </div>
         </div>
