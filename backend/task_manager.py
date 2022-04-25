@@ -9,6 +9,9 @@ from scraping import scrape_papers
 from scraping.google_scholar import get_profile_page_html, parse_profile_page_name
 from multiprocessing import Process
 from threading import Thread
+from threading import Lock
+
+lock = Lock()
 
 @contextmanager
 def db_session(Session):
@@ -35,6 +38,7 @@ def scrape_author(session, author):
     
     author.name = name
     print(f"[Task Manager] Scraped author details: '{author.name}'")
+    session.commit()
 
 def update_citations(session, paper):
     if paper is None:
@@ -46,6 +50,7 @@ def update_citations(session, paper):
         print(f"[Task Manager] Failed to scrape paper for citation update: '{paper.name}'")
         return
 
+    # TODO: Match using scholar id
     scraped_paper = scraped_papers[0]
     if scraped_paper['citations'] is None:
         print(f"[Task Manager] Failed to scrape citations for paper in citation update: '{paper.name}'")
@@ -54,46 +59,39 @@ def update_citations(session, paper):
     paper.citations.append(Citation(scraped_paper['citations'], datetime.now()))
 
     print(f"[Task Manager] Updated citations for paper: '{paper.name}'")
+    session.commit()
 
 def create_and_link_authors(session, paper, scraped_authors):
-    for scraped_author in scraped_authors:
-        existing_author = session.query(Author).filter(Author.scholar_id == scraped_author['id']).first()
-        if existing_author is None:
-            author = Author(scraped_author['name'], scraped_author['id'])
-            session.add(author)
-            author.papers.append(paper)
-            session.flush()
+    # These threads are running at the same time
+    # Race conditions could result in duplicate authors being created
+    # So lock this section, guaranteeing no duplicates
+    with lock:
+        for scraped_author in scraped_authors:
+            existing_author = session.query(Author).filter(Author.scholar_id == scraped_author['id']).first()
+            if existing_author is None:
+                author = Author(scraped_author['name'], scraped_author['id'])
+                session.add(author)
+                author.papers.append(paper)
+                session.flush()
 
-            scrape_author_task = ScrapeAuthorTask(author.id)
-            session.add(scrape_author_task)
-            print(f"[Task Manager] Created new scraped author: '{author.name}' and linked to paper: '{paper.name}'")
-        else:
-            existing_author.papers.append(paper)
-            print(f"[Task Manager] Linked scraped author: '{existing_author.name}' to paper: '{paper.name}'")
-    
-    session.commit()
+                scrape_author_task = ScrapeAuthorTask(author.id)
+                session.add(scrape_author_task)
+                print(f"[Task Manager] Created new scraped author: '{author.name}' and linked to paper: '{paper.name}'")
+            else:
+                existing_author.papers.append(paper)
+                print(f"[Task Manager] Linked scraped author: '{existing_author.name}' to paper: '{paper.name}'")
+        session.commit()
 
 def create_paper(session, paper_title, author, paper_scholar_id):
     if paper_title == None:
         print("[Task Manager] Paper title is None")
         return
 
-    # Check for an exact match for the given paper title to avoid a scraping call if possible
-    existing_paper = session.query(Paper).filter(func.lower(Paper.name) == paper_title.lower()).first()
-    if existing_paper is not None:
-        if existing_paper in author.papers:
-            print(f"[Task Manager] Paper '{paper_title}' already exists for author '{author.name}'")
-            return
-
-        existing_paper.authors.append(author)
-        print(f"[Task Manager] Added author to existing paper: '{paper_title}'")
-        return
-
     scraped_papers = scrape_papers(paper_title)
     if len(scraped_papers) == 0:
         print(f"[Task Manager] Failed to scrape paper during creation: '{paper_title}'")
         return
-    
+
     # Select the correct scraped paper to use
     # If a scholar id is given, use that paper
     # Otherwise, use the first paper
@@ -105,39 +103,26 @@ def create_paper(session, paper_title, author, paper_scholar_id):
             return
     else:
         scraped_paper = scraped_papers[0]
+    
+    with lock:
+        existing_paper = session.query(Paper).filter(Paper.scholar_id == scraped_paper['id']).first()
+        if existing_paper is not None:
+            if existing_paper in author.papers:
+                print(f"[Task Manager] Paper '{paper_title}' already exists for author '{author.name}'")
+                return
 
-    if scraped_paper['citations'] is None:
-        print(f"[Task Manager] Failed to scrape paper citations during creation: '{paper_title}'")
-        return
-    
-    if scraped_paper['year'] is None:
-        print(f"[Task Manager] Failed to scrape paper year during creation: '{paper_title}'")
-        return
-    
-    if scraped_paper['id'] is None:
-        print(f"[Task Manager] Failed to scrape paper scholar id during creation: '{paper_title}'")
-        return
-    
-    if scraped_paper['title'] is None:
-        print(f"[Task Manager] Failed to scrape paper title during creation: '{paper_title}'")
-        return
-    
-    existing_paper = session.query(Paper).filter(Paper.name == scraped_paper['title']).first()
-    if existing_paper is not None:
-        if existing_paper in author.papers:
-            print(f"[Task Manager] Paper '{paper_title}' already exists for author '{author.name}'")
+            existing_paper.authors.append(author)
+            session.commit()
+            print(f"[Task Manager] Added author {author.name} to existing paper: '{existing_paper.name}'")
             return
 
-        existing_paper.authors.append(author)
-        print(f"[Task Manager] Added author to existing paper: '{existing_paper.name}'")
-        return
+        paper = Paper(scraped_paper['title'], scraped_paper['year'], scraped_paper['id'])
 
-    paper = Paper(scraped_paper['title'], scraped_paper['year'], scraped_paper['id'])
+        paper.citations.append(Citation(scraped_paper['citations'], datetime.now()))
+        paper.authors.append(author)
 
-    paper.citations.append(Citation(scraped_paper['citations'], datetime.now()))
-    paper.authors.append(author)
-
-    session.add(paper)
+        session.add(paper)
+        session.commit()
 
     print(f"[Task Manager] Created paper: '{paper_title}'")
 
@@ -158,7 +143,6 @@ def handle_task(connection_string, task):
         author = session.query(Author).filter(Author.id == task.author_id).first()
         scrape_author(session, author)
 
-    session.commit()
     session.close()
     Session.close()
     engine.dispose()

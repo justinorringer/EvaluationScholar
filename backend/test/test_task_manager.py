@@ -81,7 +81,6 @@ def test_create_paper(session, task_manager):
     wait_for_task(task_manager, task.id)
 
     # Make sure the paper wasn't recreated
-
     assert session.query(Paper).count() == 1
     assert session.query(UpdateCitationsTask).count() == 1
 

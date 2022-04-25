@@ -53,8 +53,8 @@ def test_zero_citations():
 
 @pytest.mark.scraping
 def test_profile_page():
-    html = google_scholar.get_profile_page_html("7XjL07wAAAAJ", page = 1)
-    html_2 = google_scholar.get_profile_page_html("7XjL07wAAAAJ", page = 2)
+    html = google_scholar.get_profile_page_html("0bnFgyAAAAAJ", page = 1)
+    html_2 = google_scholar.get_profile_page_html("0bnFgyAAAAAJ", page = 2)
 
     profile_name = google_scholar.parse_profile_page_name(html)
     assert profile_name == "Gregg Rothermel"
@@ -63,8 +63,7 @@ def test_profile_page():
     assert len(profile_papers) == 100
 
     profile_papers_2 = google_scholar.parse_profile_page_papers(html_2)
-    # Second page has 100 papers, but two of them don't have years so aren't included
-    assert len(profile_papers_2) == 98
+    assert len(profile_papers_2) >= 90 and len(profile_papers_2) <= 100
 
     assert profile_papers[0]['title'] != profile_papers_2[0]['title']
 
