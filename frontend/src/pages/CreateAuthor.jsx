@@ -58,10 +58,20 @@ function CreateAuthor() {
                 document.getElementById("container").appendChild(label);
                 document.getElementById("container").appendChild(button);
             }
-            
         }
         catch (e) {
             document.getElementById("failed").style = "display: block !important";
+            let label = document.createElement("label");
+            label.id = "label";
+            label.className = "mr-2 mt-3";
+            label.innerText = "Is the author you're looking for not here? Try searching full name, partial name, or just";
+            let button = document.createElement("button");
+            button.className = "btn btm-sm btn-danger";
+            button.id = "button";
+            button.onclick = function () { createAuthor(name, null) };
+            button.innerText = "Create '" + name + "'";
+            document.getElementById("container").appendChild(label);
+            document.getElementById("container").appendChild(button);
         }
         document.getElementById("wait").innerText = "";
     }
@@ -122,7 +132,7 @@ function CreateAuthor() {
             <div className="row pl-3">
                 <label>Enter Author Name: &nbsp;</label>
                 <input className="mx-3" type="text" id="authName"></input>
-                <button type="button" className="btn btm-sm btn-danger" onClick={getScrapedAuthors}>Search Google Scholar</button>
+                <button id="searchButton" type="button" className="btn btm-sm btn-danger" onClick={getScrapedAuthors}>Search Google Scholar</button>
                 <span className="ml-3" id="wait"></span>
             </div>
         </div>

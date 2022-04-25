@@ -14,6 +14,7 @@ function Author() {
     //Variable to hold list of papers related to an author
     let papers = [];
     let tags = [];
+    let checkedPapers = [];
 
     //Function to make the API call to gather the papers of a specific author.
     function getAuthor() {
@@ -49,12 +50,22 @@ function Author() {
                 var article = document.createElement("td");
                 var year = document.createElement("td");
                 var citations = document.createElement("td");
+                var checkBox = document.createElement("td");
+
+                let input = document.createElement("input");
+                input.className = "checkbox";
+                input.type = "checkbox";
+                input.id = "p" + paper.id;
+                input.onclick = function() { checkedPaper(input.id) };
+                checkBox.appendChild(input);
+
                 article.innerText = paper.name;
                 year.innerText = paper.year;
                 citations.innerText = paper.latest_citation.num_cited;
                 row.appendChild(article);
                 row.appendChild(year);
                 row.appendChild(citations);
+                row.appendChild(checkBox);
                 paperTableBody.appendChild(row);
             });
         }
@@ -104,6 +115,107 @@ function Author() {
 
     getAuthor();
 
+    function populateUpdateModal(){
+        let curr_papers = [];
+        const getPapers = async () => {
+            try {
+                const response = await axios.get(`/api/authors/${authorID}/papers`, {mode:'cors'});
+                if (response.status === 200)
+                    curr_papers = response.data;
+            }
+            catch (e) {
+                console.log("Failed to get papers.");
+            }
+            const modalTableBody = document.getElementById("modalTableBody");
+            const modalTable = document.getElementById("modalTable");
+
+            console.log(curr_papers)
+
+            curr_papers.forEach(paper => {
+                var row = document.createElement("tr");
+                var article = document.createElement("td");
+                var add_butt = document.createElement("td");
+                article.innerText = paper.name;
+
+                var buttonInner = document.createElement("button");
+
+                buttonInner.type = "button";
+                buttonInner.innerText = "+";
+                buttonInner.className = "btn btn-dark btn-sm";
+                buttonInner.value = paper.id;
+
+                add_butt.style = "vertical-align: middle";
+                buttonInner.style = "display: block; margin: auto";
+
+                //buttonInner.onclick = () => { deleteTask(paper.id); };
+
+                add_butt.appendChild(buttonInner);
+
+                row.appendChild(article);
+                row.appendChild(add_butt);
+                modalTableBody.appendChild(row);
+            });
+        }
+        getPapers();
+    }
+
+    populateUpdateModal();
+    //Function to get called by the download button so that a CSV is generated for the user, now tied to checkboxes
+    function htmlToCSV(){
+
+        var output = ["Article,Year,CitationCount\n"];
+
+        var csv_file, download_link;
+
+        let name = authorName;
+
+        const getPapers = async () => {
+            try {
+                const response = await axios.get(`/api/authors/${authorID}/papers`, {mode:'cors'});
+                if (response.status === 200)
+                    papers = response.data;
+            }
+            catch (e) {
+                console.log("Failed to get papers.");
+            }
+        }
+        getPapers();
+        console.log(papers);
+/*        try {
+            const response = await axios.get(`/api/authors/${id}/papers`, {mode:'cors'});
+            if (response.status === 200)
+                papers = papers.concat(response.data);//= response.data;
+            //console.log({response, papers});
+        }
+        catch (e) {
+            console.log(e.getMessage);
+        }
+*/
+        papers.forEach(paper => {
+            let article = paper.name;
+            let year = paper.year;
+            let citations = paper.latest_citation.num_cited;
+
+            let new_string = "\"" + article + "\"," + year + "," + citations + "\n";
+            output.push(new_string);
+
+        });
+
+        csv_file = new Blob(output, {type: "text/csv"});
+
+        download_link = document.createElement("a");
+
+        download_link.download = name + ".csv";
+
+        download_link.href = window.URL.createObjectURL(csv_file);
+
+        download_link.style.display = "none";
+
+        document.body.appendChild(download_link);
+
+        download_link.click();
+ 
+    }
     // Function for adding new articles on click
     //Variable to hold data from a file selected to be read in.
 
@@ -135,6 +247,56 @@ function Author() {
             }
         }
         postPaperTasks();
+    }
+
+    function deleteAuthor(){
+        const deleteAnAuthor = async () => {
+            const response = await axios.delete(`/api/authors/${authorID}`, {mode:'cors'}).then(res =>{
+                if(res.status == 200){
+                    console.log("Deleted author");
+                }
+                else{
+                    console.log("Error deleting author");
+                }
+                window.location.href = `/`;
+            });
+        }
+        deleteAnAuthor();
+    }
+
+    function checkedPaper(id) {
+        var checkBox = document.getElementById(id);
+        if (checkBox.checked == true){
+            checkedPapers.push(id.substring(1));
+            console.log(checkedPapers);
+        } else {
+            const index = checkedPapers.indexOf(id.substring(1));
+            checkedPapers.splice(index, 1);
+            console.log(checkedPapers);
+        }
+    }
+
+    function deletePapers(){
+
+        const deletePaper = async () => {
+            const mapPromises = checkedPapers.map(paper => {
+                return axios.delete(`/api/authors/${authorID}/papers/${paper}`, { mode: 'cors' }).then(res => {
+                    if (res.status == 200) {
+                        console.log("Deleted paper");
+                    }
+                    else {
+                        console.log("Error deleting paper");
+                    }
+                });
+            });
+            Promise.all(mapPromises).then(() => {
+                checkedPapers = [];
+                getAuthor();
+            })
+        }
+
+        deletePaper();
+
     }
 
     function googleScholarRedirect() {
@@ -172,8 +334,18 @@ function Author() {
                     </div>
 
                     <div className="row pt-2">
-                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#uploadPapersModal">
+                        <button id="UploadPapers" type="button" class="btn btn-danger" data-toggle="modal" data-target="#uploadPapersModal">
                             Upload Papers
+                        </button>
+                    </div>
+                    <div className="row pt-2">
+                        <button id="UpdatePapers" type="button" class="btn btn-danger" data-toggle="modal" data-target="#updatePapersModal">
+                            Update Papers
+                        </button>
+                    </div>
+                    <div className="row pt-2">
+                        <button type="button" class="btn btn-danger" onClick={htmlToCSV}>
+                            Export Data
                         </button>
                     </div>
 
@@ -194,11 +366,46 @@ function Author() {
                             </div>
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                <button type="button" className="btn btn-success" data-dismiss="modal" onClick={upload}>Upload</button>
+                                <button id="uploadPapers" type="button" className="btn btn-success" data-dismiss="modal" onClick={upload}>Upload</button>
                             </div>
                             </div>
                         </div>
                     </div>
+
+                    <div className="modal fade" id="updatePapersModal" tabindex="-1" role="dialog" aria-labelledby="updatePapersModalTitle" aria-hidden="true">
+                        <div className="modal-dialog modal-dialog-centered" role="document">
+                            <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title" id="updatePapersModalLongTitle">Update Paper Data for an Author</h5>
+                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                <div className="row pl-3">
+                                    <label for="myfile">Select Papers to Update/Add:&nbsp;</label>
+                                </div>
+                                <div className="row pl-3">
+                                    <table className="table table-borderless table-striped" id="modalPaperTable">
+                                        <thead className="thead-dark">
+                                            <tr>
+                                                <th className="col-8" scope="col">Article</th>
+                                                <th className="col-2" scope="col">Update/Add</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id = "modalTableBody">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                <button type="button" className="btn btn-success" data-dismiss="modal">Update</button>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="row pt-3 pr-3">
                         <div className="alert alert-success alert-dismissible" role="alert" id="success" style={{display: "none"}}>
                             <button className="close" type="button" onClick={hideSuccessAlert}><span>&times;</span></button>File uploaded successfully.
@@ -221,17 +428,26 @@ function Author() {
                         </div>
                     </div>
                     <div className="row pt-2" id="articles">
-                        <table className="table table-borderless table-striped" id="paperTable" style={{display: "none"}}>
+                        <table className="table table-borderless table-striped mb-0" id="paperTable" style={{display: "none"}}>
                             <thead className="thead-dark">
                                 <tr>
-                                    <th scope="col-6">Article</th>
-                                    <th scope="col-2">Year</th>
-                                    <th scope="col-2">Citations</th>
+                                    <th className="col-6" scope="col">Article</th>
+                                    <th className="col-2" scope="col">Year</th>
+                                    <th className="col-2" scope="col">Citations</th>
+                                    <th className="col-2" scope="col">Check</th>
                                 </tr>
                             </thead>
                             <tbody id = "paperTableBody">
                             </tbody>
                         </table>
+                    </div>
+                    <div className="row">
+                        <div className="ml-auto" id="deleteAuthor">
+                            <button type="button" class="btn btn-danger" onClick={deleteAuthor}>Delete Author</button>
+                        </div>
+                        <div className="ml-auto" id="deletePapers">
+                            <button type="button" class="btn btn-danger" onClick={deletePapers}>Delete Checked Papers</button>
+                        </div>
                     </div>
                 </div>
             </div>

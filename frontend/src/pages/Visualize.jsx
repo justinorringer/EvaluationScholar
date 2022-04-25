@@ -1,170 +1,471 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-//import Chart from "react-apexcharts";
-import {BoxPlotChart} from '@toast-ui/chart';
-//import BoxPlotChart from '@toast-ui/chart/boxPlot';
-//import { BoxPlotChart } from '@toast-ui/react-chart';
+import { BoxPlotChart } from '@toast-ui/react-chart';
+import { styled } from '@mui/material/styles';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import Box from '@mui/material/Box';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Typography from '@mui/material/Typography';
 import Switch from '@mui/material/Switch';
+import Select from '@mui/material/Select';
+import Slider from '@mui/material/Slider';
+import Checkbox from '@mui/material/Checkbox';
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material/Autocomplete';
+import PropTypes from 'prop-types';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
+
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const checkedIcon = <CheckBoxIcon fontSize="small" />;
+const Separator = styled('div')(
+    ({ theme }) => `
+    height: ${theme.spacing(3)};
+  `,
+  );
+function a11yProps(index) {
+    return {
+        id: `simple-tab-${index}`,
+        'aria-controls': `simple-tabpanel-${index}`,
+    };
+}
 
 function Visualize() {
 
     const [aggAuthors, setAggAuthors] = useState(true);
-    
-/*
-Apex charts code (use for Toast when using react charts instead)
 
-    const [options, setOptions] = useState({
-            series: [
-                {
-                    name: 'box',
-                    type: 'boxPlot',
-                    data: [
-                        {
-                            x: 1,
-                            y: [54, 66, 69, 75, 88]
-                        },
-                        {
-                            x: 2,
-                            y: [43, 65, 69, 76, 81]
-                        },
-                        {
-                            x: 3,
-                            y: [31, 39, 45, 51, 59]
-                        },
-                        {
-                            x: 4,
-                            y: [39, 46, 55, 65, 71]
-                        },
-                        {
-                            x: 5,
-                            y: [0, 3, 13, 16, 21]
-                        }
-                    ]
-                },
-                {
-                    name: 'outliers',
-                    type: 'scatter',
-                    data: [
-                    {
-                        x: 1,
-                        y: 32
-                    },
-                    {
-                        x: 2,
-                        y: 25
-                    },
-                    {
-                        x: 3,
-                        y: 64
-                    },
-                    {
-                        x: 4,
-                        y: 27
-                    },
-                    {
-                        x: 4,
-                        y: 78
-                    },
-                    {
-                        x: 5,
-                        y: 15
-                    }
-                    ]
-                }],
-            chart: {
-                type: 'boxPlot',
-                height: 350
-            },
-            colors: ['#CC2424', '#666666'],
-            title: {
-                text: 'BoxPlot',
-                align: 'center'
-            },
-            xaxis: {
-                type: 'category',
-                categories: ["Rothermel", "Heil", "Williams", "Singh", "Ore"],
-                tickPlacement: "between"
-            },
-            tooltip: {
-                shared: false,
-                intersect: true
-            }
-        });
+    const [selectBy, setSelectBy] = useState("authors");
 
-*/
+    const [range, setRange] = useState([1960, new Date().getFullYear()]);
 
-    const testing = async () => {
-    
-        try {
-            const response = await axios.get('/api/authors', {mode:'cors'});
-            console.log(response.data)
-        }
-        catch (e) {
-            console.log(e.getMessage);
-        }
+    const [bounds, setBounds] = useState([1960, new Date().getFullYear()]);
 
-        const el = document.getElementById("chart-area");
-        console.log(el);
+    const [authors, setAuthors] = useState([]);
 
-        const data = {
-            categories: ['Budget', 'Income', 'Expenses', 'Debt'],
+    const [selectedAuthors, setSelectedAuthors] = useState([]);
+
+    const [authorsData, setAuthorsData] = useState([]);
+
+    const [tags, setTags] = useState([]);
+
+    const [selectedTags, setSelectedTags] = useState([]);
+
+    const [indexType, setIndexType] = useState("");
+
+    const [index, setIndex] = useState(0);
+
+    const [tab, setTab] = useState(0);
+
+    const [toggleOutliers, setToggleOutliers] = useState(true);
+
+    const [boxData, setBoxData] = useState({
+        categories: [],
         series: [
             {
-            name: '2020',
-            data: [
-                [1000, 2500, 3714, 5500, 7000],
-                [1000, 2750, 4571, 5250, 8000],
-                [3000, 4000, 4714, 6000, 7000],
-                [1000, 2250, 3142, 4750, 6000],
-            ],
-            outliers: [
-                [0, 14000],
-                [2, 10000],
-                [3, 9600],
-            ],
-            },
-            {
-            name: '2021',
-            data: [
-                [2000, 4500, 6714, 11500, 13000],
-                [3000, 5750, 7571, 8250, 9000],
-                [5000, 8000, 8714, 9000, 10000],
-                [7000, 9250, 10142, 11750, 12000],
-            ],
-            outliers: [[1, 14000]],
-            },
+                data: [],
+                outliers: [],
+            }
         ],
-        };
-        const options = {
-            chart: { title: 'Monthly Revenue', width: 900, height: 500 },
-        };
+    });
 
-        try {   
-            const chart = new BoxPlotChart({ el, data, options } );
-        } catch (e) {
-            console.log(e);
+    const [options, setOptions] = useState({
+        chart: { title: 'Citations', width: 700, height: 500 },
+        legend: { visible: false }
+    });
+
+    /**
+     * Function to sort alphabetically an array of objects by some specific key.
+     * 
+     * @param {String} property Key of the object to sort.
+     * @author https://ourcodeworld.com/articles/read/764/how-to-sort-alphabetically-an-array-of-objects-by-key-in-javascript
+     */
+    function alphabeticSort(property) {
+        let sortOrder = 1;
+
+        if (property[0] === "-") {
+            sortOrder = -1;
+            property = property.substr(1);
+        }
+
+        return function (a, b) {
+            if (sortOrder == -1) {
+                return b[property].localeCompare(a[property]);
+            } else {
+                return a[property].localeCompare(b[property]);
+            }
         }
     }
 
-    testing();
+    function median(papers) {
+        if (papers.length === 0) throw new Error("No inputs");
 
-    const handleChange = (event) => {
-        setAggAuthors(event.target.checked);
-        console.log(event);
-    };
+        let half = Math.floor(papers.length / 2);
+
+        if (papers.length % 2)
+            return papers[half];
+
+        return (papers[half - 1] + papers[half]) / 2.0;
+    }
+
+    //get authors and their papers if selected
+    useEffect(() => {
+        let tempMin = new Date().getFullYear(); //current year starting min
+        let tempMax = 0; //0 starting max
+        const tempAuthorData = [];
+        const mapAuthors = selectedAuthors.map(author => {
+            return axios.get(`api/authors/${author.id}?include=papers`)
+                .then(response => {
+                    tempAuthorData.push(response.data);
+                }).
+                catch(err => {
+                    console.log(err);
+                }
+                );
+        });
+        Promise.all(mapAuthors).then(() => {
+            tempAuthorData.forEach(author => {
+                author.papers.forEach(paper => {
+                    if (paper.year > tempMax) {
+                        tempMax = paper.year;
+                    }
+                    if (paper.year < tempMin) {
+                        tempMin = paper.year;
+                    }
+                })
+            })
+            if (tempMax > 0) {
+                setBounds([tempMin, tempMax]);
+            }
+            setAuthorsData(tempAuthorData);
+        })
+    }, [selectedAuthors]);
+
+    //get authors and their papers given tag(s). group authors if aggAuthors === true
+    useEffect(() => {
+        let tempMin = new Date().getFullYear(); //current year starting min
+        let tempMax = 0; //0 starting max
+        const tag_ids = [];
+        selectedTags.forEach(tag => {
+            tag_ids.push(tag.id);
+        })
+        if (aggAuthors) {
+        } else {
+            axios.get(`api/authors?include=papers&tags=${tag_ids}`)
+                .then(response => {
+                    response.data.forEach(author => {
+                        author.papers.forEach(paper => {
+                            if (paper.year > tempMax) {
+                                tempMax = paper.year;
+                            }
+                            if (paper.year < tempMin) {
+                                tempMin = paper.year;
+                            }
+                        })
+                    })
+                    setAuthorsData(response.data);
+                }).
+                catch(err => {
+                    console.log(err);
+                }
+            );
+        }
+    }, [selectedTags, aggAuthors]);
+
+    //reset graph
+    useEffect(() => {
+        const categories = [];
+        const data = [];
+        const outliers = [];
+
+        let i = 0;
+        authorsData.forEach(author => {
+            categories.push(author.name);
+            const papers = [];
+            author.papers.forEach(paper => {
+                if (paper.year >= range[0] && paper.year <= range[1]) {
+                    papers.push(paper.latest_citation.num_cited);
+                }
+            })
+            //sort the papers for the author
+            papers.sort(function (a, b) {
+                return a - b;
+            });
+            //check the sort
+            
+            let firstHalf = [];
+            let secondHalf = [];
+            let med = 0;
+            let q1 = 0;
+            let q3 = 0;
+            try {
+                if (papers.length > 0) {
+                    med = median(papers); //get median
+                }
+                q1 = med; //set to median by default
+                q3 = med; //set to median by default
+                if (papers.length > 1) {
+                    let half = Math.ceil(papers.length / 2);
+                    firstHalf = papers.splice(0, half);
+                    secondHalf = papers.splice(-half);
+                    q1 = median(firstHalf); //reset to median of the first half
+                    if (secondHalf.length > 0) {
+                        q3 = median(secondHalf); //reset to median of the second half as long as the second half exists
+                    }
+                }
+            } catch (e) { //something was length 0
+                console.log(e);
+            }
+
+            const iqr = q3 - q1; //get IQR
+            
+            let min = q1;
+            let max = q3;
+
+            const minThreshold = q1 - (1.5 * iqr); //get outlier threshold for lower bound
+            const maxThreshold = q3 + (1.5 * iqr); //get outlier threshold for higher bound
+
+            for (let j = 0; j < firstHalf.length; j++) {
+                let value = firstHalf[j];
+                if (value < minThreshold) {
+                    if (toggleOutliers) {
+                        outliers.push([i, value]);
+                    }
+                } else {
+                    min = value; //set min
+                    break;
+                }
+            }
+            for (let j = secondHalf.length - 1; j >= 0; j--) {
+                let value = secondHalf[j];
+                if (value > maxThreshold) {
+                    if (toggleOutliers) {
+                        outliers.push([i, value]);
+                    }
+                } else {
+                    max = value; //set max
+                    break;
+                }
+            }
+
+            data.push([min, q1, med, q3, max]);
+            i++;
+        });
+        
+        setBoxData({
+            categories: categories,
+            series: [
+                {
+                    name: "Author",
+                    data: data,
+                    outliers: outliers,
+                }
+            ],
+        });
+    }, [authorsData, toggleOutliers, range]);
+
+    useEffect(() => {
+        axios.get("api/authors")
+            .then(response => {
+                setAuthors(response.data.sort(alphabeticSort("name")));
+                
+            }).
+            catch(err => {
+                console.log(err);
+            }
+        );
+        axios.get("api/tags")
+            .then(response => {
+                setTags(response.data.sort(alphabeticSort("name")));
+            }).
+            catch(err => {
+                console.log(err);
+            }
+        );
+    }, []);
 
     return (
         <div className="body">
-            <FormGroup>
-                <FormControlLabel control={<Switch defaultChecked checked={aggAuthors} onChange={handleChange} inputProps={{ 'aria-label': 'controlled' }}/>} label="Aggregate Authors" />
-            </FormGroup>
-            {
-                aggAuthors && <p>Yuh</p>
-            }
-            <div id="chart-area" className="container pt-5"></div>
-            <p id="testvaluehere"></p>
+            <div className="container">
+                <div className="row d-flex">
+                    <div className="col-4">
+                        <div className="container">
+                            <h3>Visualize</h3>
+                        </div>
+                        <Separator/>
+                        <Box sx={{ width: 300 }}>
+                            <FormControl fullWidth>
+                                <InputLabel id="filter-select-label">Filter</InputLabel>
+                                <Select
+                                    labelId="filter-select-label"
+                                    id="filter-select"
+                                    value={selectBy}
+                                    label="Filter"
+                                    onChange={(event) => { setSelectBy(event.target.value); }}>
+                                    <MenuItem value={"authors"}>Authors</MenuItem>
+                                    <MenuItem value={"tags"}>Tags</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Box>
+                        <Separator />
+                        {
+                            selectBy === "authors" &&
+                            <Autocomplete
+                                multiple
+                                id="checkboxes-authors"
+                                options={authors}
+                                disableCloseOnSelect
+                                getOptionLabel={(option) => option.name}
+                                renderOption={(props, option, { selected }) => (
+                                    <li {...props}>
+                                        <Checkbox
+                                            icon={icon}
+                                            checkedIcon={checkedIcon}
+                                            style={{ marginRight: 8 }}
+                                            checked={selected}
+                                        />
+                                        {option.name}
+                                    </li>
+                                )}
+                                onChange={(event, value) => setSelectedAuthors(value)}
+                                style={{ width: 300 }}
+                                renderInput={(params) => (
+                                    <TextField {...params} label="Authors" placeholder="Authors" />
+                                )}
+                            />
+                        }
+                        {
+                            selectBy === "tags" &&
+                            <Autocomplete
+                                multiple
+                                id="checkboxes-tags"
+                                options={tags}
+                                disableCloseOnSelect
+                                getOptionLabel={(option) => option.name}
+                                renderOption={(props, option, { selected }) => (
+                                    <li {...props}>
+                                        <Checkbox
+                                            icon={icon}
+                                            checkedIcon={checkedIcon}
+                                            style={{ marginRight: 8 }}
+                                            checked={selected}
+                                        />
+                                        {option.name}
+                                    </li>
+                                )}
+                                onChange={(event, value) => setSelectedTags(value)}
+                                style={{ width: 300 }}
+                                renderInput={(params) => (
+                                    <TextField {...params} label="Tags" placeholder="Tags" />
+                                )}
+                            />
+                        }
+                        <Separator/>
+                        {
+                            selectBy === "tags" &&
+                            <FormGroup>
+                                <FormControlLabel control={
+                                    <Switch
+                                        checked={aggAuthors}
+                                        onChange={(event) => { setAggAuthors(event.target.checked); }}
+                                        inputProps={{ 'aria-label': 'controlled' }}>
+                                    </Switch>
+                                } label="Aggregate Authors">
+                                </FormControlLabel>
+                                <Separator />
+                            </FormGroup>
+                        }
+                        {
+                            (tab === 0 || tab === 1) &&
+                            <Box sx={{ width: 300 }}>
+                                <Typography id="year-range-id" gutterBottom>
+                                    Year Range
+                                </Typography>
+                                <Slider
+                                    aria-labelledby="year-range-id"
+                                    value={range}
+                                    onChange={(event) => { setRange(event.target.value); }}
+                                    valueLabelDisplay="auto"
+                                    min={bounds[0]}
+                                    max={bounds[1]}>
+                                </Slider>
+                                <Separator />
+                            </Box>
+                        }
+                        {
+                            selectBy === "tags" &&
+                            <div className="row" style={{ margin: "0 0 0 0"}}>
+                                <Box sx={{ width: 180 }}>
+                                    <FormControl fullWidth>
+                                        <InputLabel id="index-select-label">Index</InputLabel>
+                                        <Select
+                                            labelId="index-select-label"
+                                            id="index-select"
+                                            value={indexType}
+                                            label="Index"
+                                            onChange={(event) => { setIndexType(event.target.value); }}>
+                                            <MenuItem value={"h-index"}>h-index</MenuItem>
+                                            <MenuItem value={"i10-index"}>i10-index</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Box>
+                                <Box sx={{ width: 20 }}></Box>
+                                {
+                                    indexType &&
+                                    <Box sx={{ width: 100 }}>
+                                        <FormControl fullWidth>
+                                            <TextField
+                                                label="Minimum Index"
+                                                value={index}
+                                                onChange={(event) => { const onlyNums = event.target.value.replace(/[^0-9]/g, ''); setIndex(onlyNums); }}
+                                                inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+                                                variant="standard"
+                                            />
+                                        </FormControl>
+                                    </Box>
+                                }
+                            </div>
+                        }
+                        {
+                            tab === 0 &&
+                            <FormGroup>
+                                <Separator />
+                                <FormControlLabel control={
+                                    <Switch
+                                        checked={toggleOutliers}
+                                        onChange={(event) => { setToggleOutliers(event.target.checked); }}
+                                        inputProps={{ 'aria-label': 'controlled' }}>
+                                    </Switch>
+                                } label="Display Outliers">
+                                </FormControlLabel>
+                                <Separator />
+                            </FormGroup>
+                        }
+                    </div>
+                    <div className="col-8 p-4">
+                        <div id="chart-area" className="container">
+                            <Box sx={{ width: '100%' }}>
+                                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                                    <Tabs value={tab} onChange={(event, value) => { setTab(value); }} aria-label="basic tabs example">
+                                        <Tab label="Boxplot" {...a11yProps(0)} />
+                                        <Tab label="Trend" {...a11yProps(1)} />
+                                        <Tab label="h-index" {...a11yProps(2)} />
+                                        <Tab label="i10-index" {...a11yProps(3)} />
+                                    </Tabs>
+                                </Box>
+                            </Box>
+                            {
+                                boxData && options &&
+                                <BoxPlotChart data={boxData} options={options}></BoxPlotChart>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
