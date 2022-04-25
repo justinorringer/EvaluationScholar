@@ -51,7 +51,7 @@ function Tags() {
             catch(err => {
                 console.log(err);
                 document.getElementById("fail").style = "display: block !important";
-                document.getElementById("fail").innerText = "Error Getting Authors";
+                document.getElementById("failspan").innerText = "Error Getting Authors";
             }
         );
         getTags();
@@ -65,7 +65,7 @@ function Tags() {
             catch(err => {
                 console.log(err);
                 document.getElementById("fail").style = "display: block !important";
-                document.getElementById("fail").innerText = "Error Getting Tags";
+                document.getElementById("failspan").innerText = "Error Getting Tags";
             }
         );
     }
@@ -91,11 +91,11 @@ function Tags() {
 
             if (response.status === 201) {
                 document.getElementById("success").style = "display: block !important";
-                document.getElementById("success").innerText = "Tags Created Successfully";
+                document.getElementById("successspan").innerText = "Tags Created Successfully";
             }
             else {
                 document.getElementById("fail").style = "display: block !important";
-                document.getElementById("fail").innerText = "Error Creating Tag";
+                document.getElementById("failspan").innerText = "Error Creating Tag";
             }
             getTags();
         }
@@ -118,11 +118,11 @@ function Tags() {
               }, true);
             if (response.status === 200) {
                 document.getElementById("success").style = "display: block !important";
-                document.getElementById("success").innerText = "Tags Assigned Successfully";
+                document.getElementById("successspan").innerText = "Tags Assigned Successfully";
             }
             else {
                 document.getElementById("fail").style = "display: block !important";
-                document.getElementById("fail").innerText = "Error: Failed to Assign Tags";
+                document.getElementById("failspan").innerText = "Error: Failed to Assign Tags";
             }
         }
         assign();
@@ -143,11 +143,11 @@ function Tags() {
               }, true);
             if (response.status === 200) {
                 document.getElementById("success").style = "display: block !important";
-                document.getElementById("success").innerText = "Tags Unassigned Successfully";
+                document.getElementById("successspan").innerText = "Tags Unassigned Successfully";
             }
             else {
                 document.getElementById("fail").style = "display: block !important";
-                document.getElementById("fail").innerText = "Error: Failed to Unassign Tags";
+                document.getElementById("failspan").innerText = "Error: Failed to Unassign Tags";
             }
         }
         unassign();
@@ -159,7 +159,7 @@ function Tags() {
                 return axios.delete(`/api/tags/${tag.id}`).then(res => {
                     if (res.status != 200) {
                         document.getElementById("fail").style = "display: block !important";
-                        document.getElementById("fail").innerText = "Error: Failed to Delete Tags";
+                        document.getElementById("failspan").innerText = "Error: Failed to Delete Tags";
                     }
                 });
             });
@@ -188,12 +188,12 @@ function Tags() {
                 </div>
                 <div className="row">
                     <div className="alert alert-success alert-dismissible" role="alert" id="success" style={{ display: "none" }}>
-                        <button className="close" type="button" onClick={hideSuccessAlert}><span>&times;</span></button> Tags Assigned Successfully.
+                        <button className="close" type="button" data-dismiss="alert" onClick={hideSuccessAlert}><span>&times;</span></button> <span id="successspan">Tags Assigned Successfully.</span>
                     </div>
                 </div>
                 <div className="row">
                     <div className="alert alert-danger alert-dismissible" role="alert" id="fail" style={{ display: "none" }}>
-                        <button className="close" type="button" onClick={hideFailAlert}><span>&times;</span></button> Error: No Tags Assigned.
+                        <button className="close" type="button" data-dismiss="alert" onClick={hideFailAlert}><span>&times;</span></button> <span id="failspan">Error: No Tags Assigned.</span>
                     </div>
                 </div>
                 <div className="container border border-dark my-3 p-4 rounded">
