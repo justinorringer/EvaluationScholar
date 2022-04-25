@@ -27,7 +27,7 @@ def test_profile_scraping(client):
 
 @pytest.mark.scraping
 def test_profile_page_scraping(client):
-    response = client.get('/scraping/profiles/7XjL07wAAAAJ')
+    response = client.get('/scraping/profiles/0bnFgyAAAAAJ')
     assert response.status_code == 200
     assert response.json['name'] == 'Gregg Rothermel'
     assert len(response.json['papers']) == 100
@@ -35,7 +35,7 @@ def test_profile_page_scraping(client):
     assert response.json['papers'][0]['year'] == 2001
     assert response.json['papers'][0]['citations'] > 1500
 
-    response = client.get('/scraping/profiles/7XjL07wAAAAJ?all_papers=true')
+    response = client.get('/scraping/profiles/0bnFgyAAAAAJ?all_papers=true')
     assert response.status_code == 200
     assert response.json['name'] == 'Gregg Rothermel'
     assert len(response.json['papers']) > 200

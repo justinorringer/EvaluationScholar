@@ -58,6 +58,10 @@ def task_manager(database_url):
 
     thread.start()
     yield task_manager
+
+    # The task manager will stop creating new worker threads for tasks, but running tasks will finish
+    # This results in an error when the test is finished and the DB is cleared, because tasks will reference deleted objects
+    # This only affects tests, and doesn't cause any failures, it just looks ugly in the test report, so... ¯\_(ツ)_/¯
     task_manager.stop()
     thread.join()
 
