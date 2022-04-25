@@ -49,21 +49,16 @@ function Query() {
     return (
         <div className="body">
             <div className="container" id="container">
-                <div className="justify-content-center page-header">Select Author</div>
+                <h1 className='text-center pt-3'>Evaluation Scholar</h1>
                 <br />
-                <div className="row">
-                    <div className="col-10 gx-4 gy-4">
-                        <Autocomplete
-                            disablePortal
-                            id="combo-box-demo"
-                            options={authors}
-                            getOptionLabel={(option) => option.name}
-                            onChange={(event, newAuthor) => {window.location.href = `/author/${newAuthor.id}`;}}
-                            sx={{ width: 300 }}
-                            renderInput={(params) => <TextField {...params} label="Author" />}
-                        />
-                    </div>
-                </div>
+                <Autocomplete
+                    disablePortal
+                    id="combo-box-demo"
+                    options={authors}
+                    getOptionLabel={(option) => option.name}
+                    onChange={(event, newAuthor) => { window.location.href = `/author/${newAuthor.id}`; }}
+                    renderInput={(params) => <TextField {...params} label="Search Author" />}
+                />
                 <br />
                 <div className="row pl-3">
                     <label>Don't see your author?</label>
