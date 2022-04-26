@@ -60,6 +60,8 @@ class Author(Base):
             'name': self.name,
             'scholar_id': self.scholar_id,
             'uploaded_papers': self.uploaded_papers,
+            'i10_index': self.get_i10_index(),
+            'h_index': self.get_h_index()
         }
 
         if 'papers' in includes:
