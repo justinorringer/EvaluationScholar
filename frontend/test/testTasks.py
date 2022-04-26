@@ -1,18 +1,23 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import traceback
-#import time
 
+"""
+This test file specifically tests the behavior of the Tasks page of Evaluation Scholar
+
+Author: Gage Fringer
+"""
+
+#Set up webdriver
 fireFoxOptions = webdriver.FirefoxOptions()
 fireFoxOptions.headless = True
-
 driver = webdriver.Firefox(options=fireFoxOptions)
 
+#Method to check that the contents of the task page load as expected
 def test_landing_page():
     driver.get("http://localhost/tasks")
     driver.find_element(By.ID, "toTasks").click()
     alert = driver.find_element(By.ID, "alert")
-    #print(alert.text)
 
     assert "No tasks found. Upload or search for papers for an author to see scheduled tasks." in alert.text
 
@@ -29,8 +34,7 @@ def test_landing_page():
 
     assert editBut == "Edit"
 
-
-
+#Method to test that changing the update period of tasks is successful
 def test_timing_update():
     driver.get("http://localhost/tasks")
     counter = driver.find_element(By.ID, "updateCounter").text
@@ -63,6 +67,7 @@ def test_timing_update():
 
 #Testing specifically for new tasks may be tricky...
 
+#Method to run all tests in the runAll file
 def runAll():
     try:
         print("Running test: Check static contents of landing page")
@@ -79,5 +84,3 @@ def runAll():
     except:
         print("Test: FAIL")
         print(traceback.print_exc())
-
-#runAll()
