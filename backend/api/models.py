@@ -262,6 +262,8 @@ class AmbiguousPaperChoice(Base):
 
     issue_id = Column(Integer, ForeignKey('issue.id'), nullable=False)
 
+    author_names = Column(String(200), nullable=False)
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -269,14 +271,18 @@ class AmbiguousPaperChoice(Base):
             'year': self.year,
             'scholar_id': self.scholar_id,
             'citations': self.citations,
+            'author_names': self.author_names.split(";") ,
         }
     
-    def __init__(self, name, year, scholar_id, citations, issue_id):
+    def __init__(self, name, year, scholar_id, citations, issue_id, author_names_list):
+        author_names = ';'.join(author_names_list)
+
         self.name = name
         self.year = year
         self.scholar_id = scholar_id
         self.citations = citations
         self.issue_id = issue_id
+        self.author_names = author_names
 
 class AmbiguousPaperIssue(Issue):
     __tablename__ = "ambiguous_paper_issue"
