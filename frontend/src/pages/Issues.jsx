@@ -1,50 +1,109 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import axios from 'axios';
 
-function Issues() {
-  //Return the related HTML of the page.
-  return (
-    <div className="body">
-        <div className="container">
-            <h3>Issues</h3>
+function Issues(){
+
+    const [issues, setIssues] = useState([]);
+
+    useEffect(() =>{
+        axios.get(`/api/issues`)
+        .then(response => {
+            setIssues(response.data);
+        }).
+        catch(err => {
+            console.log(err);
+        });
+
+    }, []);
+
+    function resolveIssue(issue_id, scholar_id) {
+        axios.post(`/api/issues/${issue_id}/resolve?correct_scholar_id=${scholar_id}`, {'correct_scholar_id': scholar_id})
+        .then(res => {
+            if(res.status == 200){
+                console.log("Issue resolved!");
+                getIssues();
+            }
+        }).
+        catch(err => {
+            if (err.response.status === 404) {
+                console.log(err);
+            }
+        });
+    };
+
+    function dismissIssue(issue_id){
+        axios.delete(`/api/issues/${issue_id}`)
+        .then(res => {
+            if(res.status == 200){
+                console.log("Issure dismissed!");
+                getIssues();
+                
+            }
+        }).
+        catch(err => {
+            if(err.response.status === 404){
+                console.log(err);
+            }
+        });
+    }
+
+    function getIssues(){
+        axios.get(`/api/issues`)
+        .then(response => {
+            setIssues(response.data);
+        }).
+        catch(err => {
+            console.log(err);
+        });
+    }
+
+    return(
+        <div className="container mb-5">
+            <h1>Ambiguous Paper Issues</h1>
+            {issues.map(issue => (
+                <div key={issue.id} className="container border border-dark my-3 p-4 rounded">
+                    <div className="col-md-12 text-right">
+                        <button className="btn btn-danger" onClick={() => {dismissIssue(issue.id)}}>Dismiss Issue</button>
+                    </div>
+                    <div>
+                        <h4>Paper Title - {issue.title_query}</h4>
+                        <h4>Author - {issue.author.name}</h4>
+                    </div>
+                    <table className="table table-borderless table-striped">
+                        <thead className="thead-dark">
+                            <tr>
+                                <th scope="col-6"> Article</th>
+                                <th scope="col-2"> Year</th>
+                                <th scope="col-2">Co-Authors</th>
+                                <th scope="col-2"> Citations</th>
+                                <th scope="col-2"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {issue.paper_choices.map(choice => (
+                                <tr key={choice.id}>
+                                    <td>{choice.name}</td>
+                                    <td>{choice.year}</td>
+                                    <td>
+                                        <ul>
+                                            {choice.author_names.map(author => (
+                                                <li>{author}</li>
+                                            ))}
+                                        </ul>
+                                    </td>
+                                    <td>{choice.citations}</td>
+                                    <td><button className="btn btn-danger" onClick={() => {resolveIssue(issue.id ,choice.scholar_id)}}>Select</button></td>
+                                </tr>
+                            ))} 
+                        </tbody>
+                    </table>
+                    <div>
+                    </div>
+                    <br/>
+                </div>
+            ))}
         </div>
-        <div className="container my-3 p-4 border border-5 border-dark">
-            {/**<button type="button" className="close btn-small float-right" aria-label="Close">&times;</button>*/}
 
-            <h3>Ambiguous Search</h3>
-
-            <p>Inputed Title: Ambiguous</p><br />
-
-            <button type="button" className="btn btn-success btn-sm float-right">Correct</button>
-            <button type="button" className="btn btn-danger btn-sm float-right pl-1">Dismiss</button>
-
-            <h5>Select the Best Match</h5>
-            <input type="radio" aria-label="Checkbox for following text input" /> Option 1<br />
-            <input type="radio" aria-label="Checkbox for following text input" /> Option 2<br />
-            <input type="radio" aria-label="Checkbox for following text input" /> Option 3 <br />
-            <input type="radio" aria-label="Checkbox for following text input" /> None of the Suggested <br /><br />
-
-        </div>
-
-        <div className="container my-3 p-4 border border-5 border-dark">
-            <h3>Paper Not Found</h3>
-
-            <p>Inputed Title: Paper?</p><br />
-
-            <input type="text" className="form-control" id="validationServer01" placeholder="Correct Title" required></input>
-            
-            <button type="button" className="btn btn-success btn-sm float-right">Correct</button>
-            <button type="button" className="btn btn-danger btn-sm float-right">Dismiss</button>
-            
-            <div className="valid-feedback">
-                Looks good!
-            </div>
-
-            <br />
-            
-        </div>
-    </div>
-  );
+    )
 }
-
 export default Issues;

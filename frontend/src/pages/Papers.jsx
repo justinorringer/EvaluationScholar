@@ -7,7 +7,7 @@ class Papers extends Component {
     
     setPapers(page) {
         const {perPage} = this.state;
-        axios.get(`/api/papers?page=${page}&limit=${perPage}`)
+        axios.get(`/api/papers?page=${page}&limit=${perPage}&include=authors`)
             .then(res => {
                 this.setState({
                     currentPapers: res.data,
@@ -68,6 +68,7 @@ class Papers extends Component {
                         <thead className="thead-dark">
                             <tr>
                                 <th scope="col-6">Article</th>
+                                <th scope="col-6">Authors</th>
                                 <th scope="col-2">Year</th>
                                 <th scope="col-2">Citations</th>
                                 <th scope="col-2"></th>
@@ -77,6 +78,13 @@ class Papers extends Component {
                             {this.state.currentPapers.map(paper => (
                                 <tr key={paper.id}>
                                     <td>{paper.name}</td>
+                                    <td>
+                                        <ul>
+                                            {paper.authors.map(author => (
+                                                <li key={author.id}>{author.name}</li>
+                                            ))}
+                                        </ul>
+                                    </td>
                                     <td>{paper.year}</td>
                                     <td>{paper.latest_citation?.num_cited}</td>
                                     <td>
