@@ -27,7 +27,7 @@ const Separator = styled('div')(
     ({ theme }) => `
     height: ${theme.spacing(3)};
   `,
-  );
+);
 function a11yProps(index) {
     return {
         id: `simple-tab-${index}`,
@@ -73,10 +73,77 @@ function Visualize() {
         ],
     });
 
-    const [options, setOptions] = useState({
-        chart: { title: 'Citations', width: 700, height: 500 },
-        legend: { visible: false }
-    });
+    const theme = {
+        chart: {
+            fontFamily: 'Josefin Sans',
+            backgroundColor: '#e7e3e4e8',
+        },
+        series: {
+          colors: ['#CC0000'],
+          dot: {
+            radius: 5,
+            borderWidth: 3,
+            borderColor: '#000000',
+            useSeriesColor: true,
+          },
+          rect: {
+            borderWidth: 2,
+            borderColor: '#000000',
+          },
+          line: {
+            whisker: {
+              lineWidth: 2,
+              color: '#000000',
+            },
+            maximum: {
+              lineWidth: 2,
+              color: '#000000',
+            },
+            minimum: {
+              lineWidth: 2,
+              color: '#000000',
+            },
+            median: {
+              lineWidth: 2,
+              color: '#000000',
+            },
+          },
+          hover: {
+            color: '#ffdfdf',
+            rect: { borderColor: '#000000', borderWidth: 2 },
+            dot: { radius: 6 },
+            shadowColor: 'rgba(0, 0, 0, 0.7)',
+            shadowOffsetX: 4,
+            shadowOffsetY: 4,
+            shadowBlur: 6,
+            line: {
+              whisker: {
+                lineWidth: 2,
+                color: '#000000',
+              },
+              maximum: {
+                lineWidth: 2,
+                color: '#000000',
+              },
+              minimum: {
+                lineWidth: 2,
+                color: '#000000',
+              },
+              median: {
+                lineWidth: 2,
+                color: '#000000',
+              },
+            },
+          },
+        }
+      };
+
+    const options = {
+        chart: { title: "", width: 700, height: 500 },
+        yAxis: { scale: { min: 0 } },
+        legend: { visible: false },
+        theme: theme
+    };
 
     /**
      * Function to sort alphabetically an array of objects by some specific key.
@@ -149,32 +216,34 @@ function Visualize() {
     useEffect(() => {
         let tempMin = new Date().getFullYear(); //current year starting min
         let tempMax = 0; //0 starting max
-        const tag_ids = [];
-        selectedTags.forEach(tag => {
-            tag_ids.push(tag.id);
-        })
-        if (aggAuthors) {
-        } else {
-            axios.get(`api/authors?include=papers&tags=${tag_ids}`)
-                .then(response => {
-                    response.data.forEach(author => {
-                        author.papers.forEach(paper => {
-                            if (paper.year > tempMax) {
-                                tempMax = paper.year;
-                            }
-                            if (paper.year < tempMin) {
-                                tempMin = paper.year;
-                            }
-                        })
-                    })
-                    setAuthorsData(response.data);
-                }).
-                catch(err => {
-                    console.log(err);
+        axios.get(`api/authors?include=papers&tags=${selectedTags.map(tag => tag.id)}&min-${indexType}=${index}`)
+            .then(response => {
+                const papers = [];
+                response.data.forEach(author => {
+                    author.papers.forEach(paper => {
+                        if (paper.year > tempMax) {
+                            tempMax = paper.year;
+                        }
+                        if (paper.year < tempMin) {
+                            tempMin = paper.year;
+                        }
+                        papers.push(paper);
+                    });
+                });
+                if (tempMax > 0) {
+                    setBounds([tempMin, tempMax]);
                 }
+                if (aggAuthors) {
+                    setAuthorsData([{ name: selectedTags.map(tag => tag.name).join(", "), papers: papers }]);
+                } else {
+                    setAuthorsData(response.data);
+                }
+            }).
+            catch(err => {
+                console.log(err);
+            }
             );
-        }
-    }, [selectedTags, aggAuthors]);
+    }, [selectedTags, aggAuthors, index]);
 
     //reset graph
     useEffect(() => {
@@ -190,13 +259,13 @@ function Visualize() {
                 if (paper.year >= range[0] && paper.year <= range[1]) {
                     papers.push(paper.latest_citation.num_cited);
                 }
-            })
+            });
             //sort the papers for the author
             papers.sort(function (a, b) {
                 return a - b;
             });
             //check the sort
-            
+
             let firstHalf = [];
             let secondHalf = [];
             let med = 0;
@@ -222,7 +291,7 @@ function Visualize() {
             }
 
             const iqr = q3 - q1; //get IQR
-            
+
             let min = q1;
             let max = q3;
 
@@ -255,7 +324,7 @@ function Visualize() {
             data.push([min, q1, med, q3, max]);
             i++;
         });
-        
+
         setBoxData({
             categories: categories,
             series: [
@@ -272,12 +341,11 @@ function Visualize() {
         axios.get("api/authors")
             .then(response => {
                 setAuthors(response.data.sort(alphabeticSort("name")));
-                
             }).
             catch(err => {
                 console.log(err);
             }
-        );
+            );
         axios.get("api/tags")
             .then(response => {
                 setTags(response.data.sort(alphabeticSort("name")));
@@ -285,7 +353,7 @@ function Visualize() {
             catch(err => {
                 console.log(err);
             }
-        );
+            );
     }, []);
 
     return (
@@ -296,7 +364,7 @@ function Visualize() {
                         <div className="container">
                             <h3>Visualize</h3>
                         </div>
-                        <Separator/>
+                        <Separator />
                         <Box sx={{ width: 300 }}>
                             <FormControl fullWidth>
                                 <InputLabel id="filter-select-label">Filter</InputLabel>
@@ -364,7 +432,7 @@ function Visualize() {
                                 )}
                             />
                         }
-                        <Separator/>
+                        <Separator />
                         {
                             selectBy === "tags" &&
                             <FormGroup>
@@ -398,7 +466,7 @@ function Visualize() {
                         }
                         {
                             selectBy === "tags" &&
-                            <div className="row" style={{ margin: "0 0 0 0"}}>
+                            <div className="row" style={{ margin: "0 0 0 0" }}>
                                 <Box sx={{ width: 180 }}>
                                     <FormControl fullWidth>
                                         <InputLabel id="index-select-label">Index</InputLabel>
@@ -408,8 +476,8 @@ function Visualize() {
                                             value={indexType}
                                             label="Index"
                                             onChange={(event) => { setIndexType(event.target.value); }}>
-                                            <MenuItem value={"h-index"}>h-index</MenuItem>
-                                            <MenuItem value={"i10-index"}>i10-index</MenuItem>
+                                            <MenuItem value={"h"}>h-index</MenuItem>
+                                            <MenuItem value={"i10"}>i10-index</MenuItem>
                                         </Select>
                                     </FormControl>
                                 </Box>
