@@ -4,13 +4,17 @@ import time
 from datetime import datetime, timedelta
 from contextlib import contextmanager
 
-from api.models import Task, Paper, Citation, UpdateCitationsTask, Variable, Author, ScrapeAuthorTask
+from api.models import Task, UpdateCitationsTask, ScrapeAuthorTask
+from api.models import Paper, Citation, Author, Variable
+from api.models import Issue, AmbiguousPaperIssue, AmbiguousPaperChoice
 from scraping import scrape_papers
 from scraping.google_scholar import get_profile_page_html, parse_profile_page_name
 from multiprocessing import Process
 from threading import Thread
 from threading import Lock
 
+# Use the lock to prevent multiple threads from accessing the database at the same time
+# This prevents duplicate data being created (as a result of multiple threads trying to create the same data and both checking for the duplicate before either commit)
 lock = Lock()
 
 @contextmanager
@@ -62,9 +66,6 @@ def update_citations(session, paper):
     session.commit()
 
 def create_and_link_authors(session, paper, scraped_authors):
-    # These threads are running at the same time
-    # Race conditions could result in duplicate authors being created
-    # So lock this section, guaranteeing no duplicates
     with lock:
         for scraped_author in scraped_authors:
             existing_author = session.query(Author).filter(Author.scholar_id == scraped_author['id']).first()
@@ -82,6 +83,26 @@ def create_and_link_authors(session, paper, scraped_authors):
                 print(f"[Task Manager] Linked scraped author: '{existing_author.name}' to paper: '{paper.name}'")
         session.commit()
 
+def create_ambiguous_issue(session, author, query, scraped_papers):
+    with lock:
+        issue = AmbiguousPaperIssue(author.id, query)
+        session.add(issue)
+        session.flush()
+
+        choices = [AmbiguousPaperChoice(
+            name = p['title'],
+            year = p['year'],
+            scholar_id = p['id'],
+            citations = p['citations'],
+            issue_id = issue.id,
+            author_names_list = [a['name'] for a in p['authors']]
+        ) for p in scraped_papers]
+
+        session.add_all(choices)
+        session.commit()
+
+        print(f"[Task Manager] Created ambiguous paper issue for: '{query}'")
+
 def create_paper(session, paper_title, author, paper_scholar_id):
     if paper_title == None:
         print("[Task Manager] Paper title is None")
@@ -91,19 +112,23 @@ def create_paper(session, paper_title, author, paper_scholar_id):
     if len(scraped_papers) == 0:
         print(f"[Task Manager] Failed to scrape paper during creation: '{paper_title}'")
         return
-
-    # Select the correct scraped paper to use
-    # If a scholar id is given, use that paper
-    # Otherwise, use the first paper
-    # TODO: Raise an ambiguous paper issue depending on the results
+    
+    # Choose the correct scraped paper to use, or create an ambiguous issue if that's not possible
     if paper_scholar_id is not None:
-        scraped_paper = next(filter(lambda p: p['id'] == paper_scholar_id, scraped_papers), None)
+        # Pick the one with the correct scholar id if it's given
+        scraped_paper = next(iter(p for p in scraped_papers if p['id'] == paper_scholar_id), None)
+
         if scraped_paper is None:
             print(f"[Task Manager] Failed to find scraped paper with id: '{paper_scholar_id}' and title: '{paper_title}'")
             return
-    else:
+    elif len(scraped_papers) == 1:
+        # If there's only one result, use it
         scraped_paper = scraped_papers[0]
-    
+    else:
+        # Otherwise, we can't pick the correct paper, so create an ambiguous issue
+        create_ambiguous_issue(session, author, paper_title, scraped_papers)
+        return
+        
     with lock:
         existing_paper = session.query(Paper).filter(Paper.scholar_id == scraped_paper['id']).first()
         if existing_paper is not None:

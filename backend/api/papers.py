@@ -22,7 +22,7 @@ paper_routes = Blueprint('paper_routes', __name__, template_folder='templates')
 def get_papers():
     with db_session(current_app) as session:
         includes = request.args['include'].split(',') if 'include' in request.args else []
-        papers = session.query(Paper).options(subqueryload(Paper.citations))
+        papers = session.query(Paper)
 
         custom_headers = {}
 

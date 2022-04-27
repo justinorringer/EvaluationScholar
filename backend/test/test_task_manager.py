@@ -6,6 +6,7 @@ import threading
 import pytest
 
 from backend.api.models import Task, CreatePaperTask, Author, Paper, UpdateCitationsTask
+from backend.api.models import AmbiguousPaperChoice, AmbiguousPaperIssue, Issue
 from backend.test import wait_for_task, wait_for_task_count
 
 @pytest.mark.scraping
@@ -16,18 +17,18 @@ def test_create_paper(session, task_manager):
 
     # Test creating a valid paper
 
-    task = CreatePaperTask("Autonomous Aerial Water Sampling", author.id)
+    task = CreatePaperTask("Towards an autonomous water monitoring system with an unmanned aerial and surface vehicle team", author.id)
     session.add(task)
     session.commit()
 
     wait_for_task(task_manager, task.id)
 
     paper = session.query(Paper).first()
-    assert paper.name == "Autonomous aerial water sampling"
+    assert paper.name == "Towards an autonomous water monitoring system with an unmanned aerial and surface vehicle team"
     assert paper.year == 2015
     assert len(paper.citations) > 0
     assert paper.citations[0].num_cited > 0
-    assert paper.scholar_id == "bhfHsCHhomoJ"
+    assert paper.scholar_id == "EtDhtsm5YfYJ"
     assert paper.authors[0].name == "Test Author"
     session.commit()
 
@@ -35,17 +36,17 @@ def test_create_paper(session, task_manager):
     wait_for_task_count(task_manager, 1)
 
     # Check for the scraped authors
-    scraped_author = session.query(Author).filter(Author.scholar_id == "q7jnx5IAAAAJ").first()
+    scraped_author = session.query(Author).filter(Author.scholar_id == "5-SbXrQAAAAJ").first()
     assert len(scraped_author.papers) == 1
-    assert scraped_author.name == "John-Paul Ore"
+    assert scraped_author.name == "Jun Han Bae"
 
-    scraped_author = session.query(Author).filter(Author.scholar_id == "swPW5FYAAAAJ").first()
+    scraped_author = session.query(Author).filter(Author.scholar_id == "SY_I6OMAAAAJ").first()
     assert len(scraped_author.papers) == 1
-    assert scraped_author.name == "Sebastian Elbaum"
+    assert scraped_author.name == "Eric T. Matson"
 
-    scraped_author = session.query(Author).filter(Author.scholar_id == "mesiHAsAAAAJ").first()
+    scraped_author = session.query(Author).filter(Author.scholar_id == "eiAeSiAAAAAJ").first()
     assert len(scraped_author.papers) == 1
-    assert scraped_author.name == "Amy J. Burgin"
+    assert scraped_author.name == "Byung-Cheol Min"
     session.commit()
 
     # Make sure there's enough time for a citation update task to be created
@@ -74,7 +75,7 @@ def test_create_paper(session, task_manager):
     session.add(author2)
     session.flush()
 
-    task = CreatePaperTask("Autonomous Aerial Water Sampling", author2.id)
+    task = CreatePaperTask("Towards an autonomous water monitoring system with an unmanned aerial and surface vehicle team", author2.id)
     session.add(task)
     session.commit()
 
@@ -93,7 +94,7 @@ def test_create_paper(session, task_manager):
     session.add(author3)
     session.flush()
 
-    task = CreatePaperTask("Autonomous Aerial Water", author3.id)
+    task = CreatePaperTask("Towards an autonomous water monitoring system with an unmanned aerial", author3.id)
     session.add(task)
     session.commit()
 
@@ -120,14 +121,51 @@ def test_create_paper(session, task_manager):
     assert session.query(Author).filter(Author.name == "Carrick Detweiler").first() is not None
 
     authors = {author.name: author for author in session.query(Author).all()}
-    assert len(authors) == 7
+    assert len(authors) == 9
     assert "Carrick Detweiler" in authors.keys()
-    assert len(authors["John-Paul Ore"].papers) == 2
-    assert len(authors["Sebastian Elbaum"].papers) == 2
+    assert len(authors["John-Paul Ore"].papers) == 1
+    assert len(authors["Sebastian Elbaum"].papers) == 1
     assert len(authors["Carrick Detweiler"].papers) == 1
-    assert len(authors["Amy J. Burgin"].papers) == 1
     assert len(authors["Test Author"].papers) == 2
     assert len(authors["Test Author 2"].papers) == 1
+
+@pytest.mark.scraping
+def test_ambiguity(client, session, task_manager):
+    author = Author(name="Test Author", scholar_id="_QnLm3kAAAAJ")
+    session.add(author)
+    session.flush()
+
+    # Should result in ambiguity: two possible choices
+    task = CreatePaperTask("Autonomous Aerial Water", author.id)
+    session.add(task)
+    session.commit()
+
+    wait_for_task(task_manager, task.id)
+
+    assert session.query(Paper).count() == 0
+    assert session.query(AmbiguousPaperIssue).count() == 1
+
+    issue = session.query(AmbiguousPaperIssue).first()
+    session.commit()
+
+    # Disable task manager to prevent immediate execution of CreatePaperTask
+    task_manager.disable()
+
+    # Resolve it
+    resp = client.post(f"/issues/{issue.id}/resolve", json = {"correct_scholar_id": "EtDhtsm5YfYJ"})
+    assert resp.status_code == 200
+
+    assert session.query(CreatePaperTask).count() == 1
+    assert session.query(AmbiguousPaperIssue).count() == 0
+    task = session.query(CreatePaperTask).first()
+    session.commit()
+
+    task_manager.enable()
+
+    wait_for_task(task_manager, task.id)
+
+    assert session.query(Paper).count() == 1
+    assert session.query(Paper).first().name == "Towards an autonomous water monitoring system with an unmanned aerial and surface vehicle team"
 
 @pytest.mark.scraping
 def test_create_with_scholar_id(session, task_manager):

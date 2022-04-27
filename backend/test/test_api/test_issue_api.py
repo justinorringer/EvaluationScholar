@@ -15,9 +15,9 @@ def test_crud(client, session):
     session.add(issue)
     session.flush()
 
-    choice_1 = AmbiguousPaperChoice("The dynamics of lava flows", 2000, "N-GznIQELfYJ", 10, issue.id)
-    choice_2 = AmbiguousPaperChoice("Lava effusion rate definition and measurement: a review", 2001, "MVNZ5BM8UegJ", 20, issue.id)
-    choice_3 = AmbiguousPaperChoice("Differentiation behavior of Kilauea Iki lava lake, Kilauea Volcano, Hawaii: an overview of past and current work", 2002, "cy0qh3krAjgJ", 30, issue.id)
+    choice_1 = AmbiguousPaperChoice("The dynamics of lava flows", 2000, "N-GznIQELfYJ", 10, issue.id, [])
+    choice_2 = AmbiguousPaperChoice("Lava effusion rate definition and measurement: a review", 2001, "MVNZ5BM8UegJ", 20, issue.id, [])
+    choice_3 = AmbiguousPaperChoice("Differentiation behavior of Kilauea Iki lava lake, Kilauea Volcano, Hawaii: an overview of past and current work", 2002, "cy0qh3krAjgJ", 30, issue.id, [])
 
     session.add(choice_1)
     session.add(choice_2)
@@ -74,9 +74,9 @@ def test_ambiguous_resolve(client, session, task_manager):
     session.add(issue)
     session.flush()
 
-    choice_1 = AmbiguousPaperChoice("The dynamics of lava flows", 2000, "N-GznIQELfYJ", 10, issue.id)
-    choice_2 = AmbiguousPaperChoice("Lava effusion rate definition and measurement: a review", 2001, "MVNZ5BM8UegJ", 20, issue.id)
-    choice_3 = AmbiguousPaperChoice("Differentiation behavior of Kilauea Iki lava lake, Kilauea Volcano, Hawaii: an overview of past and current work", 2002, "cy0qh3krAjgJ", 30, issue.id)
+    choice_1 = AmbiguousPaperChoice("The dynamics of lava flows", 2000, "N-GznIQELfYJ", 10, issue.id, [])
+    choice_2 = AmbiguousPaperChoice("Lava effusion rate definition and measurement: a review", 2001, "MVNZ5BM8UegJ", 20, issue.id, [])
+    choice_3 = AmbiguousPaperChoice("Differentiation behavior of Kilauea Iki lava lake, Kilauea Volcano, Hawaii: an overview of past and current work", 2002, "cy0qh3krAjgJ", 30, issue.id, [])
 
     session.add(choice_1)
     session.add(choice_2)
