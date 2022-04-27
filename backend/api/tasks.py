@@ -125,6 +125,8 @@ def create_papers_list():
             session.flush()
             tasks.append(task.to_dict())
         
+        author.uploaded_papers = True
+
         return current_app.response_class(
             response=json.dumps(tasks),
                 status=201,
