@@ -8,6 +8,12 @@ import time
 from multiprocessing import Process
 import os
 
+disable_auth = os.environ.get('DISABLE_AUTH', "false")
+disable_auth = disable_auth.lower() == 'true'
+
+if disable_auth:
+    print("WARNING: Authorization is disabled")
+
 engine = create_engine(create_connection_string(), echo=False)
 
 while True:
@@ -18,7 +24,7 @@ while True:
         time.sleep(5)
 
 Session = sessionmaker(bind=engine)
-app = create_app(scoped_session(Session))
+app = create_app(scoped_session(Session), disable_auth=disable_auth)
 Base.metadata.create_all(engine)
 
 from task_manager import TaskManager
