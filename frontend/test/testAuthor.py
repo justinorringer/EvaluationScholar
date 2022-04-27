@@ -47,11 +47,15 @@ def testingOre(driver):
 
 #Run the sanity test above with debug tracing output to console
 def sanity_check():
+    pass_fail=[0,0]
     try: 
         testingOre(driver)
         print("Test: PASS")
+        pass_fail[0] += 1
     except:
         print("Test: FAIL")
         print(traceback.print_exc())
+        pass_fail[1] += 1
 
     driver.close()
+    return pass_fail

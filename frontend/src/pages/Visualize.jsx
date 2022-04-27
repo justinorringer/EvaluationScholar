@@ -694,7 +694,7 @@ function Visualize() {
                 <div className="row d-flex">
                     <div className="col-4">
                         <div className="container">
-                            <h3>Visualize</h3>
+                            <h3 id="vizTitle">Visualize</h3>
                         </div>
                         <Separator />
                         <Box sx={{ width: 300 }}>

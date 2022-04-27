@@ -81,27 +81,36 @@ def test_fake_author():
 
 #Method to run all tests and provide debugging in the event of a failure.
 def run_tests():
+    pass_fail=[0,0]
+
     try:
         print("Running test: Test to check results for 'John-Paul Ore'")
         test_author_creation_list()
         print("Test: PASS")
+        pass_fail[0] += 1
     except:
         print("Test: FAIL")
         print(traceback.print_exc())
+        pass_fail[1] += 1
 
     try:
         print("Running test: Ensure Manual Creation button has correct text")
         test_author_creation_manual()
         print("Test: PASS")
+        pass_fail[0] += 1
     except:
         print("Test: FAIL")
         print(traceback.print_exc())
+        pass_fail[1] += 1
 
     try:
         print("Running test: Search for nonexistent author (Gage Fringer)")
         test_fake_author()
         print("Test: PASS")
+        pass_fail[0] += 1
     except:
         print("Test: FAIL")
         print(traceback.print_exc())
+        pass_fail[1] += 1
     driver.close()
+    return pass_fail

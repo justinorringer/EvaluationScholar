@@ -69,18 +69,26 @@ def test_timing_update():
 
 #Method to run all tests in the runAll file
 def runAll():
+    pass_fail=[0,0]
     try:
         print("Running test: Check static contents of landing page")
         test_landing_page()
         print("Test: PASS")
+        pass_fail[0] += 1
     except:
         print("Test: FAIL")
         print(traceback.print_exc())
+        pass_fail[1] += 1
 
     try:
         print("Running test: Check update of the update period label")
         test_timing_update()
         print("Test: PASS")
+        pass_fail[0] += 1
     except:
         print("Test: FAIL")
         print(traceback.print_exc())
+        pass_fail[1] += 1
+
+    driver.close()
+    return pass_fail

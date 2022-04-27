@@ -127,39 +127,50 @@ def test_unassign_tag():
 
 #function to aggregate running all tests for runAll file 
 def runAll():
+    pass_fail=[0,0]
     try:
         print("Running Test: Checking contents loaded correctly")
         test_contents()
         print("Test: PASS")
+        pass_fail[0] += 1
     except:
         print("Test: FAIL")
         print(traceback.print_exc())
+        pass_fail[1] += 1
 
     try:
         print("Running Test: Checking creation of a tag is successful")
         test_create_tag()
         print("Test: PASS")
+        pass_fail[0] += 1
     except:
         print("Test: FAIL")
         print(traceback.print_exc())
+        pass_fail[1] += 1
 
     try:
         print("Running Test: Checking assignment of tag to 'Ore' is successful")
         test_assign_tag()
         print("Test: PASS")
+        pass_fail[0] += 1
     except:
         print("Test: FAIL")
         print(traceback.print_exc())
+        pass_fail[1] += 1
 
     try:
         print("Running Test: Testing unassignment of tag from 'Ore'")
         test_unassign_tag()
         print("Test: FAIL (Exception not caught)")
+        pass_fail[1] += 1
     except NoSuchElementException:
         #The driver should not have found the tag, and throws this error.
         print("Test: PASS")
+        pass_fail[0] += 1
     except:
         print("Test: FAIL")
         print(traceback.print_exc())
+        pass_fail[1] += 1
 
     driver.close()
+    return pass_fail

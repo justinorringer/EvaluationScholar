@@ -53,6 +53,7 @@ class Baseline:
                 driver.find_element(By.ID, "uploadPapers").click() 
         else: 
             print("Don't have Ore, creating in the system")
+            driver.find_element(By.ID, "PageTitle").click()
             driver.find_element(By.ID, "toCreateAuthor").click()
             driver.find_element(By.ID, "authName").send_keys("John-Paul Ore")
             driver.find_element(By.ID, "searchButton").click()
