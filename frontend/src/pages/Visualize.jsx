@@ -15,7 +15,6 @@ import Slider from '@mui/material/Slider';
 import Checkbox from '@mui/material/Checkbox';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
-import PropTypes from 'prop-types';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
@@ -53,6 +52,8 @@ function Visualize() {
 
     const [papersData, setPapersData] = useState([]);
 
+    const [indexData, setIndexData] = useState([]);
+
     const [tags, setTags] = useState([]);
 
     const [selectedTags, setSelectedTags] = useState([]);
@@ -64,7 +65,7 @@ function Visualize() {
     const [tab, setTab] = useState(0);
 
     const [toggleOutliers, setToggleOutliers] = useState(true);
-    
+
     const [showTrendExample, setShowTrendExample] = useState(false);
 
     const [boxData, setBoxData] = useState({
@@ -80,6 +81,11 @@ function Visualize() {
     const [trendData, setTrendData] = useState({
         categories: [],
         series: [],
+    });
+
+    const [barData, setBarData] = useState({
+        categories: [],
+        series: []
     });
 
     const boxTheme = {
@@ -153,36 +159,46 @@ function Visualize() {
             backgroundColor: '#e7e3e4e8',
         },
         series: {
-          colors: [
-            '#cc0000',
-            '#00cc00',
-            '#0000cc',
-            '#00cccc',
-            '#cc5555',
-            '#cc55cc',
-            '#55cc55',
-            '#55cccc',
-            '#516f7d',
-            '#517d5f',
-            '#7d516f',
-            '#7d5f51'
-          ],
-          lineWidth: 3,
-          hover: {
-            dot: {
-              color: '#000000',
-              radius: 5,
-              borderColor: '#000000',
-              borderWidth: 2,
+            colors: [
+                '#cc0000',
+                '#00cc00',
+                '#0000cc',
+                '#00cccc',
+                '#cc5555',
+                '#cc55cc',
+                '#55cc55',
+                '#55cccc',
+                '#516f7d',
+                '#517d5f',
+                '#7d516f',
+                '#7d5f51'
+            ],
+            lineWidth: 3,
+            hover: {
+                dot: {
+                    color: '#000000',
+                    radius: 5,
+                    borderColor: '#000000',
+                    borderWidth: 2,
+                },
             },
-          },
-          dot: {
-            radius: 4,
-            borderColor: '#ffffff',
-            borderWidth: 2,
-          },
+            dot: {
+                radius: 4,
+                borderColor: '#ffffff',
+                borderWidth: 2,
+            },
         },
-      };
+    };
+
+    const barTheme = {
+        chart: {
+            fontFamily: 'Josefin Sans',
+            backgroundColor: '#e7e3e4e8',
+        },
+        series: {
+            colors: ['#cc0000'],
+        }
+    };
 
     const boxOptions = {
         chart: { title: '', width: 700, height: 500 },
@@ -200,10 +216,23 @@ function Visualize() {
             align: 'bottom',
         },
         series: {
-          showDot: true,
-          selectable: true,
+            showDot: true,
+            selectable: true,
         },
         theme: trendTheme
+    };
+
+    const barOptions = {
+        chart: { title: '', width: 700, height: 500 },
+        xAxis: { title: 'Index' },
+        yAxis: { title: 'Author' },
+        series: {
+            selectable: true
+        },
+        legend: {
+            visible: false
+        },
+        theme: barTheme
     };
 
     /**
@@ -245,6 +274,9 @@ function Visualize() {
 
     //get authors and their papers if selected
     useEffect(() => {
+        if (selectedAuthors.length === 0) {
+            return;
+        }
         let tempMin = new Date().getFullYear(); //current year starting min
         let tempMax = 0; //0 starting max
         if (tab === 0) { //if on the boxplot tab    
@@ -257,7 +289,7 @@ function Visualize() {
                     catch(err => {
                         console.log(err);
                     }
-                );
+                    );
             });
             Promise.all(mapAuthors).then(() => {
                 tempAuthorData.forEach(author => {
@@ -281,12 +313,12 @@ function Visualize() {
             const mapCitations = selectedAuthors.map(author => {
                 return axios.get(`api/authors/${author.id}/papers?include=citations`)
                     .then(response => {
-                        tempPaperData.push({name: author.name, papers: response.data});
+                        tempPaperData.push({ name: author.name, papers: response.data });
                     }).
                     catch(err => {
                         console.log(err);
                     }
-                );
+                    );
             });
             Promise.all(mapCitations).then(() => {
                 tempPaperData.forEach(author => {
@@ -308,18 +340,38 @@ function Visualize() {
                 }
                 setPapersData(tempPaperData);
             });
-        } else {
-
+        } else { //if on the h- or i10- tab
+            const tempIndexData = [];
+            const mapAuthors = selectedAuthors.map(author => {
+                return axios.get(`api/authors/${author.id}`)
+                    .then(response => {
+                        tempIndexData.push({
+                            name: response.data.name, 
+                            hIndex: response.data.h_index, 
+                            i10Index: response.data.i10_index
+                        });
+                    }).
+                    catch(err => {
+                        console.log(err);
+                    }
+                    );
+            });
+            Promise.all(mapAuthors).then(() => {
+                setIndexData(tempIndexData);
+            });
         }
     }, [selectedAuthors, tab]);
 
     //get authors and their papers given tag(s). group authors if aggAuthors === true
     useEffect(() => {
+        if (selectedTags.length === 0) {
+            return;
+        }
         let tempMin = new Date().getFullYear(); //current year starting min
         let tempMax = 0; //0 starting max
-        if (tab === 0) {
+        if (tab === 0) { //if on the boxplot tab 
             axios.get(`api/authors?include=papers&tags=${selectedTags.map(tag => tag.id)}&min-${indexType}=${index}`)
-                .then(response => {
+                .then(response => { 
                     const papers = [];
                     response.data.forEach(author => {
                         author.papers.forEach(paper => {
@@ -346,13 +398,9 @@ function Visualize() {
                     console.log(err);
                 }
                 );
-        } else if (tab === 1) {
-            if (selectedTags.length === 0) {
-                return;
-            }
+        } else if (tab === 1) { //if on the trend tab
             axios.get(`api/authors?tags=${selectedTags.map(tag => tag.id)}&min-${indexType}=${index}`)
                 .then(response => {
-                    console.log(response);
                     const tempPaperData = [];
                     const mapCitations = response.data.map(author => {
                         return axios.get(`api/authors/${author.id}/papers?include=citations`)
@@ -389,10 +437,24 @@ function Visualize() {
                     console.log(err);
                 }
                 );
-        } else {
-
+        } else { //if on the h- or i10- tab
+            axios.get(`api/authors?tags=${selectedTags.map(tag => tag.id)}&min-${indexType}=${index}`)
+                .then(response => {  
+                    const tempIndexData = [];
+                    response.data.forEach(author => {
+                        tempIndexData.push({
+                            name: author.name, 
+                            hIndex: author.h_index, 
+                            i10Index: author.i10_index
+                        });
+                    });
+                    setIndexData(tempIndexData);
+                }).
+                catch(err => {
+                    console.log(err);
+                }
+                );
         }
-        
     }, [selectedTags, aggAuthors, index, tab]);
 
 
@@ -486,7 +548,7 @@ function Visualize() {
                     data: data,
                     outliers: outliers,
                 }
-            ],
+            ]
         });
     }, [authorsData, toggleOutliers, range]);
 
@@ -520,7 +582,6 @@ function Visualize() {
         }
         const categories = [];
         const series = [];
-        console.log(range);
         //set categories
         for (let i = range[0]; i <= range[1]; i++) {
             categories.push(i);
@@ -537,15 +598,15 @@ function Visualize() {
                 paper.citations.forEach(citation => { //for each citation record for a given paper
                     const citationYear = new Date(citation.date).getFullYear();
                     if (citationYear >= range[0] && citationYear <= range[1]) { //include if the year is within the range
-                        citationList.push({ 
-                            date: new Date(citation.date), 
-                            citations: citation.num_cited, 
-                            year: citationYear 
+                        citationList.push({
+                            date: new Date(citation.date),
+                            citations: citation.num_cited,
+                            year: citationYear
                         });
                     }
                 });
 
-                citationList.sort(function(a, b) { //sort by dates in ascending order
+                citationList.sort(function (a, b) { //sort by dates in ascending order
                     return a.date - b.date;
                 });
 
@@ -559,7 +620,7 @@ function Visualize() {
                 } //now have a list which only contains the last citation record for every year for this paper
 
                 lastCitationPerYear.reverse(); //currently backwards due to doing years in reverse order
-                
+
                 for (let i = 0; i < totalCitationsPerYear.length; i++) { //for each year
                     totalCitationsPerYear[i] += lastCitationPerYear[i]; //add to running total
                 }
@@ -568,7 +629,7 @@ function Visualize() {
             const newCitationsPerYear = [];
             newCitationsPerYear.push(0); //first year will be 0
             for (let i = 1; i < totalCitationsPerYear.length; i++) {
-                newCitationsPerYear.push(totalCitationsPerYear[i] - totalCitationsPerYear[i-1]);
+                newCitationsPerYear.push(totalCitationsPerYear[i] - totalCitationsPerYear[i - 1]);
             }
             //for each author, add a new line to the series using their name and total new citations per year
             series.push({
@@ -576,15 +637,36 @@ function Visualize() {
                 data: newCitationsPerYear
             });
         });
-
-        console.log(categories, series);
-
+        
         setTrendData({
             categories: categories,
             series: series
         });
     }, [papersData, range, showTrendExample]);
 
+    //hook to reset h- or i10- index graph
+    useEffect(() => {
+        const categories = [];
+        const data = [];
+        let type = ((tab === 2) ? "h-index" : "i10-index");
+        indexData.forEach(author => {
+            categories.push(author.name);
+            if (tab === 2) { //h-index bar chart
+                data.push(author.hIndex);
+            } else if (tab === 3) { //i10-index bar chart
+                data.push(author.i10Index);
+            }
+        });
+        setBarData({
+            categories: categories,
+            series: [
+                {
+                    name: type,
+                    data: data
+                }
+            ]
+        });
+    }, [indexData]);
 
     //hook upload page render, fill authors and tags arrays
     useEffect(() => {
@@ -797,6 +879,10 @@ function Visualize() {
                                     </FormControlLabel>
                                     <Separator />
                                 </FormGroup>
+                            }
+                            {
+                                barData && barOptions && (tab === 2 || tab === 3) &&
+                                <BarChart data={barData} options={barOptions}></BarChart>
                             }
                         </div>
                     </div>
