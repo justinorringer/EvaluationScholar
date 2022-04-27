@@ -114,7 +114,7 @@ function Tasks() {
 
     return (
         <div className="body">
-            <div className="container pt-3">
+            <div className="container">
                 <h3>Queued Paper Creations</h3>
             </div>
             <div className="container pt-3">

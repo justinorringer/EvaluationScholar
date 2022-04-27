@@ -125,6 +125,8 @@ def create_papers_list():
             session.flush()
             tasks.append(task.to_dict())
         
+        author.uploaded_papers = True
+
         return current_app.response_class(
             response=json.dumps(tasks),
                 status=201,
@@ -174,7 +176,7 @@ def create_task():
 
         file = request.files['file']
         for line in file:
-            task = CreatePaperTask(paper_title = line[0:-1].decode('utf-8'), author_id = author_id, date = datetime.now())
+            task = CreatePaperTask(paper_title = line.decode('utf-8').replace('\n', ''), author_id = author_id, date = datetime.now())
             session.add(task)
             session.flush()
             tasks.append(task.to_dict())
