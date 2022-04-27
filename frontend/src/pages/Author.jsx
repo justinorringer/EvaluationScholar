@@ -392,7 +392,7 @@ function Author() {
                             </button>
                         </div>
 
-                        <div className="alert alert-warning row mr-3" role="alert" id="flag" style={{ display: 'none' }}> You have already uploaded papers for this author.</div>
+                        <div className="alert alert-warning row mr-3" role="alert" id="flag" style={{ display: 'none' }}> You have already added papers for this author.</div>
 
                         <div className="modal fade" id="uploadPapersModal" tabIndex="-1" role="dialog" aria-labelledby="uploadPapersModalTitle" aria-hidden="true">
                             <div className="modal-dialog modal-dialog-centered" role="document">
