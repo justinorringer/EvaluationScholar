@@ -63,7 +63,7 @@ function Query() {
                 <div className="row pl-3">
                     <label>Don't see your author?</label>
                     <pre> </pre>
-                    <a href="/createauthor">Make a new author.</a>
+                    <a id="toCreateAuthor" href="/createauthor">Make a new author.</a>
                 </div>
             </div>
             <hr />
