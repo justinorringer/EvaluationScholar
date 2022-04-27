@@ -5,26 +5,40 @@ function Issues(){
 
     const [issues, setIssues] = useState([]);
 
-    useEffect(() =>{
+    const test = () => {
         axios.get(`/api/issues`)
         .then(response => {
             setIssues(response.data);
-        }).
-        catch(err => {
+        })
+        .catch(err => {
             console.log(err);
-        });
+        }); 
+    }
 
+    useEffect(() =>{
+        test();
     }, []);
 
+    checkForIssues();
+
+    function checkForIssues() {
+        if(issues.length !== 0){
+            console.log(issues.length);
+            console.log(issues);
+            hideAlert();
+        }
+    }
+    
     function resolveIssue(issue_id, scholar_id) {
         axios.post(`/api/issues/${issue_id}/resolve?correct_scholar_id=${scholar_id}`, {'correct_scholar_id': scholar_id})
         .then(res => {
-            if(res.status == 200){
+            if(res.status === 200){
                 console.log("Issue resolved!");
                 getIssues();
+                checkForIssues();
             }
-        }).
-        catch(err => {
+        })
+        .catch(err => {
             if (err.response.status === 404) {
                 console.log(err);
             }
@@ -34,13 +48,14 @@ function Issues(){
     function dismissIssue(issue_id){
         axios.delete(`/api/issues/${issue_id}`)
         .then(res => {
-            if(res.status == 200){
+            if(res.status === 200){
                 console.log("Issure dismissed!");
                 getIssues();
+                checkForIssues();
                 
             }
-        }).
-        catch(err => {
+        })
+        .catch(err => {
             if(err.response.status === 404){
                 console.log(err);
             }
@@ -51,15 +66,26 @@ function Issues(){
         axios.get(`/api/issues`)
         .then(response => {
             setIssues(response.data);
-        }).
-        catch(err => {
+        })
+        .catch(err => {
             console.log(err);
         });
     }
 
+    function hideAlert() {
+        document.getElementById("alert").style = "display: none !important";
+    }
+
     return(
-        <div className="container mb-5">
-            <h1>Ambiguous Paper Issues</h1>
+        <div className="body">
+            <div className="container mb-5">
+            <h3>Ambiguous Paper Issues</h3>
+            <div className="row pt-3 d-flex justify-content-center">
+                <div className="alert alert-primary alert-dismissible pt-2" role="alert" id="alert" style={{ display: "block" }}>
+                    <button className="close" type="button" onClick={hideAlert}><span>&times;</span></button> No issues found!
+                </div>
+            </div>
+
             {issues.map(issue => (
                 <div key={issue.id} className="container border border-dark my-3 p-4 rounded">
                     <div className="col-md-12 text-right">
@@ -96,13 +122,15 @@ function Issues(){
                                 </tr>
                             ))} 
                         </tbody>
-                    </table>
+                    </table>           
                     <div>
                     </div>
                     <br/>
                 </div>
             ))}
         </div>
+        </div>
+        
 
     )
 }
