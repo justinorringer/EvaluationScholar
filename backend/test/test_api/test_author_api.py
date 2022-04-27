@@ -408,6 +408,13 @@ def test_filtering(client, session):
     # 1         0
     # 1         1
 
+    # Test getting indices
+    resp = client.get('/authors?name=Sandra Dollop')
+    assert resp.status_code == 200
+    assert resp.json[0]['h_index'] == 6
+    assert resp.json[0]['i10_index'] == 2
+
+    # Test the filtering
     resp = client.get('/authors?min-h=2&max-i10=1')
     assert resp.status_code == 200
     assert len(resp.json) == 1
