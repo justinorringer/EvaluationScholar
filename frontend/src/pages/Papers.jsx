@@ -1,6 +1,7 @@
 import React, {Component, Fragment} from "react";
 import axios from 'axios';
 import Pagination from "../components/pagination";
+import TextField from '@mui/material/TextField';
 
 class Papers extends Component {
     state = {currentPapers: [], currentPage: 1, totalPages: 2, perPage: 10};
@@ -63,6 +64,11 @@ class Papers extends Component {
                     <div className="d-flex flex-row py-4 align-items-center">
                         <Pagination pageNeighbors={2} currentPage={this.state.currentPage} totalPages={this.state.totalPages} onPageChanged={this.onPageChanged} />
                     </div>
+                    </div>
+                    <div className="w-100 px-4 py-5 d-flex flex-row flex-wrap">
+                    {/* <div className="d-flex flex-row py-5 justify-content-center"> */}
+                        <TextField label="Search Paper" inputProps={{ style: {textAlign: 'center'} }} className="col-8 px-2"/>
+                        <button type="button" class="col-1 btn btn-danger px-1">Search</button>
                     </div>
                     <table className="table table-borderless table-striped" id="paperTable">
                         <thead className="thead-dark">
