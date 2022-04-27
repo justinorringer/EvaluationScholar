@@ -370,11 +370,11 @@ function Author() {
                         </div>
                         <div className="row pt-4" id="tagHeader">
                             <h4>Tags</h4>
-                        </div>
-                        <div>
-                            {/* <button id="linkToTags" type="button" className="btn btn-primary btn-sm" onClick={redirectToTags}>
-                            +
-                        </button> */}
+                            <div>
+                                <button id="linkToTags" type="button" className="btn btn-success btn-sm ml-2" onClick={redirectToTags}>
+                                    +
+                                </button>
+                            </div>
                         </div>
                         <div className="row pt-2">
                             <div className="container">
@@ -505,7 +505,7 @@ function Author() {
                     <div className="col-9" id="mainColumn">
                         <div className="row">
                             <h3 className="px-0" id="authorName"></h3>
-                            <div className="pl-4" id="deleteAuthor">
+                            <div className="pl-2" id="deleteAuthor">
                                 <button type="button" className="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteAuthorModal">x</button>
                             </div>
                             {/* <button type="button" className="close btn-xl" aria-label="Close">
