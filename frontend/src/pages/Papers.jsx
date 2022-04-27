@@ -4,11 +4,11 @@ import Pagination from "../components/pagination";
 import TextField from '@mui/material/TextField';
 
 class Papers extends Component {
-    state = {currentPapers: [], currentPage: 1, totalPages: 2, perPage: 10};
+    state = {currentPapers: [], currentPage: 1, totalPages: 2, perPage: 10, search: ''};
     
     setPapers(page) {
         const {perPage} = this.state;
-        axios.get(`/api/papers?page=${page}&limit=${perPage}&include=authors`)
+        axios.get(`/api/papers?page=${page}&limit=${perPage}&include=authors&search=${this.state.search}`)
             .then(res => {
                 this.setState({
                     currentPapers: res.data,
@@ -49,6 +49,16 @@ class Papers extends Component {
         );
     }
 
+
+    searchChange = e => {
+        this.setState({search: e.target.value});
+    }
+
+    searchSubmit = e => {
+        e.preventDefault();
+        this.setPapers(1);
+    }
+
     render() {
         return (
             <div className="container mb-5">
@@ -67,8 +77,8 @@ class Papers extends Component {
                     </div>
                     <div className="w-100 px-4 py-5 d-flex flex-row flex-wrap">
                     {/* <div className="d-flex flex-row py-5 justify-content-center"> */}
-                        <TextField label="Search Paper" inputProps={{ style: {textAlign: 'center'} }} className="col-8 px-2"/>
-                        <button type="button" class="col-1 btn btn-danger px-1">Search</button>
+                        <TextField label="Search Paper" inputProps={{ style: {textAlign: 'center'} }} className="col-8 px-2" value={this.state.search} onChange={this.searchChange}/>
+                        <button type="button" class="col-1 btn btn-danger px-1" onClick={this.searchSubmit}>Search</button>
                     </div>
                     <table className="table table-borderless table-striped" id="paperTable">
                         <thead className="thead-dark">

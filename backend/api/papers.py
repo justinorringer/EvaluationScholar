@@ -24,6 +24,11 @@ def get_papers():
         includes = request.args['include'].split(',') if 'include' in request.args else []
         papers = session.query(Paper).options(subqueryload(Paper.citations))
 
+        if 'search' in request.args:
+            words = request.args['search'].split(' ')
+            for word in words:
+                papers = papers.filter(Paper.name.like('%' + word + '%'))
+
         custom_headers = {}
 
         try:
