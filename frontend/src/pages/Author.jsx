@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 
@@ -18,8 +18,9 @@ function Author() {
     let papers = [];
     let tags = [];
     let checkedPapers = [];
-    let checkedPapersToBeScraped = [];
-    let paperTitlesForScraping = [];
+
+    let papersFromProfile = [];
+    let papersToBeScraped = [];
 
 
     //Function to make the API call to gather the papers of a specific author.
@@ -129,29 +130,54 @@ function Author() {
 
     getAuthor();
 
+    function checkForSelectedPapersFromProfileScrape(id, singlePaper, list){
+        var checkBox = document.getElementById(id);
+        if (checkBox.checked === true) {
+            list.push(singlePaper);
+        } else {
+            const index = list.indexOf(singlePaper);
+            list.splice(index, 1);
+        }
+
+    }
+
     function populateUpdateModal(papers) {
         const modalTableBody = document.getElementById("modalTableBody");
         const modalTable = document.getElementById("modalTable");
+        let i = 0;
 
         papers.forEach(paper => {
             var row = document.createElement("tr");
             var article = document.createElement("td");
+            var year = document.createElement("td");
+            var citationsCount = document.createElement("td");
             var checkBox = document.createElement("td");
 
             let input = document.createElement("input");
             input.className = "checkbox";
             input.type = "checkbox";
             input.checked = "true";
-            input.id = "p" + paper.id;
-            input.onclick = function () { checkedPaper(input.id, papers) };
+            input.id = "p" + i;
+            input.onclick = function () { checkForSelectedPapersFromProfileScrape(input.id, paper, papersToBeScraped) };
             checkBox.appendChild(input);
 
             article.innerText = paper.title;
+            year.innerText = paper.year;
+            citationsCount.innerText = paper.citations;
+
+            papersToBeScraped.push(paper.title);
 
             row.appendChild(article);
+            row.appendChild(year);
+            row.appendChild(citationsCount);
             row.appendChild(checkBox);
             modalTableBody.appendChild(row);
+            i++;
         });
+
+        document.getElementById("GSButton").style = "display: none !important";
+        document.getElementById("modalPaperTable").style = "display: block !important";
+        document.getElementById("helperForSelectPapers").style = "display: block !important";
 
     }
     //Function to get called by the download button so that a CSV is generated for the user, now tied to checkboxes
@@ -174,17 +200,7 @@ function Author() {
             }
         }
         getPapers();
-        console.log(papers);
-        /*        try {
-                    const response = await axios.get(`/api/authors/${id}/papers`, {mode:'cors'});
-                    if (response.status === 200)
-                        papers = papers.concat(response.data);//= response.data;
-                    //console.log({response, papers});
-                }
-                catch (e) {
-                    console.log(e.getMessage);
-                }
-        */
+
         papers.forEach(paper => {
             let article = paper.name;
             let year = paper.year;
@@ -262,11 +278,9 @@ function Author() {
         var checkBox = document.getElementById(id);
         if (checkBox.checked === true) {
             list.push(id.substring(1));
-            console.log(list);
         } else {
             const index = list.indexOf(id.substring(1));
             list.splice(index, 1);
-            console.log(list);
         }
     }
 
@@ -302,13 +316,9 @@ function Author() {
                         scrapedPapers = res.data;
 
                         console.log("scraped Papers!");
-                        checkedPapersToBeScraped = scrapedPapers['papers'];
+                        papersFromProfile = scrapedPapers['papers'];
 
-                        populateUpdateModal(checkedPapersToBeScraped);
-
-
-                        checkedPapersToBeScraped.forEach(paper =>
-                            paperTitlesForScraping.push(paper.title));
+                        populateUpdateModal(papersFromProfile);    
                     }
                 })
                 .catch(err => {
@@ -322,7 +332,7 @@ function Author() {
 
     function createTaskFromList() {
         const addTasks = async () => {
-            await axios.post(`/api/tasks/create-papers-list?author_id=${authorID}`, paperTitlesForScraping)
+            await axios.post(`/api/tasks/create-papers-list?author_id=${authorID}`, papersToBeScraped)
                 .then(res => {
                     if (res.status === 201) {
                         console.log("Added the Papers!");
@@ -429,14 +439,17 @@ function Author() {
                                     </div>
                                     <div className="modal-body">
                                         <div className="row pl-3">
-                                            <label htmlfor="myfile">Select Papers to Scrape/Add:&nbsp;</label>
+                                            <label htmlfor="myfile" id="helperForSelectPapers" style={{ display: "none" }}>Select Papers to Scrape/Add:&nbsp;</label>
                                         </div>
-                                        <div className="row pl-3">
-                                            <table className="table table-borderless table-striped" id="modalPaperTable">
+                                        <button type="button" className="btn btn-info pl-3" id="GSButton" onClick={scrapePapersFromProfile} style={{ display: "block" }}>Search Google Scholar</button>
+                                        <div className="row px-3">
+                                            <table className="table table-borderless table-striped" id="modalPaperTable" style={{ display: "none" }}>
                                                 <thead className="thead-dark">
                                                     <tr>
                                                         <th className="col-8" scope="col">Article</th>
-                                                        <th className="col-2" scope="col">Scrape/Add</th>
+                                                        <th className="col-1" scope="col">Year</th>
+                                                        <th className="col-1" scope="col">Citation</th>
+                                                        <th className="col-1" scope="col">Scrape/Add</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="modalTableBody">
@@ -446,7 +459,6 @@ function Author() {
                                     </div>
                                     <div className="modal-footer">
                                         <button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                        <button type="button" className="btn btn-info" onClick={scrapePapersFromProfile}>Search Google Scholar</button>
                                         <button type="button" className="btn btn-success" data-dismiss="modal" onClick={createTaskFromList}>Add Selected Papers</button>
                                     </div>
                                 </div>
@@ -509,9 +521,6 @@ function Author() {
                             <div className="pl-2" id="deleteAuthor">
                                 <button type="button" className="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteAuthorModal">x</button>
                             </div>
-                            {/* <button type="button" className="close btn-xl" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button> */}
                             <div className="ml-auto" id="gslink">
                                 <a href="" rel="noreferrer noopener" onClick={googleScholarRedirect}>Google Scholar profile</a>
                             </div>
@@ -531,9 +540,6 @@ function Author() {
                             </table>
                         </div>
                         <div className="row py-4 btn-toolbar">
-                            {/* <div className="ml-auto" id="deleteAuthor">
-                            <button type="button" className="btn btn-danger" data-toggle="modal" data-target="#deleteAuthorModal">Delete Author</button>
-                        </div> */}
                             <div className="d-flex justify-content-start">
                                 <button type="button" className="btn btn-primary" onClick={htmlToCSV}>
                                     Export
@@ -542,13 +548,6 @@ function Author() {
                             <div className="ml-auto d-flex justify-content-end" id="deletePapers">
                                 <button type="button" className="btn btn-danger" onClick={deletePapers}>Remove Checked Papers</button>
                             </div>
-                        </div>
-                        <div className="row py-2">
-                            {/* <div className="ml-auto">
-                            <button type="button" className="btn btn-primary" onClick={htmlToCSV}>
-                                Export
-                            </button>
-                        </div> */}
                         </div>
                     </div>
                 </div>
