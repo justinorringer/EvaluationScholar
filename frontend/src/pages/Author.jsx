@@ -104,6 +104,7 @@ function Author() {
                         authorScholarID = response.data.scholar_id;
                     } else {
                         document.getElementById("gslink").remove();
+                        document.getElementById("UpdatePapers").disabled = true;
                     }
 
 
