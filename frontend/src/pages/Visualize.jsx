@@ -468,7 +468,11 @@ function Visualize() {
 
         let i = 0;
         authorsData.forEach(author => {
-            categories.push(author.name);
+            let el = "";
+            if (author.name.length > 20) {
+                el = "...";
+            }
+            categories.push(author.name.slice(0, 20) + el);
             const papers = [];
             author.papers.forEach(paper => {
                 if (paper.year >= range[0] && paper.year <= range[1]) {
@@ -632,8 +636,12 @@ function Visualize() {
                 newCitationsPerYear.push(totalCitationsPerYear[i] - totalCitationsPerYear[i - 1]);
             }
             //for each author, add a new line to the series using their name and total new citations per year
+            let el = "";
+            if (author.name.length > 20) {
+                el = "...";
+            }
             series.push({
-                name: author.name,
+                name: author.name.slice(0, 20) + el,
                 data: newCitationsPerYear
             });
         });
@@ -650,7 +658,11 @@ function Visualize() {
         const data = [];
         let type = ((tab === 2) ? "h-index" : "i10-index");
         indexData.forEach(author => {
-            categories.push(author.name);
+            let el = "";
+            if (author.name.length > 20) {
+                el = "...";
+            }
+            categories.push(author.name.slice(0, 20) + el);
             if (tab === 2) { //h-index bar chart
                 data.push(author.hIndex);
             } else if (tab === 3) { //i10-index bar chart

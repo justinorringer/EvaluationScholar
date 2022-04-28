@@ -98,7 +98,7 @@ function CreateAuthor() {
                 const authorID = response.data.id;
                 window.location.href = `/author/${authorID}`;
             } catch (e) {
-                console.log("Failed to create author.");
+                document.getElementById("warning").style = "display: block !important";
             }
         }
         makeAuthor();
@@ -106,6 +106,10 @@ function CreateAuthor() {
 
     function hideFailedAlert() {
         document.getElementById("failed").style = "display: none !important";
+    }
+
+    function hideWarningAlert() {
+        document.getElementById("warning").style = "display: none !important";
     }
 
     function hideNoResultsAlert() {
@@ -127,7 +131,9 @@ function CreateAuthor() {
         <div className="alert alert-warning alert-dismissible" role="alert" id="failed" style={{display: "none"}}>
             <button className="close" type="button" onClick={hideFailedAlert}><span>&times;</span></button>Failed to search author, please try again.
         </div>
-
+        <div className="alert alert-warning alert-dismissible" role="alert" id="warning" style={{display: "none"}}>
+            <button className="close" type="button" onClick={hideWarningAlert}><span>&times;</span></button>Author already exists, find on <a href="/">home page</a>!
+        </div>
         <div className="container">
             <div className="row pl-3">
                 <label>Enter Author Name: &nbsp;</label>
