@@ -32,22 +32,8 @@ def test_create_paper(session, task_manager):
     assert paper.authors[0].name == "Test Author"
     session.commit()
 
-    # Wait for the scrape_author tasks to finish. Only one task should be left: the update citations task
+    # Only one task should be left: the update citations task
     wait_for_task_count(task_manager, 1)
-
-    # Check for the scraped authors
-    scraped_author = session.query(Author).filter(Author.scholar_id == "5-SbXrQAAAAJ").first()
-    assert len(scraped_author.papers) == 1
-    assert scraped_author.name == "Jun Han Bae"
-
-    scraped_author = session.query(Author).filter(Author.scholar_id == "SY_I6OMAAAAJ").first()
-    assert len(scraped_author.papers) == 1
-    assert scraped_author.name == "Eric T. Matson"
-
-    scraped_author = session.query(Author).filter(Author.scholar_id == "eiAeSiAAAAAJ").first()
-    assert len(scraped_author.papers) == 1
-    assert scraped_author.name == "Byung-Cheol Min"
-    session.commit()
 
     # Make sure there's enough time for a citation update task to be created
     time.sleep(0.2)
@@ -86,7 +72,7 @@ def test_create_paper(session, task_manager):
     assert session.query(UpdateCitationsTask).count() == 1
 
     # Make sure the author was added to the paper
-    assert len(session.query(Paper).first().authors) == 5
+    assert len(session.query(Paper).first().authors) == 2
     assert len(author2.papers) == 1
 
     # Try with inexact paper name, will require scraping to match the title with existing paper
@@ -104,7 +90,7 @@ def test_create_paper(session, task_manager):
     assert session.query(Paper).count() == 1
 
     # Make sure the author was added to the paper
-    assert len(session.query(Paper).first().authors) == 6
+    assert len(session.query(Paper).first().authors) == 3
 
     # Test a new paper with some same authors
     task = CreatePaperTask("An empirical study on type annotations: Accuracy, speed, and suggestion effectiveness", author.id)
@@ -118,16 +104,11 @@ def test_create_paper(session, task_manager):
     wait_for_task_count(task_manager, 2)
 
     assert session.query(UpdateCitationsTask).count() == 2
-    assert session.query(Author).filter(Author.name == "Carrick Detweiler").first() is not None
 
     authors = {author.name: author for author in session.query(Author).all()}
-    assert len(authors) == 9
-    assert "Carrick Detweiler" in authors.keys()
-    assert len(authors["John-Paul Ore"].papers) == 1
-    assert len(authors["Sebastian Elbaum"].papers) == 1
-    assert len(authors["Carrick Detweiler"].papers) == 1
     assert len(authors["Test Author"].papers) == 2
     assert len(authors["Test Author 2"].papers) == 1
+    assert len(authors["Test Author 3"].papers) == 1
 
 @pytest.mark.scraping
 def test_ambiguity(client, session, task_manager):

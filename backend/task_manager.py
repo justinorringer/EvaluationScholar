@@ -151,7 +151,9 @@ def create_paper(session, paper_title, author, paper_scholar_id):
 
     print(f"[Task Manager] Created paper: '{paper_title}'")
 
-    create_and_link_authors(session, paper, scraped_paper['authors'])
+    # This feature creates a large number of authors, most of which are irrelevant data.
+    # Parts of our frontend don't perform well with a large number of authors, so for now we're leaving it disabled.
+    #create_and_link_authors(session, paper, scraped_paper['authors'])
 
 def handle_task(connection_string, task):
     engine = create_engine(connection_string, echo=False)
