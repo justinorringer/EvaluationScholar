@@ -41,9 +41,7 @@ function Author() {
             if (papers.length > 0) {
                 paperTableBody.innerHTML = "";
                 paperTable.style = "display: block !important";
-                console.log(papers);
                 papers.sort(function(a, b) { return b.latest_citation.num_cited - a.latest_citation.num_cited});
-                console.log(papers);
             } else {
                 paperTable.style = "display: none !important";
                 var alert = document.createElement("div");
