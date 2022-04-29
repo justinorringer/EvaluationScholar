@@ -63,12 +63,12 @@ class Papers extends Component {
         return (
             <div className="body">
                 <div className="container">
-                    <h3>Papers</h3>
+                    <h3 id="paperTitle">Papers</h3>
                     <div className="row d-flex flex-row">
                         <div className="w-100 py-3 d-flex flex-row flex-wrap align-items-center justify-content-between">
                             <div className="align-items-center">
                                 <TextField label="Search Paper" className="pr-2 btn-lg" style={{ width: 500 }} value={this.state.search} onChange={this.searchChange} />
-                                <button type="button" class="btn btn-danger btn-lg" onClick={this.searchSubmit}>Search</button>
+                                <button id="searchButton" type="button" class="btn btn-danger btn-lg" onClick={this.searchSubmit}>Search</button>
                             </div>
                             <div className="align-items-center">
                                 <Pagination pageNeighbors={2} currentPage={this.state.currentPage} totalPages={this.state.totalPages} onPageChanged={this.onPageChanged} />
@@ -86,18 +86,18 @@ class Papers extends Component {
                             </thead>
                             <tbody id="paperTableBody">
                                 {this.state.currentPapers.map(paper => (
-                                    <tr key={paper.id}>
-                                        <td>{paper.name}</td>
-                                        <td>
+                                    <tr id={"paper"+paper.id} key={paper.id}>
+                                        <td id={"name" + paper.id}>{paper.name}</td>
+                                        <td id={"authors" + paper.id}>
                                             <ul>
                                                 {paper.authors.map(author => (
-                                                    <li key={author.id}>{author.name}</li>
+                                                    <li id={author.id} key={author.id}>{author.name}</li>
                                                 ))}
                                             </ul>
                                         </td>
-                                        <td>{paper.year}</td>
-                                        <td>{paper.latest_citation?.num_cited}</td>
-                                        <td>
+                                        <td id={"year" + paper.id}>{paper.year}</td>
+                                        <td id={"citation" + paper.id}>{paper.latest_citation?.num_cited}</td>
+                                        <td id={"delete" + paper.id}>
                                             <button className="btn btn-danger" onClick={() => this.deletePaper(paper.id)}>Delete</button>
                                         </td>
                                     </tr>

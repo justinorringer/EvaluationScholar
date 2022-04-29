@@ -15,27 +15,27 @@ function Header() {
           <div>
             <ul className="navbar-nav ml-auto">
               <li className="nav-item">
-                <NavLink className="nav-link" to="/papers">
+                <NavLink id="toPapers" className="nav-link" to="/papers">
                   Papers
                 </NavLink>
               </li>
               <li className="nav-item">
-                <NavLink className="nav-link" to="/issues">
+                <NavLink id="toIssues" className="nav-link" to="/issues">
                   Issues
                 </NavLink>
               </li>
               <li className="nav-item">
-                <NavLink className="nav-link" to="/tasks">
+                <NavLink id="toTasks" className="nav-link" to="/tasks">
                   Tasks
                 </NavLink>
               </li>
               <li className="nav-item">
-                <NavLink className="nav-link" to="/tags">
+                <NavLink id="toTags" className="nav-link" to="/tags">
                   Tags
                 </NavLink>
               </li>
               <li className="nav-item">
-                <NavLink className="nav-link" to="/visualize">
+                <NavLink id="toVisualize" className="nav-link" to="/visualize">
                   Visualize
                 </NavLink>
               </li>
