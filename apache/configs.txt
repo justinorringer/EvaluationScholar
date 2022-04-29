@@ -1,0 +1,8 @@
+docker run --rm httpd:2.4.48 cat /usr/local/apache2/conf/httpd.conf > conf/httpd.conf
+
+docker run --rm httpd:2.4.48 cat /usr/local/apache2/conf/extra/httpd-ssl.conf > conf/extra/httpd-ssl.conf
+docker run --rm httpd:2.4.48 cat /usr/local/apache2/conf/extra/httpd-default.conf > conf/extra/httpd-default.conf
+docker run --rm httpd:2.4.48 cat /usr/local/apache2/conf/extra/proxy-html.conf > conf/extra/proxy-html.conf
+docker run --rm httpd:2.4.48 cat /usr/local/apache2/conf/extra/httpd-vhosts.conf > conf/extra/httpd-vhosts.conf
+
+

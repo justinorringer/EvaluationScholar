@@ -1,20 +1,17 @@
 version: '3.4'
 
 services:
-  apache:
-    build: ./apache
-    container_name: apache
-    restart: unless-stopped
+  nginx:
+    image: nginx
+    container_name: nginx
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      # - "./apache/test_certs/local.ncsu.edu-selfsigned.crt:/etc/ssl/certs/sdc.csc.ncsu.edu.crt"
-      # - "./apache/test_certs/local.ncsu.edu-selfsigned.key:/etc/ssl/private/sdc.csc.ncsu.edu.key"
-      - "./apache/test_certs/local.ncsu.edu-selfsigned.crt:/etc/ssl/certs/sdc.csc.ncsu.edu.crt"
-      - "./apache/test_certs/local.ncsu.edu-selfsigned.key:/etc/ssl/private/sdc.csc.ncsu.edu.key"
-      - "./apache/conf/default.conf:/etc/apache2/sites-enabled/000-default.conf"
-      - "./apache/conf/ssl.conf:/etc/apache2/sites-enabled/ssl.conf"
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+    restart: unless-stopped
 
   database:
     container_name: database
@@ -28,22 +25,10 @@ services:
     #Otherwise, the container will create a new volume on each run and lose data
     volumes:
       - ./mysql-data:/var/lib/mysql
-  scraperapi:
-    container_name: scraperapi
-
-    env_file:
-      - .env
-
-    #Builds the image from the Dockerfile in the current directory
-    build: ./scraperapi
-
-    volumes:
-      - './scraperapi:/app'
   backend:
     container_name: backend
     depends_on:
       - database
-      - scraperapi
 
     env_file:
       - .env
@@ -69,3 +54,15 @@ services:
     volumes:
       - ./frontend/src:/app/src
       - ./frontend/public:/app/public
+  
+  scraperapi:
+    container_name: scraperapi
+
+    env_file:
+      - .env
+
+    #Builds the image from the Dockerfile in the current directory
+    build: ./scraperapi
+
+    volumes:
+      - './scraperapi:/app'

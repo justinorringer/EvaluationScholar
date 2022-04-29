@@ -1,2 +1,9 @@
 mysql-data/
-src/app/__pycache__/
+**/.pytest_cache/
+**/.coverage
+**/__pycache__/
+.env
+.idea/*
+**/.vscode/*
+**/test_database.db
+node_modules/

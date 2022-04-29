@@ -1,0 +1,1114 @@
+components:
+  schemas:
+    Author:
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+        scholar_id:
+          type: string
+          nullable: true
+        papers:
+          type: array
+          readOnly: true
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                readOnly: true
+              latest_citations:
+                type: integer
+                readOnly: true
+                nullable: true
+      type: object
+    Citation:
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        num_cited:
+          type: integer
+        paper_id:
+          type: integer
+          readOnly: true
+        date:
+          type: string
+          format: date-time
+      type: object
+    Paper:
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        year:
+          type: integer
+        name:
+          type: string
+        latest_citation:
+          readOnly: true
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Citation'
+
+      type: object
+    Tag:
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+      type: object
+    Task:
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        type:
+          type: string
+        priority:
+          type: integer
+        date:
+          type: string
+          format: date-time
+    Issue:
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        type:
+          type: string
+    Variable:
+      properties:
+        value:
+          type: string
+    AuthorsTags:
+      properties:
+        authors:
+          type: array
+          items:
+            type: integer
+        tags:
+          type: array
+          items:
+            type: integer
+    Profile:
+      properties:
+        name: 
+          type: string
+        institution:
+          type: string
+        id:
+          type: string
+    ProfilePage:
+      properties:
+        name:
+          type: string
+        papers:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              year:
+                type: integer
+              citations:
+                type: integer
+info:
+  description: API Docs
+  title: API Docs
+  version: 1.0.0
+openapi: 3.0.2
+paths:
+  /api/authors:
+    post:
+      tags:
+        - Authors
+      description: Create a new author
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Author'
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                type: integer
+    get:
+      tags:
+        - Authors
+      description: Get all authors
+      parameters:
+        - in: query
+          name: include
+          required: false
+          example: papers,tags
+          schema:
+            type: string
+        - in: query
+          name: name
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: tags
+          required: false
+          example: 1,2,3
+          schema:
+            type: string
+        - in: query
+          name: min-i10
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: max-i10
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: min-h
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: max-h
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Author'
+  /api/authors/{author_id}:
+    get:
+      tags:
+        - Authors
+      description: Get an author
+      parameters:
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+        '404':
+          description: Author not found
+    put:
+      tags:
+        - Authors
+      description: Update an author
+      parameters:
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Author'
+      responses:
+        '200':
+          description: Updated successfully
+        '404':
+          description: Author not found
+    delete:
+      tags:
+        - Authors
+      description: Delete an author
+      parameters:
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted successfully
+        '404':
+          description: Author not found
+  /api/authors/{author_id}/papers:
+    get:
+      tags:
+        - Authors
+      description: Get all papers by author
+      parameters:
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: include
+          required: false
+          example: citations
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Paper'
+        '404':
+          description: Author not found
+  /api/authors/{author_id}/papers/{paper_id}:
+    put:
+      tags:
+        - Authors
+      description: Add a paper to an author
+      parameters:
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: paper_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Added successfully
+        '404':
+          description: Author or paper not found
+    delete:
+      tags:
+        - Authors
+      description: Remove a paper from an author
+      parameters:
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: paper_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Removed successfully
+        '404':
+          description: Author or paper not found
+  /api/authors/{author_id}/tags:
+    get:
+      tags:
+        - Authors
+      description: Get all tags by author
+      parameters:
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+        '404':
+          description: Author not found
+  /api/authors/{author_id}/tags/{tag_id}:
+    put:
+      tags:
+        - Authors
+      description: Add a tag to an author
+      parameters:
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: tag_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Added successfully
+        '404':
+          description: Author or tag not found
+    delete:
+      tags:
+        - Authors
+      description: Remove a tag from an author
+      parameters:
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: tag_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Removed successfully
+        '404':
+          description: Author or tag not found
+  /api/authors/tags:
+    put:
+      tags:
+        - Authors
+      description: Batch add tags to authors
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorsTags'
+      responses:
+        '200':
+          description: Tags added to authors
+    delete:
+      tags:
+        - Authors
+      description: Batch remove tags from authors
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorsTags'
+      responses:
+        '200':
+          description: Tags removed from authors
+  /api/papers:
+    post:
+      tags:
+        - Papers
+      description: Create a new paper
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Paper'
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                type: integer
+    get:
+      tags:
+        - Papers
+      description: Get all papers
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: include
+          required: false
+          example: citations
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            Total-Pages:
+              description: Total number of pages. Only present if limit is set.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Paper'
+        '404':
+          description: Paged too far
+  /api/papers/{paper_id}:
+    get:
+      tags:
+        - Papers
+      description: Get a paper
+      parameters:
+        - in: path
+          name: paper_id
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: include
+          required: false
+          example: citations
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Paper'
+        '404':
+          description: Paper not found
+    put:
+      tags:
+        - Papers
+      description: Update a paper
+      parameters:
+        - in: path
+          name: paper_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Paper'
+      responses:
+        '200':
+          description: Updated successfully
+        '404':
+          description: Paper not found
+    delete:
+      tags:
+        - Papers
+      description: Delete a paper
+      parameters:
+        - in: path
+          name: paper_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted successfully
+        '404':
+          description: Paper not found
+  /api/papers/{paper_id}/authors:
+    get:
+      tags:
+        - Papers
+      description: Get all authors for a paper
+      parameters:
+        - in: path
+          name: paper_id
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: include
+          required: false
+          example: papers
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Author'
+        '404':
+          description: Paper not found
+  /api/papers/{paper_id}/authors/{author_id}:
+    put:
+      tags:
+        - Papers
+      description: Add an author to a paper
+      parameters:
+        - in: path
+          name: paper_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Added successfully
+        '404':
+          description: Author or paper not found
+    delete:
+      tags:
+        - Papers
+      description: Remove an author from a paper
+      parameters:
+        - in: path
+          name: paper_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Removed successfully
+        '404':
+          description: Author or paper not found
+  /api/papers/{paper_id}/citations:
+    get:
+      tags:
+        - Papers
+      description: Get all citations for a paper
+      parameters:
+        - in: path
+          name: paper_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Citation'
+        '404':
+          description: Paper not found
+    post:
+      tags:
+        - Papers
+      description: Triggers a new citation lookup for a paper
+      parameters:
+        - in: path
+          name: paper_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Citation'
+        '404':
+          description: Paper not found
+        '500':
+          description: Error retrieving citations
+        '403':
+          description: Not enough API credits
+  /api/papers/{paper_id}/latest-citations:
+    get:
+      tags:
+        - Papers
+      description: Get the latest citations for a paper
+      parameters:
+        - in: path
+          name: paper_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Citation'
+        '404':
+          description: Paper not found
+  /api/papers/citations:
+    post:
+      tags:
+        - Papers
+      description: Triggers a new citation lookup for a list of paper ids
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: integer
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Citation'
+        '500':
+          description: Error retrieving citations for one or more papers. Returns citations for all papers that were successfully retrieved.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Citation'
+        '403':
+          description: Ran out of API credits. Returns citations for all papers that were successfully retrieved.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Citation'
+  /api/scraping/papers:
+    get:
+      tags:
+        - Scraping
+      description: Returns the year and citation count for a given paper title.
+      parameters:
+        - in: query
+          name: title
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  year:
+                    type: integer
+                  citations:
+                    type: integer
+        '500':
+          description: Error retrieving citations
+        '403':
+          description: Not enough API credits
+  /api/scraping/profiles:
+    get:
+      tags:
+        - Scraping
+      description: Searches Google Scholar for a given author name and returns details of any results
+      parameters:
+        - in: query
+          name: name
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Profile'
+        '500':
+          description: Error retrieving data
+        '403':
+          description: Not enough API credits
+  /api/scraping/profiles/{scholar_id}:
+    get:
+      tags:
+        - Scraping
+      description: Returns details of a given profile
+      parameters:
+        - in: path
+          name: scholar_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: all_papers
+          description: Whether to return all papers or just the first 100
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfilePage'
+        '500':
+          description: Error retrieving data
+        '403':
+          description: Not enough API credits
+  /api/tags:
+    post:
+      tags:
+        - Tags
+      description: Create a new tag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tag'
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                type: integer
+    get:
+      tags:
+        - Tags
+      description: Get all tags
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+  /api/tags/{tag_id}:
+    get:
+      tags:
+        - Tags
+      description: Get a tag
+      parameters:
+        - in: path
+          name: tag_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '404':
+          description: Tag not found
+    put:
+      tags:
+        - Tags
+      description: Update a tag
+      parameters:
+        - in: path
+          name: tag_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tag'
+      responses:
+        '200':
+          description: Updated successfully
+        '404':
+          description: Tag not found
+    delete:
+      tags:
+        - Tags
+      description: Delete a tag
+      parameters:
+        - in: path
+          name: tag_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted successfully
+        '404':
+          description: Tag not found
+  /api/tags/{tag_id}/authors:
+    get:
+      tags:
+        - Tags
+      description: Get all authors for a tag
+      parameters:
+        - in: path
+          name: tag_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Author'
+        '404':
+          description: Tag not found
+  /api/tags/{tag_id}/authors/{author_id}:
+    put:
+      tags:
+        - Tags
+      description: Add an author to a tag
+      parameters:
+        - in: path
+          name: tag_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Added successfully
+        '404':
+          description: Author or tag not found
+    delete:
+      tags:
+        - Tags
+      description: Remove an author from a tag
+      parameters:
+        - in: path
+          name: tag_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: author_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Removed successfully
+        '404':
+          description: Author or tag not found
+  /api/tags/authors:
+    put:
+      tags:
+        - Tags
+      description: Batch add authors to tags
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorsTags'
+      responses:
+        '200':
+          description: Added successfully
+    delete:
+      tags:
+        - Tags
+      description: Batch remove authors from tags
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorsTags'
+      responses:
+        '200':
+          description: Removed successfully
+  /api/issues:
+    get:
+      tags:
+        - Issues
+      description: Get all issues. Note that the schema will vary depending on the issue type
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Issue'
+  /api/issues/{issue_id}:
+    get:
+      tags:
+        - Issues
+      description: Get an issue. Note that the schema will vary depending on the issue type
+      parameters:
+        - in: path
+          name: issue_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+        '404':
+          description: Issue not found
+    delete:
+      tags:
+        - Issues
+      description: Delete an issue
+      parameters:
+        - in: path
+          name: issue_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted successfully
+        '404':
+          description: Issue not found
+  /api/tasks:
+    get:
+      tags:
+        - Tasks
+      description: Get all tasks
+      parameters:
+        - in: query
+          name: type
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+    delete:
+      tags:
+        - Tasks
+      description: Delete all tasks
+      responses:
+        '200':
+          description: Deleted successfully
+  /api/tasks/{task_id}:
+    get:
+      tags:
+        - Tasks
+      description: Get a task
+      parameters:
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          description: Task not found
+    delete:
+      tags:
+        - Tasks
+      description: Delete a task
+      parameters:
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted successfully
+        '404':
+          description: Task not found
+  /api/tasks/create-papers:
+    post:
+      tags:
+        - Tasks
+      description: Schedule CreatePaperTasks using the given file for an author
+      parameters:
+        - in: query
+          name: author_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '404':
+          description: Author not found
+  /api/tasks/create-papers-list:
+    post:
+      tags:
+        - Tasks
+      description: Schedule CreatePaperTasks using the given list of paper titles for an author
+      parameters:
+        - in: query
+          name: author_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '404':
+          description: Author not found

@@ -1,1 +1,0 @@
-#Defines data models for the application
