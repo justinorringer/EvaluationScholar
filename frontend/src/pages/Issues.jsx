@@ -79,7 +79,7 @@ function Issues() {
     return (
         <div className="body">
             <div className="container mb-5">
-                <h3>Ambiguous Paper Issues</h3>
+                <h3 id="issuesTitle">Ambiguous Paper Issues</h3>
                 <div className="row pt-3 d-flex justify-content-center">
                     <div className="alert alert-primary alert-dismissible pt-2" role="alert" id="alert" style={{ display: "block" }}>
                         <button className="close" type="button" onClick={hideAlert}><span>&times;</span></button> No issues found!

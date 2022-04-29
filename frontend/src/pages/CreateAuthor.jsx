@@ -68,7 +68,7 @@ function CreateAuthor() {
             label.innerText = "Is the author you're looking for not here? Try searching full name, partial name, or just";
             let button = document.createElement("button");
             button.className = "btn btm-sm btn-danger";
-            button.id = "button";
+            button.id = "manualButton";
             button.onclick = function () { createAuthor(name, null) };
             button.innerText = "Create '" + name + "'";
             document.getElementById("container").appendChild(label);
