@@ -31,7 +31,7 @@ def test_author_creation_manual():
     driver.implicitly_wait(10)
 
     #A button pops up on the page to create the author manually, check the text matches.
-    nameCheck = driver.find_element(By.ID, "manualButton").text
+    nameCheck = driver.find_element(By.ID, "button").text
     assert nameCheck == "Create 'John-Paul Ore'"
 
 #Method to check the list of author options provided by the search returns expected info
@@ -71,7 +71,7 @@ def test_fake_author():
 
     driver.implicitly_wait(10)
 
-    nameCheck = driver.find_element(By.ID, "manualOnlyButton").text
+    nameCheck = driver.find_element(By.ID, "button").text
 
     assert nameCheck == "Create 'Gage Fringer' Anyway"
 
