@@ -98,7 +98,7 @@ class Citation(Base):
 class Paper(Base):
     __tablename__ = 'paper'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(400), unique=True, nullable=False)
+    name = Column(String(191), unique=True, nullable=False)
     year = Column(Integer, unique=False, nullable=False)
     scholar_id = Column(String(100), unique=False, nullable=True)
 
@@ -165,7 +165,7 @@ class Task(Base):
 class CreatePaperTask(Task):
     __tablename__ = 'create_paper_task'
     id = Column(Integer, ForeignKey('task.id'), primary_key=True)
-    paper_title = Column(String(200), nullable=False)
+    paper_title = Column(String(191), nullable=False)
     author_id = Column(Integer, ForeignKey('author.id'), nullable=False)
     paper_scholar_id = Column(String(40), nullable=True)
 
@@ -257,14 +257,14 @@ class AmbiguousPaperChoice(Base):
     __tablename__ = "ambiguous_paper_choice"
     id = Column(Integer, primary_key=True, autoincrement=True)
 
-    name = Column(String(200), nullable=False)
+    name = Column(String(191), nullable=False)
     year = Column(Integer, nullable=False)
     scholar_id = Column(String(40), nullable=True)
     citations = Column(Integer, nullable=False)
 
     issue_id = Column(Integer, ForeignKey('issue.id'), nullable=False)
 
-    author_names = Column(String(200), nullable=False)
+    author_names = Column(String(191), nullable=False)
 
     def to_dict(self):
         return {
@@ -290,7 +290,7 @@ class AmbiguousPaperIssue(Issue):
     __tablename__ = "ambiguous_paper_issue"
     id = Column(Integer, ForeignKey('issue.id'), primary_key=True)
 
-    title_query = Column(String(200), nullable=False)
+    title_query = Column(String(191), nullable=False)
 
     author_id = Column(Integer, ForeignKey('author.id'), nullable=False)
 
