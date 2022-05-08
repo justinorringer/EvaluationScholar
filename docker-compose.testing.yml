@@ -1,0 +1,68 @@
+version: '3.4'
+
+services:
+  nginx:
+    image: nginx
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+    restart: unless-stopped
+
+  database:
+    container_name: database
+    image: mysql
+    env_file:
+      - .env
+    ports:
+      - "3306:3306"
+
+    #This specifies that the container should use a persistent volume at /mysql-data
+    #Otherwise, the container will create a new volume on each run and lose data
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+  backend:
+    container_name: backend
+    depends_on:
+      - database
+
+    env_file:
+      - .env
+
+    #Builds the image from the Dockerfile in the current directory
+    build: ./backend
+
+    #Shares the container volume with the host so code changes are immediately available
+    volumes:
+      - './backend:/app'
+  frontend:
+    container_name: frontend
+
+    #Builds the image from the Dockerfile in the current directory
+    build: ./frontend
+
+    environment:
+      - "FAST_REFRESH=false"
+      - "CHOKIDAR_USEPOLLING=true"
+      - "WDS_SOCKET_PORT=80"
+
+    #Shares the container volume with the host so code changes are immediately available
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+  
+  scraperapi:
+    container_name: scraperapi
+
+    env_file:
+      - .env
+
+    #Builds the image from the Dockerfile in the current directory
+    build: ./scraperapi
+
+    volumes:
+      - './scraperapi:/app'

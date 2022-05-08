@@ -91,6 +91,7 @@ function Author() {
                 // fill in the list of tags
                 var tagElement = document.createElement("li");
                 tagElement.innerText = tag.name;
+                tagElement.id = tag.name;
                 tagList.appendChild(tagElement);
             });
         }

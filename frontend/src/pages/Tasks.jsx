@@ -151,13 +151,13 @@ function Tasks() {
                     </tr>
                     <tr>
                         <td>
-                            <label>New Update Period (in Days): </label>
+                            <label id="newCounterLabel">New Update Period (in Days): </label>
                         </td>
                         <td>
                             <input type="text" placeholder="Insert Number Here" id="updatePeriod"></input>
                         </td>
                         <td>
-                            <button type="button" onClick={performUpdate} className="btn btn-sm btn-danger">
+                            <button id="editButton" type="button" onClick={performUpdate} className="btn btn-sm btn-danger">
                                 Edit
                             </button>
                         </td>
